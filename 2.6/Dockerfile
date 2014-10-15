@@ -12,7 +12,7 @@ RUN curl -o /usr/local/bin/gosu -SL 'https://github.com/tianon/gosu/releases/dow
 
 RUN gpg --keyserver pgp.mit.edu --recv-keys DFFA3DCF326E302C4787673A01C4E7FAAAB2461C
 
-ENV MONGO_VERSION 2.6.4
+ENV MONGO_VERSION 2.6.5
 
 RUN curl -SL "https://fastdl.mongodb.org/linux/mongodb-linux-x86_64-$MONGO_VERSION.tgz" -o mongo.tgz \
 	&& curl -SL "https://fastdl.mongodb.org/linux/mongodb-linux-x86_64-$MONGO_VERSION.tgz.sig" -o mongo.tgz.sig \
