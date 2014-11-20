@@ -41,7 +41,7 @@ for version in "${versions[@]}"; do
 	(
 		set -x
 		[ -z "$fullVersion" ] || sed -ri 's/^(ENV MONGO_VERSION) .*/\1 '"$fullVersion"'/' "$version/Dockerfile"
-		sed -ri 's/^(RUN gpg .* --recv-keys) [0-9a-fA-F]*$/\1 '"$gpgKey"'/' "$version/Dockerfile"
+		sed -ri 's/^(ENV MONGO_RELEASE_FINGERPRINT) .*/\1 '"$gpgKey"'/' "$version/Dockerfile"
 	)
 done
 
