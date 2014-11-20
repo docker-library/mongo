@@ -15,7 +15,8 @@ RUN curl -o /usr/local/bin/gosu -SL "https://github.com/tianon/gosu/releases/dow
 	&& rm /usr/local/bin/gosu.asc \
 	&& chmod +x /usr/local/bin/gosu
 
-RUN gpg --keyserver pgp.mit.edu --recv-keys CEA1E18DDA77EF4E67884FF2A6982D0160456C5A
+ENV MONGO_RELEASE_FINGERPRINT CEA1E18DDA77EF4E67884FF2A6982D0160456C5A
+RUN gpg --keyserver pgp.mit.edu --recv-keys $MONGO_RELEASE_FINGERPRINT
 
 ENV MONGO_VERSION 2.4.12
 
