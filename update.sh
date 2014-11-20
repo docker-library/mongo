@@ -24,6 +24,8 @@ if [ ${#versions[@]} -eq 0 ]; then
 fi
 versions=( "${versions[@]%/}" )
 
+# TODO do something with https://www.mongodb.org/dl/linux/x86_64 instead, but have to solve hard "release candidate" problems (ie, if we have 2.6.4 and 2.6.5-rc0 comes out, we don't want 2.6 to switch over to the RC)
+
 packagesUrl='http://downloads-distro.mongodb.org/repo/debian-sysvinit/dists/dist/10gen/binary-amd64/Packages'
 packages="$(echo "$packagesUrl" | sed -r 's/[^a-zA-Z.-]+/-/g')"
 curl -sSL "${packagesUrl}.gz" | gunzip > "$packages"
