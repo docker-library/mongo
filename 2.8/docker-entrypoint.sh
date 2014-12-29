@@ -7,7 +7,7 @@ fi
 
 if [ "$1" = 'mongod' ]; then
 	chown -R mongodb /data/db
-	exec gosu mongodb "$@"
+	exec gosu numactl --interleave=all mongodb "$@"
 fi
 
 exec "$@"
