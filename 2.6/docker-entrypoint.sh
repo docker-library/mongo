@@ -7,7 +7,13 @@ fi
 
 if [ "$1" = 'mongod' ]; then
 	chown -R mongodb /data/db
-	exec gosu mongodb numactl --interleave=all "$@"
+
+	NUMA_CMD="numactl --interleave=all"
+	if ! ($NUMA_CMD true >/dev/null 2>&1) ; then
+		NUMA_CMD=
+	fi
+
+	exec gosu mongodb $NUMA_CMD "$@"
 fi
 
 exec "$@"
