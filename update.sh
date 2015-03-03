@@ -24,14 +24,16 @@ if [ ${#versions[@]} -eq 0 ]; then
 fi
 versions=( "${versions[@]%/}" )
 
-# TODO do something with https://www.mongodb.org/dl/linux/x86_64 instead, but have to solve hard "release candidate" problems (ie, if we have 2.6.4 and 2.6.5-rc0 comes out, we don't want 2.6 to switch over to the RC)
-
-packagesUrl='http://downloads-distro.mongodb.org/repo/debian-sysvinit/dists/dist/10gen/binary-amd64/Packages'
-packages="$(echo "$packagesUrl" | sed -r 's/[^a-zA-Z.-]+/-/g')"
-curl -sSL "${packagesUrl}.gz" | gunzip > "$packages"
+# TODO do something with https://www.mongodb.org/dl/linux/x86_64 instead of scraping the APT repo contents
+# (but then have to solve hard "release candidate" problems; ie, if we have 2.6.4 and 2.6.5-rc0 comes out, we don't want 2.6 to switch over to the RC)
 
 for version in "${versions[@]}"; do
-	fullVersion="$(grep -EA10 '^Package: mongodb-(org(-unstable)?|10gen)$' "$packages" | grep "^Version: $version\." | cut -d' ' -f2 | sort -V | tail -1)"
+	if [ "${version%%.*}" -ge 3 ]; then
+		packagesUrl="http://repo.mongodb.org/apt/debian/dists/wheezy/mongodb-org/$version/main/binary-amd64/Packages"
+	else
+		packagesUrl='http://downloads-distro.mongodb.org/repo/debian-sysvinit/dists/dist/10gen/binary-amd64/Packages'
+	fi
+	fullVersion="$(curl -sSL "$packagesUrl.gz" | gunzip | grep -EA10 '^Package: mongodb-(org(-unstable)?|10gen)$' | grep "^Version: $version\." | cut -d' ' -f2 | sort -V | tail -1)"
 	gpgKey="${gpgKeys[$version]}"
 	if [ -z "$gpgKey" ]; then
 		echo >&2 "ERROR: missing GPG key fingerprint for $version; try:"
@@ -44,5 +46,3 @@ for version in "${versions[@]}"; do
 		sed -ri 's/^(ENV MONGO_RELEASE_FINGERPRINT) .*/\1 '"$gpgKey"'/' "$version/Dockerfile"
 	)
 done
-
-rm "$packages"
