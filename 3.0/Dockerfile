@@ -28,6 +28,10 @@ RUN echo "deb http://repo.mongodb.org/apt/debian wheezy/mongodb-org/$MONGO_MAJOR
 RUN set -x \
 	&& apt-get update \
 	&& apt-get install -y mongodb-org=$MONGO_VERSION \
+                              mongodb-org-server=$MONGO_VERSION \
+                              mongodb-org-shell=$MONGO_VERSION \
+                              mongodb-org-mongos=$MONGO_VERSION \
+                              mongodb-org-tools=$MONGO_VERSION \
 	&& rm -rf /var/lib/apt/lists/* \
 	&& rm -rf /var/lib/mongodb \
 	&& mv /etc/mongod.conf /etc/mongod.conf.orig
