@@ -27,7 +27,12 @@ RUN echo "deb http://repo.mongodb.org/apt/debian wheezy/mongodb-org/$MONGO_MAJOR
 
 RUN set -x \
 	&& apt-get update \
-	&& apt-get install -y mongodb-org-unstable=$MONGO_VERSION \
+	&& apt-get install -y \
+		mongodb-org-unstable=$MONGO_VERSION \
+		mongodb-org-unstable-server=$MONGO_VERSION \
+		mongodb-org-unstable-shell=$MONGO_VERSION \
+		mongodb-org-unstable-mongos=$MONGO_VERSION \
+		mongodb-org-unstable-tools=$MONGO_VERSION \
 	&& rm -rf /var/lib/apt/lists/* \
 	&& rm -rf /var/lib/mongodb \
 	&& mv /etc/mongod.conf /etc/mongod.conf.orig
