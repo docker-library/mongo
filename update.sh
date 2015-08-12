@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e
+set -eo pipefail
 
 cd "$(dirname "$(readlink -f "$BASH_SOURCE")")"
 
@@ -12,6 +12,7 @@ versions=( "${versions[@]%/}" )
 # TODO do something with https://www.mongodb.org/dl/linux/x86_64 instead of scraping the APT repo contents
 # (but then have to solve hard "release candidate" problems; ie, if we have 2.6.4 and 2.6.5-rc0 comes out, we don't want 2.6 to switch over to the RC)
 
+travisEnv=
 for version in "${versions[@]}"; do
 	if [ "${version%%.*}" -ge 3 ]; then
 		packagesUrl="http://repo.mongodb.org/apt/debian/dists/wheezy/mongodb-org/$version/main/binary-amd64/Packages"
@@ -26,4 +27,9 @@ for version in "${versions[@]}"; do
 			s/^(ENV MONGO_VERSION) .*/\1 '"$fullVersion"'/;
 		' "$version/Dockerfile"
 	)
+	
+	travisEnv='\n  - VERSION='"$version$travisEnv"
 done
+
+travis="$(awk -v 'RS=\n\n' '$1 == "env:" { $0 = "env:'"$travisEnv"'" } { printf "%s%s", $0, RS }' .travis.yml)"
+echo "$travis" > .travis.yml
