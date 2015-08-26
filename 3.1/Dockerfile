@@ -17,8 +17,10 @@ RUN curl -o /usr/local/bin/gosu -SL "https://github.com/tianon/gosu/releases/dow
 	&& rm /usr/local/bin/gosu.asc \
 	&& chmod +x /usr/local/bin/gosu
 
-# gpg: key 7F0CEB10: public key "Richard Kreuter <richard@10gen.com>" imported
-RUN apt-key adv --keyserver ha.pool.sks-keyservers.net --recv-keys 492EAFE8CD016A07919F1D2B9ECBEC467F0CEB10
+# pub   4096R/04A2163B 2015-06-23 [expires: 2017-06-22]
+#       Key fingerprint = 13AC B91D 285D D025 66BB  4116 614D 9855 04A2 163B
+# uid                  MongoDB 3.2 Release Signing Key <packaging@mongodb.com>
+RUN apt-key adv --keyserver ha.pool.sks-keyservers.net --recv-keys 13ACB91D285DD02566BB4116614D985504A2163B
 
 ENV MONGO_MAJOR 3.1
 ENV MONGO_VERSION 3.1.7
