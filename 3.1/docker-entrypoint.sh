@@ -12,6 +12,11 @@ if [ "$1" = 'mongod' ]; then
 	if $numa true &> /dev/null; then
 		set -- $numa "$@"
 	fi
+	
+	if [ -f "/data/db/mongod.lock" ]; then
+		unlink "/data/db/mongod.lock"
+		gosu mongodb "$@" --repair
+	fi
 
 	exec gosu mongodb "$@"
 fi
