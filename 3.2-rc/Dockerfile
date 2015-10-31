@@ -22,7 +22,7 @@ RUN curl -o /usr/local/bin/gosu -SL "https://github.com/tianon/gosu/releases/dow
 # uid                  MongoDB 3.2 Release Signing Key <packaging@mongodb.com>
 RUN apt-key adv --keyserver ha.pool.sks-keyservers.net --recv-keys 42F3E95A2C4F08279C4960ADD68FA50FEA312927
 
-ENV MONGO_MAJOR 3.2
+ENV MONGO_MAJOR testing
 ENV MONGO_VERSION 3.2.0~rc1
 
 RUN echo "deb http://repo.mongodb.org/apt/debian wheezy/mongodb-org/$MONGO_MAJOR main" > /etc/apt/sources.list.d/mongodb-org.list

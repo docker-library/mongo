@@ -15,10 +15,12 @@ versions=( "${versions[@]%/}" )
 travisEnv=
 for version in "${versions[@]}"; do
 	rcVersion="${version%-rc}"
+	major="$rcVersion"
 	if [ "$rcVersion" != "$version" ]; then
-		packagesUrl='http://repo.mongodb.org/apt/debian/dists/wheezy/mongodb-org/testing/main/binary-amd64/Packages'
-	elif [ "${version%%.*}" -ge 3 ]; then
-		packagesUrl="http://repo.mongodb.org/apt/debian/dists/wheezy/mongodb-org/$version/main/binary-amd64/Packages"
+		major='testing'
+	fi
+	if [ "${version%%.*}" -ge 3 ]; then
+		packagesUrl="http://repo.mongodb.org/apt/debian/dists/wheezy/mongodb-org/$major/main/binary-amd64/Packages"
 	else
 		packagesUrl='http://downloads-distro.mongodb.org/repo/debian-sysvinit/dists/dist/10gen/binary-amd64/Packages'
 	fi
@@ -26,7 +28,7 @@ for version in "${versions[@]}"; do
 	(
 		set -x
 		sed -ri '
-			s/^(ENV MONGO_MAJOR) .*/\1 '"$rcVersion"'/;
+			s/^(ENV MONGO_MAJOR) .*/\1 '"$major"'/;
 			s/^(ENV MONGO_VERSION) .*/\1 '"$fullVersion"'/;
 		' "$version/Dockerfile"
 	)
