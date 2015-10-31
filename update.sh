@@ -14,16 +14,19 @@ versions=( "${versions[@]%/}" )
 
 travisEnv=
 for version in "${versions[@]}"; do
-	if [ "${version%%.*}" -ge 3 ]; then
+	rcVersion="${version%-rc}"
+	if [ "$rcVersion" != "$version" ]; then
+		packagesUrl='http://repo.mongodb.org/apt/debian/dists/wheezy/mongodb-org/testing/main/binary-amd64/Packages'
+	elif [ "${version%%.*}" -ge 3 ]; then
 		packagesUrl="http://repo.mongodb.org/apt/debian/dists/wheezy/mongodb-org/$version/main/binary-amd64/Packages"
 	else
 		packagesUrl='http://downloads-distro.mongodb.org/repo/debian-sysvinit/dists/dist/10gen/binary-amd64/Packages'
 	fi
-	fullVersion="$(curl -sSL "$packagesUrl.gz" | gunzip | grep -EA10 '^Package: mongodb-(org(-unstable)?|10gen)$' | grep "^Version: $version\." | cut -d' ' -f2 | sort -V | tail -1)"
+	fullVersion="$(curl -sSL "$packagesUrl.gz" | gunzip | awk -F ': ' '$1 == "Package" { pkg = $2 } pkg ~ /^mongodb-(org(-unstable)?|10gen)$/ && $1 == "Version" { print $2 }' | grep "^$rcVersion\." | grep -v '~pre~$' | sort -V | tail -1)"
 	(
 		set -x
 		sed -ri '
-			s/^(ENV MONGO_MAJOR) .*/\1 '"$version"'/;
+			s/^(ENV MONGO_MAJOR) .*/\1 '"$rcVersion"'/;
 			s/^(ENV MONGO_VERSION) .*/\1 '"$fullVersion"'/;
 		' "$version/Dockerfile"
 	)

@@ -17,7 +17,8 @@ echo '# maintainer: InfoSiftr <github@infosiftr.com> (@infosiftr)'
 
 for version in "${versions[@]}"; do
 	commit="$(cd "$version" && git log -1 --format='format:%H' -- Dockerfile $(awk 'toupper($1) == "COPY" { for (i = 2; i < NF; i++) { print $i } }' Dockerfile))"
-	fullVersion="$(grep -m1 'ENV MONGO_VERSION ' "$version/Dockerfile" | cut -d' ' -f3)"
+	[ "$commit" ] || continue
+	fullVersion="$(grep -m1 'ENV MONGO_VERSION ' "$version/Dockerfile" | cut -d' ' -f3 | sed 's/~/-/g')"
 	
 	versionAliases=()
 	while [ "$fullVersion" != "$version" -a "${fullVersion%[.-]*}" != "$fullVersion" ]; do
