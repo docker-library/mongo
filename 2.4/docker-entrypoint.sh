@@ -6,11 +6,8 @@ if [ "${1:0:1}" = '-' ]; then
 fi
 
 if [ "$1" = 'mongod' ]; then
-	if [[ " $@ " =~ " --configsvr " ]]; then
-		chown -R mongodb /data/configdb
-	else
-		chown -R mongodb /data/db
-	fi
+	chown -R mongodb /data/configdb
+	chown -R mongodb /data/db
 
 	numa='numactl --interleave=all'
 	if $numa true &> /dev/null; then
