@@ -27,6 +27,8 @@ RUN curl -SL "https://fastdl.mongodb.org/linux/mongodb-linux-x86_64-$MONGO_VERSI
 	&& tar -xvf mongo.tgz -C /usr/local --strip-components=1 \
 	&& rm mongo.tgz*
 
+RUN mkdir /docker-entrypoint-initdb.d
+
 VOLUME /data/db
 
 COPY docker-entrypoint.sh /entrypoint.sh
