@@ -18,12 +18,12 @@ RUN curl -SL "https://fastdl.mongodb.org/src/mongodb-src-r$MONGO_VERSION.tar.gz"
 	&& rm mongo.tar.gz
 
 RUN cd mongo \
-	&& wget  \
+	&& wget \
 	    http://git.alpinelinux.org/cgit/aports/plain/testing/mongodb/40-fix-elf-native-class.patch \
 	    https://patch-diff.githubusercontent.com/raw/mongodb/mongo/pull/1059.patch \
 	&& patch -p1 < 40-fix-elf-native-class.patch \
 	&& patch -p1 < 1059.patch \
-	&& scons core -j$(getconf _NPROCESSORS_ONLN) --disable-warnings-as-errors  \
+	&& scons core -j$(getconf _NPROCESSORS_ONLN) --ssl --disable-warnings-as-errors  \
 	&& scons --prefix=/opt/mongo install \
 	&& cd .. \
 	&& rm -r mongo \
