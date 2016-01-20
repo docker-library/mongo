@@ -11,7 +11,7 @@ RUN apk add --no-cache --virtual .build-deps curl tar scons g++ \
 	&& chmod +x /usr/local/bin/gosu \
 	&& curl -SL "https://github.com/mongodb/mongo/archive/r$MONGO_VERSION.tar.gz" -o mongo.tgz \
 	&& mkdir mongo \
-	&& tar -xvf mongo.tgz -C mongo --strip-components=1 \
+	&& tar -xf mongo.tgz -C mongo --strip-components=1 \
 	&& cd mongo \
 	&& scons -j$(getconf _NPROCESSORS_ONLN) \
 	&& scons --prefix=/opt/mongo install \
