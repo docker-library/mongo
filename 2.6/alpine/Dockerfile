@@ -5,7 +5,8 @@ ENV MONGO_VERSION 2.6.11
 # add our user and group first to make sure their IDs get assigned consistently, regardless of whatever dependencies get added
 RUN adduser -D mongodb
 
-RUN apk add --no-cache --virtual .build-deps curl tar scons g++ \
+RUN apk add --no-cache --virtual .deps openssl \
+	&& apk add --no-cache --virtual .build-deps curl tar scons g++ linux-headers openssl-dev \
 	# grab gosu for easy step-down from root
 	&& curl -o /usr/local/bin/gosu -fsSL "https://github.com/tianon/gosu/releases/download/1.7/gosu-amd64" \
 	&& chmod +x /usr/local/bin/gosu
@@ -15,7 +16,7 @@ RUN curl -SL "https://fastdl.mongodb.org/src/mongodb-src-r$MONGO_VERSION.tar.gz"
 	&& tar -xf mongo.tgz -C mongo --strip-components=1
 
 RUN cd mongo \
-	&& scons -j$(getconf _NPROCESSORS_ONLN) --disable-warnings-as-errors \
+	&& scons core --ssl -j$(getconf _NPROCESSORS_ONLN) --disable-warnings-as-errors \
 	&& scons --prefix=/opt/mongo install \
 	&& rm mongo.tgz \
 	&& apk del .build-deps
