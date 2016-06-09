@@ -1,8 +1,7 @@
 #!/bin/bash
 set -eu
 
-declare -A aliases
-aliases=(
+declare -A aliases=(
 	[2.6]='2'
 	[3.2]='3 latest'
 )
