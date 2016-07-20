@@ -28,7 +28,7 @@ RUN set -x \
 RUN apt-key adv --keyserver ha.pool.sks-keyservers.net --recv-keys 0C49F3730359A14518585931BC711F9BA15703C6
 
 ENV MONGO_MAJOR 3.3
-ENV MONGO_VERSION 3.3.9
+ENV MONGO_VERSION 3.3.10
 
 RUN echo "deb http://repo.mongodb.org/apt/debian jessie/mongodb-org/$MONGO_MAJOR main" > /etc/apt/sources.list.d/mongodb-org.list
 
