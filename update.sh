@@ -19,12 +19,25 @@ for version in "${versions[@]}"; do
 	if [ "$rcVersion" != "$version" ]; then
 		major='testing'
 	fi
+
 	if [ "${version%%.*}" -ge 3 ]; then
 		packagesUrl="http://repo.mongodb.org/apt/debian/dists/wheezy/mongodb-org/$major/main/binary-amd64/Packages"
 	else
 		packagesUrl='http://downloads-distro.mongodb.org/repo/debian-sysvinit/dists/dist/10gen/binary-amd64/Packages'
 	fi
-	fullVersion="$(curl -fsSL "$packagesUrl.gz" | gunzip | awk -F ': ' '$1 == "Package" { pkg = $2 } pkg ~ /^mongodb-(org(-unstable)?|10gen)$/ && $1 == "Version" { print $2 }' | grep "^$rcVersion\." | grep -v '~pre~$' | sort -V | tail -1)"
+	fullVersion="$(
+		curl -fsSL "$packagesUrl.gz" \
+			| gunzip \
+			| awk -F ': ' '
+				$1 == "Package" { pkg = $2 }
+				pkg ~ /^mongodb-(org(-unstable)?|10gen)$/ && $1 == "Version" { print $2 }
+			' \
+			| grep "^$rcVersion\." \
+			| grep -v '~pre~$' \
+			| sort -V \
+			| tail -1
+	)"
+
 	(
 		set -x
 		sed -ri \
