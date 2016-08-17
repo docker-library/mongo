@@ -24,7 +24,7 @@ for version in "${versions[@]}"; do
 	else
 		packagesUrl='http://downloads-distro.mongodb.org/repo/debian-sysvinit/dists/dist/10gen/binary-amd64/Packages'
 	fi
-	fullVersion="$(curl -sSL "$packagesUrl.gz" | gunzip | awk -F ': ' '$1 == "Package" { pkg = $2 } pkg ~ /^mongodb-(org(-unstable)?|10gen)$/ && $1 == "Version" { print $2 }' | grep "^$rcVersion\." | grep -v '~pre~$' | sort -V | tail -1)"
+	fullVersion="$(curl -fsSL "$packagesUrl.gz" | gunzip | awk -F ': ' '$1 == "Package" { pkg = $2 } pkg ~ /^mongodb-(org(-unstable)?|10gen)$/ && $1 == "Version" { print $2 }' | grep "^$rcVersion\." | grep -v '~pre~$' | sort -V | tail -1)"
 	(
 		set -x
 		sed -ri \
