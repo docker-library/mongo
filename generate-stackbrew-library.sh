@@ -70,4 +70,26 @@ for version in "${versions[@]}"; do
 		GitCommit: $commit
 		Directory: $version
 	EOE
+
+	for v in \
+		windows/windowsservercore windows/nanoserver \
+	; do
+		dir="$version/$v"
+		variant="$(basename "$v")"
+
+		[ -f "$dir/Dockerfile" ] || continue
+
+		commit="$(dirCommit "$dir")"
+
+		variantAliases=( "${versionAliases[@]/%/-$variant}" )
+		variantAliases=( "${variantAliases[@]//latest-/}" )
+
+		echo
+		cat <<-EOE
+			Tags: $(join ', ' "${variantAliases[@]}")
+			GitCommit: $commit
+			Directory: $dir
+		EOE
+		[ "$variant" = "$v" ] || echo "Constraints: $variant"
+	done
 done
