@@ -16,7 +16,9 @@ travisEnv=
 for version in "${versions[@]}"; do
 	rcVersion="${version%-rc}"
 	major="$rcVersion"
+	rcGrepV='-v'
 	if [ "$rcVersion" != "$version" ]; then
+		rcGrepV=
 		major='testing'
 	fi
 
@@ -45,6 +47,29 @@ for version in "${versions[@]}"; do
 			-e 's/^(ENV MONGO_VERSION) .*/\1 '"$fullVersion"'/' \
 			"$version/Dockerfile"
 	)
+
+	if [ -d "$version/windows" ]; then
+		windowsUrlPrefix='http://downloads.mongodb.org/win32/mongodb-win32-x86_64-2008plus-ssl-'
+		windowsUrlSuffix='-signed.msi'
+		windowsVersions="$(
+			curl -fsSL 'https://www.mongodb.org/dl/win32/x86_64-2008plus-ssl' \
+				| grep --extended-regexp --only-matching '"'"${windowsUrlPrefix}${rcVersion//./\\.}"'\.[^"]+'"${windowsUrlSuffix}"'"' \
+				| sed \
+					-e 's!^"'"$windowsUrlPrefix"'!!' \
+					-e 's!'"$windowsUrlSuffix"'"$!!' \
+				| grep $rcGrepV -- '-rc'
+		)"
+		windowsLatest="$(echo "$windowsVersions" | head -1)"
+		windowsSha256="$(curl -fsSL "${windowsUrlPrefix}${windowsLatest}${windowsUrlSuffix}.sha256" | cut -d' ' -f1)"
+
+		(
+			set -x
+			sed -ri \
+				-e 's/^(ENV MONGO_VERSION) .*/\1 '"$windowsLatest"'/' \
+				-e 's/^(ENV MONGO_DOWNLOAD_SHA256) .*/\1 '"$windowsSha256"'/' \
+				"$version/windows/"*"/Dockerfile"
+		)
+	fi
 
 	travisEnv='\n  - VERSION='"$version$travisEnv"
 done
