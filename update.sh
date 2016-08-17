@@ -27,12 +27,12 @@ for version in "${versions[@]}"; do
 	fullVersion="$(curl -sSL "$packagesUrl.gz" | gunzip | awk -F ': ' '$1 == "Package" { pkg = $2 } pkg ~ /^mongodb-(org(-unstable)?|10gen)$/ && $1 == "Version" { print $2 }' | grep "^$rcVersion\." | grep -v '~pre~$' | sort -V | tail -1)"
 	(
 		set -x
-		sed -ri '
-			s/^(ENV MONGO_MAJOR) .*/\1 '"$major"'/;
-			s/^(ENV MONGO_VERSION) .*/\1 '"$fullVersion"'/;
-		' "$version/Dockerfile"
+		sed -ri \
+			-e 's/^(ENV MONGO_MAJOR) .*/\1 '"$major"'/' \
+			-e 's/^(ENV MONGO_VERSION) .*/\1 '"$fullVersion"'/' \
+			"$version/Dockerfile"
 	)
-	
+
 	travisEnv='\n  - VERSION='"$version$travisEnv"
 done
 
