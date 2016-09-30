@@ -6,9 +6,9 @@ SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop';"]
 RUN [Environment]::SetEnvironmentVariable('PATH', 'C:\mongodb\bin;' + $env:PATH, [EnvironmentVariableTarget]::Machine);
 # doing this first to share cache across versions more aggressively
 
-ENV MONGO_VERSION 3.2.9
+ENV MONGO_VERSION 3.2.10
 ENV MONGO_DOWNLOAD_URL http://downloads.mongodb.org/win32/mongodb-win32-x86_64-2008plus-ssl-${MONGO_VERSION}-signed.msi
-ENV MONGO_DOWNLOAD_SHA256 348db5060e5c821acbd170331e806ea0233626837e6ea30e7d0e8dc72cc2e41f
+ENV MONGO_DOWNLOAD_SHA256 630b614df367d8ca98f7d57e3937cae7c3915e1fb8da100f316c680da8d7f4ef
 
 RUN Write-Host ('Downloading {0} ...' -f $env:MONGO_DOWNLOAD_URL); \
 	(New-Object System.Net.WebClient).DownloadFile($env:MONGO_DOWNLOAD_URL, 'mongo.msi'); \
