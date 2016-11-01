@@ -6,7 +6,6 @@ env:
   - VERSION=3.3
   - VERSION=3.2
   - VERSION=3.0
-  - VERSION=2.6
 
 install:
   - git clone https://github.com/docker-library/official-images.git ~/official-images
