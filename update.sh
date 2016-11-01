@@ -35,19 +35,22 @@ for version in "${versions[@]}"; do
 			| gunzip \
 			| awk -F ': ' '
 				$1 == "Package" { pkg = $2 }
-				pkg ~ /^mongodb-(org(-unstable)?|10gen)$/ && $1 == "Version" { print $2 }
+				pkg ~ /^mongodb-(org(-unstable)?|10gen)$/ && $1 == "Version" { print $2 "=" pkg }
 			' \
 			| grep "^$rcVersion\." \
 			| grep -v '~pre~$' \
 			| sort -V \
 			| tail -1
 	)"
+	packageName="${fullVersion#*=}"
+	fullVersion="${fullVersion%=$packageName}"
 
 	(
 		set -x
 		sed -ri \
 			-e 's/^(ENV MONGO_MAJOR) .*/\1 '"$major"'/' \
 			-e 's/^(ENV MONGO_VERSION) .*/\1 '"$fullVersion"'/' \
+			-e 's/^(ENV MONGO_PACKAGE) .*/\1 '"$packageName"'/' \
 			"$version/Dockerfile"
 	)
 
