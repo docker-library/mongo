@@ -2,10 +2,6 @@ FROM microsoft/windowsservercore
 
 SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop';"]
 
-# PATH isn't actually set in the Docker image, so we have to set it from within the container
-RUN [Environment]::SetEnvironmentVariable('PATH', 'C:\mongodb\bin;' + $env:PATH, [EnvironmentVariableTarget]::Machine);
-# doing this first to share cache across versions more aggressively
-
 ENV MONGO_VERSION 3.0.14
 ENV MONGO_DOWNLOAD_URL http://downloads.mongodb.org/win32/mongodb-win32-x86_64-2008plus-ssl-${MONGO_VERSION}-signed.msi
 ENV MONGO_DOWNLOAD_SHA256 5a081722c42c79f23d9201c97500be6ddc8741b66ce707d88dad058bf84165f1
@@ -30,12 +26,16 @@ RUN Write-Host ('Downloading {0} ...' -f $env:MONGO_DOWNLOAD_URL); \
 			'INSTALLLOCATION=C:\mongodb', \
 			'ADDLOCAL=all' \
 		); \
+	$env:PATH = 'C:\mongodb\bin;' + $env:PATH; \
+	[Environment]::SetEnvironmentVariable('PATH', $env:PATH, [EnvironmentVariableTarget]::Machine); \
 	\
 	Write-Host 'Verifying install ...'; \
 	Write-Host '  mongo --version'; mongo --version; \
 	Write-Host '  mongod --version'; mongod --version; \
 	\
 	Write-Host 'Removing ...'; \
+	Remove-Item C:\mongodb\bin\*.pdb -Force; \
+	Remove-Item C:\windows\installer\*.msi -Force; \
 	Remove-Item mongo.msi -Force; \
 	\
 	Write-Host 'Complete.';
