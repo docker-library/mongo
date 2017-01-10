@@ -22,8 +22,17 @@ RUN set -x \
 	&& gosu nobody true \
 	&& apt-get purge -y --auto-remove ca-certificates wget
 
+ENV GPG_KEYS \
 # gpg: key 7F0CEB10: public key "Richard Kreuter <richard@10gen.com>" imported
-RUN apt-key adv --keyserver ha.pool.sks-keyservers.net --recv-keys 492EAFE8CD016A07919F1D2B9ECBEC467F0CEB10
+	492EAFE8CD016A07919F1D2B9ECBEC467F0CEB10
+RUN set -ex; \
+	export GNUPGHOME="$(mktemp -d)"; \
+	for key in $GPG_KEYS; do \
+		gpg --keyserver ha.pool.sks-keyservers.net --recv-keys "$key"; \
+	done; \
+	gpg --export $GPG_KEYS > /etc/apt/trusted.gpg.d/mongodb.gpg; \
+	rm -r "$GNUPGHOME"; \
+	apt-key list
 
 ENV MONGO_MAJOR 3.0
 ENV MONGO_VERSION 3.0.14

@@ -22,21 +22,23 @@ RUN set -x \
 	&& gosu nobody true \
 	&& apt-get purge -y --auto-remove ca-certificates wget
 
+ENV GPG_KEYS \
 # pub   4096R/AAB2461C 2014-02-25 [expires: 2016-02-25]
 #       Key fingerprint = DFFA 3DCF 326E 302C 4787  673A 01C4 E7FA AAB2 461C
 # uid                  MongoDB 2.6 Release Signing Key <packaging@mongodb.com>
-#
+	DFFA3DCF326E302C4787673A01C4E7FAAAB2461C \
 # pub   4096R/EA312927 2015-10-09 [expires: 2017-10-08]
 #       Key fingerprint = 42F3 E95A 2C4F 0827 9C49  60AD D68F A50F EA31 2927
 # uid                  MongoDB 3.2 Release Signing Key <packaging@mongodb.com>
-#
-ENV GPG_KEYS \
-	DFFA3DCF326E302C4787673A01C4E7FAAAB2461C \
 	42F3E95A2C4F08279C4960ADD68FA50FEA312927
-RUN set -ex \
-	&& for key in $GPG_KEYS; do \
-		apt-key adv --keyserver ha.pool.sks-keyservers.net --recv-keys "$key"; \
-	done
+RUN set -ex; \
+	export GNUPGHOME="$(mktemp -d)"; \
+	for key in $GPG_KEYS; do \
+		gpg --keyserver ha.pool.sks-keyservers.net --recv-keys "$key"; \
+	done; \
+	gpg --export $GPG_KEYS > /etc/apt/trusted.gpg.d/mongodb.gpg; \
+	rm -r "$GNUPGHOME"; \
+	apt-key list
 
 ENV MONGO_MAJOR 3.2
 ENV MONGO_VERSION 3.2.11
