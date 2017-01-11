@@ -22,10 +22,19 @@ RUN set -x \
 	&& gosu nobody true \
 	&& apt-get purge -y --auto-remove ca-certificates wget
 
+ENV GPG_KEYS \
 # pub   4096R/A15703C6 2016-01-11 [expires: 2018-01-10]
 #       Key fingerprint = 0C49 F373 0359 A145 1858  5931 BC71 1F9B A157 03C6
 # uid                  MongoDB 3.4 Release Signing Key <packaging@mongodb.com>
-RUN apt-key adv --keyserver ha.pool.sks-keyservers.net --recv-keys 0C49F3730359A14518585931BC711F9BA15703C6
+	0C49F3730359A14518585931BC711F9BA15703C6
+RUN set -ex; \
+	export GNUPGHOME="$(mktemp -d)"; \
+	for key in $GPG_KEYS; do \
+		gpg --keyserver ha.pool.sks-keyservers.net --recv-keys "$key"; \
+	done; \
+	gpg --export $GPG_KEYS > /etc/apt/trusted.gpg.d/mongodb.gpg; \
+	rm -r "$GNUPGHOME"; \
+	apt-key list
 
 ENV MONGO_MAJOR 3.4
 ENV MONGO_VERSION 3.4.1
