@@ -59,5 +59,7 @@ VOLUME /data/db /data/configdb
 COPY docker-entrypoint.sh /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
 
+HEALTHCHECK --interval=10s --timeout=10s --retries=3 CMD echo 'db.stats().ok' | mongo --quiet || exit1
+
 EXPOSE 27017
 CMD ["mongod"]
