@@ -23,7 +23,8 @@ for version in "${versions[@]}"; do
 	fi
 
 	from="$(awk -F '[[:space:]]+' 'toupper($1) == "FROM" { print $2; exit }' "$version/Dockerfile")" # "debian:xxx"
-	suite="${from#*:}" # "wheezy" or "jessie"
+	suite="${from#*:}" # "wheezy-slim" or "jessie-slim"
+	suite="${suite%-slim}" # "wheezy" or "jessie"
 
 	if [ "${version%%.*}" -ge 3 ]; then
 		packagesUrl="http://repo.mongodb.org/apt/debian/dists/$suite/mongodb-org/$major/main/binary-amd64/Packages"
