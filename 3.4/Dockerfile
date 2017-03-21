@@ -1,10 +1,11 @@
-FROM debian:jessie
+FROM debian:jessie-slim
 
 # add our user and group first to make sure their IDs get assigned consistently, regardless of whatever dependencies get added
 RUN groupadd -r mongodb && useradd -r -g mongodb mongodb
 
 RUN apt-get update \
 	&& apt-get install -y --no-install-recommends \
+		jq \
 		numactl \
 	&& rm -rf /var/lib/apt/lists/*
 
@@ -21,6 +22,8 @@ RUN set -x \
 	&& chmod +x /usr/local/bin/gosu \
 	&& gosu nobody true \
 	&& apt-get purge -y --auto-remove ca-certificates wget
+
+RUN mkdir /docker-entrypoint-initdb.d
 
 ENV GPG_KEYS \
 # pub   4096R/A15703C6 2016-01-11 [expires: 2018-01-10]
@@ -58,8 +61,9 @@ RUN mkdir -p /data/db /data/configdb \
 	&& chown -R mongodb:mongodb /data/db /data/configdb
 VOLUME /data/db /data/configdb
 
-COPY docker-entrypoint.sh /entrypoint.sh
-ENTRYPOINT ["/entrypoint.sh"]
+COPY docker-entrypoint.sh /usr/local/bin/
+RUN ln -s usr/local/bin/docker-entrypoint.sh /entrypoint.sh # backwards compat
+ENTRYPOINT ["docker-entrypoint.sh"]
 
 EXPOSE 27017
 CMD ["mongod"]

@@ -1,10 +1,14 @@
-FROM debian:wheezy
+FROM debian:wheezy-slim
 
 # add our user and group first to make sure their IDs get assigned consistently, regardless of whatever dependencies get added
 RUN groupadd -r mongodb && useradd -r -g mongodb mongodb
 
+# add "wheezy-backports" for "jq"
+RUN echo 'deb http://deb.debian.org/debian wheezy-backports main' > /etc/apt/sources.list.d/backports.list
+
 RUN apt-get update \
 	&& apt-get install -y --no-install-recommends \
+		jq \
 		numactl \
 	&& rm -rf /var/lib/apt/lists/*
 
@@ -21,6 +25,8 @@ RUN set -x \
 	&& chmod +x /usr/local/bin/gosu \
 	&& gosu nobody true \
 	&& apt-get purge -y --auto-remove ca-certificates wget
+
+RUN mkdir /docker-entrypoint-initdb.d
 
 ENV GPG_KEYS \
 # gpg: key 7F0CEB10: public key "Richard Kreuter <richard@10gen.com>" imported
@@ -56,8 +62,9 @@ RUN mkdir -p /data/db /data/configdb \
 	&& chown -R mongodb:mongodb /data/db /data/configdb
 VOLUME /data/db /data/configdb
 
-COPY docker-entrypoint.sh /entrypoint.sh
-ENTRYPOINT ["/entrypoint.sh"]
+COPY docker-entrypoint.sh /usr/local/bin/
+RUN ln -s usr/local/bin/docker-entrypoint.sh /entrypoint.sh # backwards compat
+ENTRYPOINT ["docker-entrypoint.sh"]
 
 EXPOSE 27017
 CMD ["mongod"]
