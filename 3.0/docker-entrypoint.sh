@@ -50,7 +50,18 @@ if [ "$1" = 'mongod' ]; then
 	file_env 'MONGO_INITDB_ROOT_USERNAME'
 	file_env 'MONGO_INITDB_ROOT_PASSWORD'
 	if [ "$MONGO_INITDB_ROOT_USERNAME" ] && [ "$MONGO_INITDB_ROOT_PASSWORD" ]; then
-		set -- "$@" --auth
+		# if we have a username/password, let's set "--auth" (but only if it isn't included already, because mongod is very picky)
+		# see https://github.com/docker-library/mongo/issues/147
+		haveAuth=
+		for arg; do
+			if [ "$arg" = '--auth' ]; then
+				haveAuth=1
+				break
+			fi
+		done
+		if [ -z "$haveAuth" ]; then
+			set -- "$@" --auth
+		fi
 	fi
 
 	# check for a few known paths (to determine whether we've already initialized and should thus skip our initdb scripts)
