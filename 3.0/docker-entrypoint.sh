@@ -84,17 +84,35 @@ if [ "$1" = 'mongod' ]; then
 	done
 
 	if [ -z "$definitelyAlreadyInitialized" ]; then
-		"$@" --fork --bind_ip 127.0.0.1 --logpath "/proc/$$/fd/1"
+		pidfile="$(mktemp)"
+		trap "rm -f '$pidfile'" EXIT
+		"$@" --bind_ip 127.0.0.1 --logpath "/proc/$$/fd/1" --pidfilepath "$pidfile" --fork
 
 		mongo=( mongo --quiet )
 
-		# check to see that "mongod" actually did start up (catches "--help", "--version", MongoDB 3.2 being silly, etc)
-		if ! "${mongo[@]}" 'admin' --eval 'quit(0)' &> /dev/null; then
-			echo >&2
-			echo >&2 'error: mongod does not appear to have started up -- perhaps it had an error?'
-			echo >&2
-			exit 1
-		fi
+		# check to see that our "mongod" actually did start up (catches "--help", "--version", MongoDB 3.2 being silly, slow prealloc, etc)
+		tries=30
+		while true; do
+			if ! { [ -s "$pidfile" ] && ps "$(< "$pidfile")" &> /dev/null; }; then
+				# bail ASAP if "mongod" isn't even running
+				echo >&2
+				echo >&2 "error: $1 does not appear to have stayed running -- perhaps it had an error?"
+				echo >&2
+				exit 1
+			fi
+			if "${mongo[@]}" 'admin' --eval 'quit(0)' &> /dev/null; then
+				# success!
+				break
+			fi
+			(( tries-- ))
+			if [ "$tries" -le 0 ]; then
+				echo >&2
+				echo >&2 "error: $1 does not appear to have accepted connections quickly enough -- perhaps it had an error?"
+				echo >&2
+				exit 1
+			fi
+			sleep 1
+		done
 
 		if [ "$MONGO_INITDB_ROOT_USERNAME" ] && [ "$MONGO_INITDB_ROOT_PASSWORD" ]; then
 			rootAuthDatabase='admin'
@@ -126,7 +144,9 @@ if [ "$1" = 'mongod' ]; then
 			echo
 		done
 
-		"$@" --shutdown
+		"$@" --pidfilepath="$pidfile" --shutdown
+		rm "$pidfile"
+		trap - EXIT
 
 		echo
 		echo 'MongoDB init process complete; ready for start up.'
