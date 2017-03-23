@@ -91,6 +91,7 @@ if [ "$1" = 'mongod' ]; then
 		mongo=( mongo --quiet )
 
 		# check to see that our "mongod" actually did start up (catches "--help", "--version", MongoDB 3.2 being silly, slow prealloc, etc)
+		# https://jira.mongodb.org/browse/SERVER-16292
 		tries=30
 		while true; do
 			if ! { [ -s "$pidfile" ] && ps "$(< "$pidfile")" &> /dev/null; }; then

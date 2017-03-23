@@ -10,6 +10,8 @@ RUN apt-get update \
 	&& apt-get install -y --no-install-recommends \
 		jq \
 		numactl \
+# ps is not in base debian:wheezy image
+		procps \
 	&& rm -rf /var/lib/apt/lists/*
 
 # grab gosu for easy step-down from root
