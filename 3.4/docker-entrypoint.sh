@@ -84,36 +84,18 @@ if [ "$1" = 'mongod' ]; then
 	done
 
 	if [ -z "$definitelyAlreadyInitialized" ]; then
-		pidfile="$(mktemp)"
-		trap "rm -f '$pidfile'" EXIT
-		"$@" --bind_ip 127.0.0.1 --logpath "/proc/$$/fd/1" --pidfilepath "$pidfile" --fork
+		"$@" --bind_ip 127.0.0.1 --logpath "/proc/$$/fd/1" --fork
 
 		mongo=( mongo --quiet )
 
 		# check to see that our "mongod" actually did start up (catches "--help", "--version", MongoDB 3.2 being silly, slow prealloc, etc)
-		# https://jira.mongodb.org/browse/SERVER-16292
-		tries=30
-		while true; do
-			if ! { [ -s "$pidfile" ] && ps "$(< "$pidfile")" &> /dev/null; }; then
-				# bail ASAP if "mongod" isn't even running
-				echo >&2
-				echo >&2 "error: $1 does not appear to have stayed running -- perhaps it had an error?"
-				echo >&2
-				exit 1
-			fi
-			if "${mongo[@]}" 'admin' --eval 'quit(0)' &> /dev/null; then
-				# success!
-				break
-			fi
-			(( tries-- ))
-			if [ "$tries" -le 0 ]; then
-				echo >&2
-				echo >&2 "error: $1 does not appear to have accepted connections quickly enough -- perhaps it had an error?"
-				echo >&2
-				exit 1
-			fi
-			sleep 1
-		done
+		# https://jira.mongodb.org/browse/SERVER-16292 (as of MongoDB 3.4+, the contract for "--fork" implies that once we get control back, the database is ready and listening for connections if it is going to be)
+		if "${mongo[@]}" 'admin' --eval 'quit(0)' &> /dev/null; then
+			echo >&2
+			echo >&2 "error: $1 does not appear to have started successfully -- perhaps it had an error?"
+			echo >&2
+			exit 1
+		fi
 
 		if [ "$MONGO_INITDB_ROOT_USERNAME" ] && [ "$MONGO_INITDB_ROOT_PASSWORD" ]; then
 			rootAuthDatabase='admin'
@@ -145,9 +127,7 @@ if [ "$1" = 'mongod' ]; then
 			echo
 		done
 
-		"$@" --pidfilepath="$pidfile" --shutdown
-		rm "$pidfile"
-		trap - EXIT
+		"$@" --shutdown
 
 		echo
 		echo 'MongoDB init process complete; ready for start up.'
