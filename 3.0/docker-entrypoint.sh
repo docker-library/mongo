@@ -5,10 +5,12 @@ if [ "${1:0:1}" = '-' ]; then
 	set -- mongod "$@"
 fi
 
+originalArgOne="$1"
+
 # allow the container to be started with `--user`
 # all mongo* commands should be dropped to the correct user
-if [[ "$1" == mongo* ]] && [ "$(id -u)" = '0' ]; then
-	if [ "$1" = 'mongod' ]; then
+if [[ "$originalArgOne" == mongo* ]] && [ "$(id -u)" = '0' ]; then
+	if [ "$originalArgOne" = 'mongod' ]; then
 		chown -R mongodb /data/configdb /data/db
 	fi
 
@@ -22,7 +24,7 @@ fi
 
 # you should use numactl to start your mongod instances, including the config servers, mongos instances, and any clients.
 # https://docs.mongodb.com/manual/administration/production-notes/#configuring-numa-on-linux
-if [[ "$1" == mongo* ]]; then
+if [[ "$originalArgOne" == mongo* ]]; then
 	numa='numactl --interleave=all'
 	if $numa true &> /dev/null; then
 		set -- $numa "$@"
@@ -51,7 +53,7 @@ file_env() {
 	unset "$fileVar"
 }
 
-if [ "$1" = 'mongod' ]; then
+if [ "$originalArgOne" = 'mongod' ]; then
 	file_env 'MONGO_INITDB_ROOT_USERNAME'
 	file_env 'MONGO_INITDB_ROOT_PASSWORD'
 	if [ "$MONGO_INITDB_ROOT_USERNAME" ] && [ "$MONGO_INITDB_ROOT_PASSWORD" ]; then
@@ -97,7 +99,7 @@ if [ "$1" = 'mongod' ]; then
 			if ! { [ -s "$pidfile" ] && ps "$(< "$pidfile")" &> /dev/null; }; then
 				# bail ASAP if "mongod" isn't even running
 				echo >&2
-				echo >&2 "error: $1 does not appear to have stayed running -- perhaps it had an error?"
+				echo >&2 "error: $originalArgOne does not appear to have stayed running -- perhaps it had an error?"
 				echo >&2
 				exit 1
 			fi
@@ -108,7 +110,7 @@ if [ "$1" = 'mongod' ]; then
 			(( tries-- ))
 			if [ "$tries" -le 0 ]; then
 				echo >&2
-				echo >&2 "error: $1 does not appear to have accepted connections quickly enough -- perhaps it had an error?"
+				echo >&2 "error: $originalArgOne does not appear to have accepted connections quickly enough -- perhaps it had an error?"
 				echo >&2
 				exit 1
 			fi
