@@ -26,14 +26,10 @@ RUN set -x \
 RUN mkdir /docker-entrypoint-initdb.d
 
 ENV GPG_KEYS \
-# pub   4096R/AAB2461C 2014-02-25 [expires: 2016-02-25]
-#       Key fingerprint = DFFA 3DCF 326E 302C 4787  673A 01C4 E7FA AAB2 461C
-# uid                  MongoDB 2.6 Release Signing Key <packaging@mongodb.com>
-	DFFA3DCF326E302C4787673A01C4E7FAAAB2461C \
-# pub   4096R/EA312927 2015-10-09 [expires: 2017-10-08]
-#       Key fingerprint = 42F3 E95A 2C4F 0827 9C49  60AD D68F A50F EA31 2927
-# uid                  MongoDB 3.2 Release Signing Key <packaging@mongodb.com>
-	42F3E95A2C4F08279C4960ADD68FA50FEA312927
+# pub   4096R/91FA4AD5 2016-12-14 [expires: 2018-12-14]
+#       Key fingerprint = 2930 ADAE 8CAF 5059 EE73  BB4B 5871 2A22 91FA 4AD5
+# uid                  MongoDB 3.6 Release Signing Key <packaging@mongodb.com>
+	2930ADAE8CAF5059EE73BB4B58712A2291FA4AD5
 # https://docs.mongodb.com/manual/tutorial/verify-mongodb-packages/#download-then-import-the-key-file
 RUN set -ex; \
 	export GNUPGHOME="$(mktemp -d)"; \
@@ -44,9 +40,9 @@ RUN set -ex; \
 	rm -r "$GNUPGHOME"; \
 	apt-key list
 
-ENV MONGO_MAJOR 3.2
-ENV MONGO_VERSION 3.2.12
-ENV MONGO_PACKAGE mongodb-org
+ENV MONGO_MAJOR 3.5
+ENV MONGO_VERSION 3.5.5
+ENV MONGO_PACKAGE mongodb-org-unstable
 
 RUN echo "deb http://repo.mongodb.org/apt/debian jessie/mongodb-org/$MONGO_MAJOR main" > /etc/apt/sources.list.d/mongodb-org.list
 

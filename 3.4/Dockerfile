@@ -30,6 +30,7 @@ ENV GPG_KEYS \
 #       Key fingerprint = 0C49 F373 0359 A145 1858  5931 BC71 1F9B A157 03C6
 # uid                  MongoDB 3.4 Release Signing Key <packaging@mongodb.com>
 	0C49F3730359A14518585931BC711F9BA15703C6
+# https://docs.mongodb.com/manual/tutorial/verify-mongodb-packages/#download-then-import-the-key-file
 RUN set -ex; \
 	export GNUPGHOME="$(mktemp -d)"; \
 	for key in $GPG_KEYS; do \
