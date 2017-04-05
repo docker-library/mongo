@@ -88,9 +88,9 @@ if [ "$originalArgOne" = 'mongod' ]; then
 	if [ -z "$definitelyAlreadyInitialized" ]; then
 		pidfile="$(mktemp)"
 		trap "rm -f '$pidfile'" EXIT
-		"$@" --bind_ip 127.0.0.1 --logpath "/proc/$$/fd/1" --pidfilepath "$pidfile" --fork
+		"$@" --bind_ip 127.0.0.1 --port 27017 --logpath "/proc/$$/fd/1" --pidfilepath "$pidfile" --fork
 
-		mongo=( mongo --quiet )
+		mongo=( mongo --host 127.0.0.1 --port 27017 --quiet )
 
 		# check to see that our "mongod" actually did start up (catches "--help", "--version", MongoDB 3.2 being silly, slow prealloc, etc)
 		# https://jira.mongodb.org/browse/SERVER-16292
