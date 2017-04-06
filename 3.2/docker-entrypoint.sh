@@ -53,22 +53,59 @@ file_env() {
 	unset "$fileVar"
 }
 
+# see https://github.com/docker-library/mongo/issues/147 (mongod is picky about duplicated arguments)
+_mongod_hack_have_arg() {
+	local checkArg="$1"; shift
+	for arg; do
+		case "$arg" in
+			"$checkArg"|"$checkArg"=*)
+				return 0
+				;;
+		esac
+	done
+	return 1
+}
+declare -a mongodHackedArgs
+# _mongod_hack_ensure_arg '--some-arg' "$@"
+# set -- "${mongodHackedArgs[@]}"
+_mongod_hack_ensure_arg() {
+	local ensureArg="$1"; shift
+	mongodHackedArgs=( "$@" )
+	if ! _mongod_hack_have_arg "$ensureArg" "$@"; then
+		mongodHackedArgs+=( "$ensureArg" )
+	fi
+}
+# _mongod_hack_ensure_arg_val '--some-arg' 'some-val' "$@"
+# set -- "${mongodHackedArgs[@]}"
+_mongod_hack_ensure_arg_val() {
+	local ensureArg="$1"; shift
+	local ensureVal="$1"; shift
+	mongodHackedArgs=()
+	while [ "$#" -gt 0 ]; do
+		arg="$1"; shift
+		case "$arg" in
+			"$ensureArg")
+				shift # also skip the value
+				continue
+				;;
+			"$ensureArg"=*)
+				# value is already included
+				continue
+				;;
+		esac
+		mongodHackedArgs+=( "$arg" )
+	done
+	mongodHackedArgs+=( "$ensureArg" "$ensureVal" )
+}
+# TODO what do to about "--config" ? :(
+
 if [ "$originalArgOne" = 'mongod' ]; then
 	file_env 'MONGO_INITDB_ROOT_USERNAME'
 	file_env 'MONGO_INITDB_ROOT_PASSWORD'
 	if [ "$MONGO_INITDB_ROOT_USERNAME" ] && [ "$MONGO_INITDB_ROOT_PASSWORD" ]; then
-		# if we have a username/password, let's set "--auth" (but only if it isn't included already, because mongod is very picky)
-		# see https://github.com/docker-library/mongo/issues/147
-		haveAuth=
-		for arg; do
-			if [ "$arg" = '--auth' ]; then
-				haveAuth=1
-				break
-			fi
-		done
-		if [ -z "$haveAuth" ]; then
-			set -- "$@" --auth
-		fi
+		# if we have a username/password, let's set "--auth"
+		_mongod_hack_ensure_arg '--auth' "$@"
+		set -- "${mongodHackedArgs[@]}"
 	fi
 
 	# check for a few known paths (to determine whether we've already initialized and should thus skip our initdb scripts)
@@ -88,7 +125,13 @@ if [ "$originalArgOne" = 'mongod' ]; then
 	if [ -z "$definitelyAlreadyInitialized" ]; then
 		pidfile="$(mktemp)"
 		trap "rm -f '$pidfile'" EXIT
-		"$@" --bind_ip 127.0.0.1 --port 27017 --logpath "/proc/$$/fd/1" --pidfilepath "$pidfile" --fork
+		_mongod_hack_ensure_arg_val --bind_ip 127.0.0.1 "$@"
+		_mongod_hack_ensure_arg_val --port 27017 "${mongodHackedArgs[@]}"
+		sslMode="$(_mongod_hack_have_arg '--sslPEMKeyFile' "$@" && echo 'allowSSL' || echo 'disabled')" # "BadValue: need sslPEMKeyFile when SSL is enabled" vs "BadValue: need to enable SSL via the sslMode flag when using SSL configuration parameters"
+		_mongod_hack_ensure_arg_val --sslMode "$sslMode" "${mongodHackedArgs[@]}"
+		_mongod_hack_ensure_arg_val --logpath "/proc/$$/fd/1" "${mongodHackedArgs[@]}"
+		_mongod_hack_ensure_arg_val --pidfilepath "$pidfile" "${mongodHackedArgs[@]}"
+		"${mongodHackedArgs[@]}" --fork
 
 		mongo=( mongo --host 127.0.0.1 --port 27017 --quiet )
 
