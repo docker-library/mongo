@@ -123,6 +123,13 @@ if [ "$originalArgOne" = 'mongod' ]; then
 	done
 
 	if [ -z "$definitelyAlreadyInitialized" ]; then
+		if _mongod_hack_have_arg --config "$@"; then
+			echo >&2
+			echo >&2 'warning: database is not yet initialized, and "--config" is specified'
+			echo >&2 '  the initdb database startup might fail as a result!'
+			echo >&2
+		fi
+
 		pidfile="$(mktemp)"
 		trap "rm -f '$pidfile'" EXIT
 		_mongod_hack_ensure_arg_val --bind_ip 127.0.0.1 "$@"
