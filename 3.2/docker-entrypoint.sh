@@ -132,11 +132,23 @@ if [ "$originalArgOne" = 'mongod' ]; then
 
 		pidfile="$(mktemp)"
 		trap "rm -f '$pidfile'" EXIT
+
 		_mongod_hack_ensure_arg_val --bind_ip 127.0.0.1 "$@"
 		_mongod_hack_ensure_arg_val --port 27017 "${mongodHackedArgs[@]}"
+
 		sslMode="$(_mongod_hack_have_arg '--sslPEMKeyFile' "$@" && echo 'allowSSL' || echo 'disabled')" # "BadValue: need sslPEMKeyFile when SSL is enabled" vs "BadValue: need to enable SSL via the sslMode flag when using SSL configuration parameters"
 		_mongod_hack_ensure_arg_val --sslMode "$sslMode" "${mongodHackedArgs[@]}"
-		_mongod_hack_ensure_arg_val --logpath "/proc/$$/fd/1" "${mongodHackedArgs[@]}"
+
+		if stat "/proc/$$/fd/1" > /dev/null && [ -w "/proc/$$/fd/1" ]; then
+			# https://github.com/mongodb/mongo/blob/38c0eb538d0fd390c6cb9ce9ae9894153f6e8ef5/src/mongo/db/initialize_server_global_state.cpp#L237-L251
+			# https://github.com/docker-library/mongo/issues/164#issuecomment-293965668
+			_mongod_hack_ensure_arg_val --logpath "/proc/$$/fd/1" "${mongodHackedArgs[@]}"
+		else
+			echo >&2 "warning: initdb logs cannot write to '/proc/$$/fd/1', so they are in '/data/db/docker-initdb.log' instead"
+			_mongod_hack_ensure_arg_val --logpath /data/db/docker-initdb.log "${mongodHackedArgs[@]}"
+		fi
+		_mongod_hack_ensure_arg --logappend "${mongodHackedArgs[@]}"
+
 		_mongod_hack_ensure_arg_val --pidfilepath "$pidfile" "${mongodHackedArgs[@]}"
 		"${mongodHackedArgs[@]}" --fork
 
