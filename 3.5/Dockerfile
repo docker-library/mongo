@@ -41,7 +41,7 @@ RUN set -ex; \
 	apt-key list
 
 ENV MONGO_MAJOR 3.5
-ENV MONGO_VERSION 3.5.5
+ENV MONGO_VERSION 3.5.6
 ENV MONGO_PACKAGE mongodb-org-unstable
 
 RUN echo "deb http://repo.mongodb.org/apt/debian jessie/mongodb-org/$MONGO_MAJOR main" > /etc/apt/sources.list.d/mongodb-org.list
