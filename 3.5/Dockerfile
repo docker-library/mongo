@@ -42,7 +42,7 @@ RUN set -ex; \
 	apt-key list
 
 ENV MONGO_MAJOR 3.5
-ENV MONGO_VERSION 3.5.6
+ENV MONGO_VERSION 3.5.7
 ENV MONGO_PACKAGE mongodb-org-unstable
 
 RUN echo "deb http://repo.mongodb.org/apt/debian jessie/mongodb-org/$MONGO_MAJOR main" > /etc/apt/sources.list.d/mongodb-org.list
@@ -64,8 +64,7 @@ RUN mkdir -p /data/db /data/configdb \
 VOLUME /data/db /data/configdb
 
 COPY docker-entrypoint.sh /usr/local/bin/
-RUN ln -s usr/local/bin/docker-entrypoint.sh /entrypoint.sh # backwards compat
 ENTRYPOINT ["docker-entrypoint.sh"]
 
 EXPOSE 27017
-CMD ["mongod"]
+CMD ["mongod", "--bind_ip_all"]
