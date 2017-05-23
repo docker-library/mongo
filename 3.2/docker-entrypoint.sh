@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e
+set -Eeuo pipefail
 
 if [ "${1:0:1}" = '-' ]; then
 	set -- mongod "$@"
@@ -56,6 +56,7 @@ file_env() {
 # see https://github.com/docker-library/mongo/issues/147 (mongod is picky about duplicated arguments)
 _mongod_hack_have_arg() {
 	local checkArg="$1"; shift
+	local arg
 	for arg; do
 		case "$arg" in
 			"$checkArg"|"$checkArg"=*)
@@ -82,7 +83,7 @@ _mongod_hack_ensure_arg_val() {
 	local ensureVal="$1"; shift
 	mongodHackedArgs=()
 	while [ "$#" -gt 0 ]; do
-		arg="$1"; shift
+		local arg="$1"; shift
 		case "$arg" in
 			"$ensureArg")
 				shift # also skip the value
@@ -102,27 +103,51 @@ _mongod_hack_ensure_arg_val() {
 if [ "$originalArgOne" = 'mongod' ]; then
 	file_env 'MONGO_INITDB_ROOT_USERNAME'
 	file_env 'MONGO_INITDB_ROOT_PASSWORD'
+	# pre-check a few factors to see if it's even worth bothering with initdb
+	shouldPerformInitdb=
 	if [ "$MONGO_INITDB_ROOT_USERNAME" ] && [ "$MONGO_INITDB_ROOT_PASSWORD" ]; then
 		# if we have a username/password, let's set "--auth"
 		_mongod_hack_ensure_arg '--auth' "$@"
 		set -- "${mongodHackedArgs[@]}"
+		shouldPerformInitdb='true'
+	elif [ "$MONGO_INITDB_ROOT_USERNAME" ] || [ "$MONGO_INITDB_ROOT_PASSWORD" ]; then
+		cat >&2 <<-'EOF'
+
+			error: missing 'MONGO_INITDB_ROOT_USERNAME' or 'MONGO_INITDB_ROOT_PASSWORD'
+			       both must be specified for a user to be created
+
+		EOF
+		exit 1
+	fi
+
+	if [ -z "$shouldPerformInitdb" ]; then
+		# if we've got any /docker-entrypoint-initdb.d/* files to parse later, we should initdb
+		for f in /docker-entrypoint-initdb.d/*; do
+			case "$f" in
+				*.sh|*.js) # this should match the set of files we check for below
+					shouldPerformInitdb="$f"
+					break
+					;;
+			esac
+		done
 	fi
 
 	# check for a few known paths (to determine whether we've already initialized and should thus skip our initdb scripts)
-	definitelyAlreadyInitialized=
-	for path in \
-		/data/db/WiredTiger \
-		/data/db/journal \
-		/data/db/local.0 \
-		/data/db/storage.bson \
-	; do
-		if [ -e "$path" ]; then
-			definitelyAlreadyInitialized="$path"
-			break
-		fi
-	done
+	if [ -n "$shouldPerformInitdb" ]; then
+		for path in \
+			/data/db/WiredTiger \
+			/data/db/journal \
+			/data/db/local.0 \
+			/data/db/storage.bson \
+		; do
+			if [ -e "$path" ]; then
+				shouldPerformInitdb=
+				break
+			fi
+		done
+	fi
 
-	if [ -z "$definitelyAlreadyInitialized" ]; then
+	if [ -n "$shouldPerformInitdb" ]; then
 		if _mongod_hack_have_arg --config "$@"; then
 			echo >&2
 			echo >&2 'warning: database is not yet initialized, and "--config" is specified'
@@ -218,9 +243,7 @@ if [ "$originalArgOne" = 'mongod' ]; then
 		echo
 	fi
 
-	unset MONGO_INITDB_ROOT_USERNAME
-	unset MONGO_INITDB_ROOT_PASSWORD
-	unset MONGO_INITDB_DATABASE
+	unset "${!MONGO_INITDB_@}"
 fi
 
 exec "$@"
