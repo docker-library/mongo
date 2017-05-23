@@ -103,24 +103,23 @@ _mongod_hack_ensure_arg_val() {
 if [ "$originalArgOne" = 'mongod' ]; then
 	file_env 'MONGO_INITDB_ROOT_USERNAME'
 	file_env 'MONGO_INITDB_ROOT_PASSWORD'
+	# pre-check a few factors to see if it's even worth bothering with initdb
+	shouldPerformInitdb=
 	if [ "$MONGO_INITDB_ROOT_USERNAME" ] && [ "$MONGO_INITDB_ROOT_PASSWORD" ]; then
 		# if we have a username/password, let's set "--auth"
 		_mongod_hack_ensure_arg '--auth' "$@"
 		set -- "${mongodHackedArgs[@]}"
+		shouldPerformInitdb='true'
+	elif [ "$MONGO_INITDB_ROOT_USERNAME" ] || [ "$MONGO_INITDB_ROOT_PASSWORD" ]; then
+		cat >&2 <<-'EOF'
+
+			error: missing 'MONGO_INITDB_ROOT_USERNAME' or 'MONGO_INITDB_ROOT_PASSWORD'
+			       both must be specified for a user to be created
+
+		EOF
+		exit 1
 	fi
 
-	# pre-check a few factors to see if it's even worth bothering with initdb
-	shouldPerformInitdb=
-	if [ -z "$shouldPerformInitdb" ]; then
-		# if we've got any MONGO_INITDB_xxx environment variables set, we should initdb
-		for var in "${!MONGO_INITDB_@}"; do
-			val="${!var}"
-			if [ -n "$val" ]; then
-				shouldPerformInitdb="$var"
-				break
-			fi
-		done
-	fi
 	if [ -z "$shouldPerformInitdb" ]; then
 		# if we've got any /docker-entrypoint-initdb.d/* files to parse later, we should initdb
 		for f in /docker-entrypoint-initdb.d/*; do
