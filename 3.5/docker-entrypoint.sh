@@ -133,6 +133,14 @@ if [ "$originalArgOne" = 'mongod' ]; then
 		exit 1
 	fi
 
+	if [ "$MONGO_REPLICA_SET" ] ; then
+		# if we have a replica set name, let's set "--replSet" and the replica set name.
+		_mongod_hack_ensure_arg '--replSet' "$@"
+		set -- "${mongodHackedArgs[@]}"
+		_mongod_hack_ensure_arg "$MONGO_REPLICA_NAME" "$@"
+		set -- "${mongodHackedArgs[@]}"
+	fi
+
 	if [ -z "$shouldPerformInitdb" ]; then
 		# if we've got any /docker-entrypoint-initdb.d/* files to parse later, we should initdb
 		for f in /docker-entrypoint-initdb.d/*; do
