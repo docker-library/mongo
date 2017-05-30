@@ -22,7 +22,7 @@ for version in "${versions[@]}"; do
 		major='testing'
 	fi
 
-	from="$(awk -F '[[:space:]]+' 'toupper($1) == "FROM" { print $2; exit }' "$version/Dockerfile")" # "debian:xxx"
+	from="$(gawk -F '[[:space:]]+' 'toupper($1) == "FROM" { print $2; exit }' "$version/Dockerfile")" # "debian:xxx"
 	suite="${from#*:}" # "wheezy-slim" or "jessie-slim"
 	suite="${suite%-slim}" # "wheezy" or "jessie"
 
