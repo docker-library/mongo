@@ -1,6 +1,8 @@
 #!/bin/bash
 set -Eeuo pipefail
 
+false
+
 if [ "${1:0:1}" = '-' ]; then
 	set -- mongod "$@"
 fi
