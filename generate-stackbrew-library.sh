@@ -69,6 +69,9 @@ for version in "${versions[@]}"; do
 	echo
 	cat <<-EOE
 		Tags: $(join ', ' "${versionAliases[@]}")
+		# see http://repo.mongodb.org/apt/debian/dists/jessie/mongodb-org/${version}/main/
+		# (i386 is empty, as is ppc64el)
+		Architectures: amd64
 		GitCommit: $commit
 		Directory: $version
 	EOE
@@ -89,6 +92,7 @@ for version in "${versions[@]}"; do
 		echo
 		cat <<-EOE
 			Tags: $(join ', ' "${variantAliases[@]}")
+			Architectures: windows-amd64
 			GitCommit: $commit
 			Directory: $dir
 		EOE
