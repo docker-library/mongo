@@ -51,7 +51,7 @@ for version in "${versions[@]}"; do
 		sed -ri \
 			-e 's/^(ENV MONGO_MAJOR) .*/\1 '"$major"'/' \
 			-e 's/^(ENV MONGO_VERSION) .*/\1 '"$fullVersion"'/' \
-			-e 's/^(ENV MONGO_PACKAGE) .*/\1 '"$packageName"'/' \
+			-e 's/^(ARG MONGO_PACKAGE)=.*/\1='"$packageName"'/' \
 			"$version/Dockerfile"
 	)
 
