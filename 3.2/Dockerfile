@@ -46,7 +46,7 @@ RUN set -ex; \
 	apt-key list
 
 ENV MONGO_MAJOR 3.2
-ENV MONGO_VERSION 3.2.13
+ENV MONGO_VERSION 3.2.14
 ENV MONGO_PACKAGE mongodb-org
 
 RUN echo "deb http://repo.mongodb.org/apt/debian jessie/mongodb-org/$MONGO_MAJOR main" > /etc/apt/sources.list.d/mongodb-org.list
