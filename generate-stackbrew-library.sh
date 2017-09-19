@@ -66,10 +66,16 @@ for version in "${versions[@]}"; do
 		${aliases[$version]:-}
 	)
 
+	variant="$(git show "$commit":"$version/Dockerfile" | awk '$1 == "FROM" { gsub(/^.*:|-.*$/, "", $2); print $2; exit }')"
+
+	variantAliases=( "${versionAliases[@]/%/-$variant}" )
+	variantAliases=( "${variantAliases[@]//latest-/}" )
+
 	echo
 	cat <<-EOE
-		Tags: $(join ', ' "${versionAliases[@]}")
-		# see http://repo.mongodb.org/apt/debian/dists/jessie/mongodb-org/${version}/main/
+		Tags: $(join ', ' "${variantAliases[@]}")
+		SharedTags: $(join ', ' "${versionAliases[@]}")
+		# see http://repo.mongodb.org/apt/debian/dists/$variant/mongodb-org/${version}/main/
 		# (i386 is empty, as is ppc64el)
 		Architectures: amd64
 		GitCommit: $commit
@@ -90,8 +96,11 @@ for version in "${versions[@]}"; do
 		variantAliases=( "${variantAliases[@]//latest-/}" )
 
 		echo
+		echo "Tags: $(join ', ' "${variantAliases[@]}")"
+		if [ "$variant" = 'windowsservercore' ]; then
+			echo "SharedTags: $(join ', ' "${versionAliases[@]}")"
+		fi
 		cat <<-EOE
-			Tags: $(join ', ' "${variantAliases[@]}")
 			Architectures: windows-amd64
 			GitCommit: $commit
 			Directory: $dir
