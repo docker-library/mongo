@@ -1,0 +1,28 @@
+version: build-{build}.{branch}
+image: Visual Studio 2017
+
+environment:
+  matrix:
+    - version: 3.5
+      variant: windowsservercore
+    - version: 3.4
+      variant: windowsservercore
+    - version: 3.2
+      variant: windowsservercore
+    - version: 3.0
+      variant: windowsservercore
+
+install:
+  - ps: |
+      [Environment]::SetEnvironmentVariable('dockerImage', ('mongo:{0}' -f $env:version), [EnvironmentVariableTarget]::Process);
+      [Environment]::SetEnvironmentVariable('buildDirectory', ('{0}/windows/{1}' -f $env:version, $env:variant), [EnvironmentVariableTarget]::Process);
+
+build_script:
+  - cmd: appveyor-retry docker build --pull -t %dockerImage% %buildDirectory%
+
+after_build:
+  - ps: docker images
+
+test_script:
+  - cmd: docker run --rm %dockerImage% mongod --version
+  - cmd: docker run --rm %dockerImage% mongo --version
