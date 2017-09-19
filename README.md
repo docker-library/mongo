@@ -10,6 +10,8 @@ See a change merged here that doesn't show up on the Docker Hub yet? Check [the 
 
 -	[Travis CI:  
 	![build status badge](https://img.shields.io/travis/docker-library/mongo/master.svg)](https://travis-ci.org/docker-library/mongo/branches)
+-	[AppVeyor (Windows):  
+	![build status badge](https://ci.appveyor.com/api/projects/status/github/docker-library/mongo?branch=master&svg=true)](https://ci.appveyor.com/project/docker-library/mongo)
 -	[Automated `update.sh`:  
 	![build status badge](https://doi-janky.infosiftr.net/job/update.sh/job/mongo/badge/icon)](https://doi-janky.infosiftr.net/job/update.sh/job/mongo)
 
