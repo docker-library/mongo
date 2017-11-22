@@ -83,7 +83,8 @@ for version in "${versions[@]}"; do
 	EOE
 
 	for v in \
-		windows/windowsservercore windows/nanoserver \
+		windows/windowsservercore-{ltsc2016,1709} \
+		windows/nanoserver-{sac2016,1709} \
 	; do
 		dir="$version/$v"
 		variant="$(basename "$v")"
@@ -95,10 +96,21 @@ for version in "${versions[@]}"; do
 		variantAliases=( "${versionAliases[@]/%/-$variant}" )
 		variantAliases=( "${variantAliases[@]//latest-/}" )
 
+		sharedTags=()
+		for windowsShared in windowsservercore nanoserver; do
+			if [[ "$variant" == "$windowsShared"* ]]; then
+				sharedTags+=( "$windowsShared" )
+				break
+			fi
+		done
+		if [[ "$variant" == 'windowsservercore'* ]]; then
+			sharedTags+=( "${versionAliases[@]}" )
+		fi
+
 		echo
 		echo "Tags: $(join ', ' "${variantAliases[@]}")"
-		if [ "$variant" = 'windowsservercore' ]; then
-			echo "SharedTags: $(join ', ' "${versionAliases[@]}")"
+		if [ "${#sharedTags[@]}" -gt 0 ]; then
+			echo "SharedTags: $(join ', ' "${sharedTags[@]}")"
 		fi
 		cat <<-EOE
 			Architectures: windows-amd64
