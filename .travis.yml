@@ -3,7 +3,6 @@ services: docker
 
 env:
   - VERSION=3.6
-  - VERSION=3.5
   - VERSION=3.4
   - VERSION=3.2
   - VERSION=3.0
