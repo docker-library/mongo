@@ -122,6 +122,7 @@ _js_escape() {
 	jq --null-input --arg 'str' "$1" '$str'
 }
 
+jsonConfigFile="${TMPDIR:-/tmp}/docker-entrypoint-config.json"
 tempConfigFile="${TMPDIR:-/tmp}/docker-entrypoint-temp-config.json"
 _parse_config() {
 	if [ -s "$tempConfigFile" ]; then
@@ -132,9 +133,8 @@ _parse_config() {
 	if configPath="$(_mongod_hack_get_arg_val --config "$@")"; then
 		# if --config is specified, parse it into a JSON file so we can remove a few problematic keys (especially SSL-related keys)
 		# see https://docs.mongodb.com/manual/reference/configuration-options/
-		mongo --norc --nodb --quiet --eval "load('/js-yaml.js'); printjson(jsyaml.load(cat($(_js_escape "$configPath"))))" \
-			| jq 'del(.systemLog, .processManagement, .net, .security)' \
-			> "$tempConfigFile"
+		mongo --norc --nodb --quiet --eval "load('/js-yaml.js'); printjson(jsyaml.load(cat($(_js_escape "$configPath"))))" > "$jsonConfigFile"
+		jq 'del(.systemLog, .processManagement, .net, .security)' "$jsonConfigFile" > "$tempConfigFile"
 		return 0
 	fi
 
@@ -149,7 +149,7 @@ _dbPath() {
 
 	if ! dbPath="$(_mongod_hack_get_arg_val --dbpath "$@")"; then
 		if _parse_config "$@"; then
-			dbPath="$(jq '.storage.dbPath' "$tempConfigFile")"
+			dbPath="$(jq '.storage.dbPath' "$jsonConfigFile")"
 		fi
 	fi
 
@@ -302,6 +302,6 @@ if [ "$originalArgOne" = 'mongod' ]; then
 	unset "${!MONGO_INITDB_@}"
 fi
 
-rm -f "$tempConfigFile"
+rm -f "$jsonConfigFile" "$tempConfigFile"
 
 exec "$@"
