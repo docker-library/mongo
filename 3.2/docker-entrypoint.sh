@@ -94,26 +94,45 @@ _mongod_hack_ensure_arg() {
 		mongodHackedArgs+=( "$ensureArg" )
 	fi
 }
-# _mongod_hack_ensure_arg_val '--some-arg' 'some-val' "$@"
+# _mongod_hack_ensure_no_arg '--some-unwanted-arg' "$@"
 # set -- "${mongodHackedArgs[@]}"
-_mongod_hack_ensure_arg_val() {
-	local ensureArg="$1"; shift
-	local ensureVal="$1"; shift
+_mongod_hack_ensure_no_arg() {
+	local ensureNoArg="$1"; shift
+	mongodHackedArgs=()
+	while [ "$#" -gt 0 ]; do
+		local arg="$1"; shift
+		if [ "$arg" = "$ensureNoArg" ]; then
+			continue
+		fi
+		mongodHackedArgs+=( "$arg" )
+	done
+}
+# _mongod_hack_ensure_no_arg '--some-unwanted-arg' "$@"
+# set -- "${mongodHackedArgs[@]}"
+_mongod_hack_ensure_no_arg_val() {
+	local ensureNoArg="$1"; shift
 	mongodHackedArgs=()
 	while [ "$#" -gt 0 ]; do
 		local arg="$1"; shift
 		case "$arg" in
-			"$ensureArg")
+			"$ensureNoArg")
 				shift # also skip the value
 				continue
 				;;
-			"$ensureArg"=*)
+			"$ensureNoArg"=*)
 				# value is already included
 				continue
 				;;
 		esac
 		mongodHackedArgs+=( "$arg" )
 	done
+}
+# _mongod_hack_ensure_arg_val '--some-arg' 'some-val' "$@"
+# set -- "${mongodHackedArgs[@]}"
+_mongod_hack_ensure_arg_val() {
+	local ensureArg="$1"; shift
+	local ensureVal="$1"; shift
+	_mongod_hack_ensure_no_arg_val "$ensureArg" "$@"
 	mongodHackedArgs+=( "$ensureArg" "$ensureVal" )
 }
 
@@ -214,6 +233,13 @@ if [ "$originalArgOne" = 'mongod' ]; then
 		_mongod_hack_ensure_arg_val --bind_ip 127.0.0.1 "${mongodHackedArgs[@]}"
 		_mongod_hack_ensure_arg_val --port 27017 "${mongodHackedArgs[@]}"
 
+		# remove "--auth" and "--replSet" for our initial startup (see https://docs.mongodb.com/manual/tutorial/enable-authentication/#start-mongodb-without-access-control)
+		# https://github.com/docker-library/mongo/issues/211
+		_mongod_hack_ensure_no_arg --auth "${mongodHackedArgs[@]}"
+		if [ "$MONGO_INITDB_ROOT_USERNAME" ] && [ "$MONGO_INITDB_ROOT_PASSWORD" ]; then
+			_mongod_hack_ensure_no_arg_val --replSet "${mongodHackedArgs[@]}"
+		fi
+
 		sslMode="$(_mongod_hack_have_arg '--sslPEMKeyFile' "$@" && echo 'allowSSL' || echo 'disabled')" # "BadValue: need sslPEMKeyFile when SSL is enabled" vs "BadValue: need to enable SSL via the sslMode flag when using SSL configuration parameters"
 		_mongod_hack_ensure_arg_val --sslMode "$sslMode" "${mongodHackedArgs[@]}"
 
@@ -271,12 +297,6 @@ if [ "$originalArgOne" = 'mongod' ]; then
 					roles: [ { role: 'root', db: $(_js_escape "$rootAuthDatabase") } ]
 				})
 			EOJS
-
-			mongo+=(
-				--username="$MONGO_INITDB_ROOT_USERNAME"
-				--password="$MONGO_INITDB_ROOT_PASSWORD"
-				--authenticationDatabase="$rootAuthDatabase"
-			)
 		fi
 
 		export MONGO_INITDB_DATABASE="${MONGO_INITDB_DATABASE:-test}"
