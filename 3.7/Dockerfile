@@ -41,10 +41,10 @@ RUN set -ex; \
 RUN mkdir /docker-entrypoint-initdb.d
 
 ENV GPG_KEYS \
-# pub   4096R/91FA4AD5 2016-12-14 [expires: 2018-12-14]
-#       Key fingerprint = 2930 ADAE 8CAF 5059 EE73  BB4B 5871 2A22 91FA 4AD5
-# uid                  MongoDB 3.6 Release Signing Key <packaging@mongodb.com>
-	2930ADAE8CAF5059EE73BB4B58712A2291FA4AD5
+# pub   rsa4096 2017-11-15 [SC] [expires: 2019-11-15]
+#       BD8C 80D9 C729 D005 24E0  68E0 3DAB 7171 3396 F72B
+# uid           [ unknown] MongoDB 3.8 Release Signing Key <packaging@mongodb.com>
+	BD8C80D9C729D00524E068E03DAB71713396F72B
 # https://docs.mongodb.com/manual/tutorial/verify-mongodb-packages/#download-then-import-the-key-file
 RUN set -ex; \
 	export GNUPGHOME="$(mktemp -d)"; \
