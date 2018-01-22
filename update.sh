@@ -27,11 +27,7 @@ for version in "${versions[@]}"; do
 	suite="${from#*:}" # "wheezy-slim" or "jessie-slim"
 	suite="${suite%-slim}" # "wheezy" or "jessie"
 
-	if [ "${version%%.*}" -ge 3 ]; then
-		packagesUrl="https://repo.mongodb.org/apt/debian/dists/$suite/mongodb-org/$major/main/binary-amd64/Packages"
-	else
-		packagesUrl='https://downloads-distro.mongodb.org/repo/debian-sysvinit/dists/dist/10gen/binary-amd64/Packages'
-	fi
+	packagesUrl="https://repo.mongodb.org/apt/debian/dists/$suite/mongodb-org/$major/main/binary-amd64/Packages"
 	fullVersion="$(
 		curl -fsSL "$packagesUrl.gz" \
 			| gunzip \
