@@ -28,9 +28,9 @@ for version in "${versions[@]}"; do
 	suite="${suite%-slim}" # "wheezy" or "jessie"
 
 	if [ "${version%%.*}" -ge 3 ]; then
-		packagesUrl="http://repo.mongodb.org/apt/debian/dists/$suite/mongodb-org/$major/main/binary-amd64/Packages"
+		packagesUrl="https://repo.mongodb.org/apt/debian/dists/$suite/mongodb-org/$major/main/binary-amd64/Packages"
 	else
-		packagesUrl='http://downloads-distro.mongodb.org/repo/debian-sysvinit/dists/dist/10gen/binary-amd64/Packages'
+		packagesUrl='https://downloads-distro.mongodb.org/repo/debian-sysvinit/dists/dist/10gen/binary-amd64/Packages'
 	fi
 	fullVersion="$(
 		curl -fsSL "$packagesUrl.gz" \
@@ -57,7 +57,7 @@ for version in "${versions[@]}"; do
 	)
 
 	if [ -d "$version/windows" ]; then
-		windowsUrlPrefix='http://downloads.mongodb.org/win32/mongodb-win32-x86_64-2008plus-ssl-'
+		windowsUrlPrefix='https://downloads.mongodb.org/win32/mongodb-win32-x86_64-2008plus-ssl-'
 		windowsUrlSuffix='-signed.msi'
 		windowsVersions="$(
 			curl -fsSL 'https://www.mongodb.org/dl/win32/x86_64-2008plus-ssl' \
