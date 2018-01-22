@@ -53,7 +53,7 @@ for version in "${versions[@]}"; do
 	)
 
 	if [ -d "$version/windows" ]; then
-		windowsUrlPrefix='https://downloads.mongodb.org/win32/mongodb-win32-x86_64-2008plus-ssl-'
+		windowsUrlPrefix='http://downloads.mongodb.org/win32/mongodb-win32-x86_64-2008plus-ssl-'
 		windowsUrlSuffix='-signed.msi'
 		windowsVersions="$(
 			curl -fsSL 'https://www.mongodb.org/dl/win32/x86_64-2008plus-ssl' \
