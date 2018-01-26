@@ -85,6 +85,8 @@ RUN mkdir -p /data/db /data/configdb \
 VOLUME /data/db /data/configdb
 
 COPY docker-entrypoint.sh /usr/local/bin/
+RUN ln -sf /dev/stdout /var/log/mongodb/mongodb.log
+
 ENTRYPOINT ["docker-entrypoint.sh"]
 
 EXPOSE 27017
