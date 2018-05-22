@@ -2,9 +2,9 @@ FROM microsoft/windowsservercore:1709
 
 SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop';"]
 
-ENV MONGO_VERSION 3.4.14
+ENV MONGO_VERSION 3.4.15
 ENV MONGO_DOWNLOAD_URL https://downloads.mongodb.org/win32/mongodb-win32-x86_64-2008plus-ssl-${MONGO_VERSION}-signed.msi
-ENV MONGO_DOWNLOAD_SHA256 0cb34aecb4ae50680a895ea9ebd1516d28eb1498b47faf63d9f065eb6548fcb9
+ENV MONGO_DOWNLOAD_SHA256 0d5791168deb2cd8872b896bdf2667c47b310d4116fafdff243bcbb698639f51
 
 RUN Write-Host ('Downloading {0} ...' -f $env:MONGO_DOWNLOAD_URL); \
 	(New-Object System.Net.WebClient).DownloadFile($env:MONGO_DOWNLOAD_URL, 'mongo.msi'); \
