@@ -24,10 +24,16 @@ for version in "${versions[@]}"; do
 	fi
 
 	from="$(gawk -F '[[:space:]]+' 'toupper($1) == "FROM" { print $2; exit }' "$version/Dockerfile")" # "debian:xxx"
-	suite="${from#*:}" # "wheezy-slim" or "jessie-slim"
-	suite="${suite%-slim}" # "wheezy" or "jessie"
+	distro="${from%%:*}" # "debian", "ubuntu"
+	suite="${from#$distro:}" # "jessie-slim", "xenial"
+	suite="${suite%-slim}" # "jessie", "xenial"
 
-	packagesUrl="https://repo.mongodb.org/apt/debian/dists/$suite/mongodb-org/$major/main/binary-amd64/Packages"
+	component='multiverse'
+	if [ "$distro" = 'debian' ]; then
+		component='main'
+	fi
+
+	packagesUrl="https://repo.mongodb.org/apt/$distro/dists/$suite/mongodb-org/$major/$component/binary-amd64/Packages"
 	fullVersion="$(
 		curl -fsSL "$packagesUrl.gz" \
 			| gunzip \

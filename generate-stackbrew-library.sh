@@ -71,18 +71,34 @@ for version in "${versions[@]}"; do
 		${aliases[$version]:-}
 	)
 
-	variant="$(git show "$commit":"$version/Dockerfile" | awk '$1 == "FROM" { gsub(/^.*:|-.*$/, "", $2); print $2; exit }')"
+	from="$(git show "$commit":"$version/Dockerfile" | awk '$1 == "FROM" { print $2; exit }')"
+	distro="${from%%:*}" # "debian", "ubuntu"
+	suite="${from#$distro:}" # "jessie-slim", "xenial"
+	suite="${suite%-slim}" # "jessie", "xenial"
 
+	component='multiverse'
+	if [ "$distro" = 'debian' ]; then
+		component='main'
+	fi
+
+	variant="$suite"
 	variantAliases=( "${versionAliases[@]/%/-$variant}" )
 	variantAliases=( "${variantAliases[@]//latest-/}" )
+
+	major="$(git show "$commit":"$version/Dockerfile" | awk '$1 == "ENV" && $2 == "MONGO_MAJOR" { print $3 }')"
+
+	variantArches=( amd64 )
+	if [ "$distro" = 'ubuntu' ]; then
+		variantArches+=( arm64v8 )
+	fi
 
 	echo
 	cat <<-EOE
 		Tags: $(join ', ' "${variantAliases[@]}")
 		SharedTags: $(join ', ' "${versionAliases[@]}")
-		# see http://repo.mongodb.org/apt/debian/dists/$variant/mongodb-org/${version}/main/
-		# (i386 is empty, as is ppc64el)
-		Architectures: amd64
+		# see http://repo.mongodb.org/apt/$distro/dists/$suite/mongodb-org/$major/$component/
+		# (i386, ppc64el, s390x are empty)
+		Architectures: $(join ', ' "${variantArches[@]}")
 		GitCommit: $commit
 		Directory: $version
 	EOE
