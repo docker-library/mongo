@@ -41,10 +41,10 @@ RUN set -ex; \
 RUN mkdir /docker-entrypoint-initdb.d
 
 ENV GPG_KEYS \
-# pub   rsa4096 2017-11-15 [SC] [expires: 2019-11-15]
-#       BD8C 80D9 C729 D005 24E0  68E0 3DAB 7171 3396 F72B
-# uid           [ unknown] MongoDB 3.8 Release Signing Key <packaging@mongodb.com>
-	BD8C80D9C729D00524E068E03DAB71713396F72B
+# pub   rsa4096 2018-04-18 [SC] [expires: 2023-04-17]
+#       9DA3 1620 334B D75D 9DCB  49F3 6881 8C72 E525 29D4
+# uid           [ unknown] MongoDB 4.0 Release Signing Key <packaging@mongodb.com>
+	9DA31620334BD75D9DCB49F368818C72E52529D4
 # https://docs.mongodb.com/manual/tutorial/verify-mongodb-packages/#download-then-import-the-key-file
 RUN set -ex; \
 	export GNUPGHOME="$(mktemp -d)"; \
@@ -59,12 +59,12 @@ RUN set -ex; \
 # Options for MONGO_PACKAGE: mongodb-org OR mongodb-enterprise
 # Options for MONGO_REPO: repo.mongodb.org OR repo.mongodb.com
 # Example: docker build --build-arg MONGO_PACKAGE=mongodb-enterprise --build-arg MONGO_REPO=repo.mongodb.com .
-ARG MONGO_PACKAGE=mongodb-org-unstable
+ARG MONGO_PACKAGE=mongodb-org
 ARG MONGO_REPO=repo.mongodb.org
 ENV MONGO_PACKAGE=${MONGO_PACKAGE} MONGO_REPO=${MONGO_REPO}
 
-ENV MONGO_MAJOR 3.7
-ENV MONGO_VERSION 3.7.9
+ENV MONGO_MAJOR 4.0
+ENV MONGO_VERSION 4.0.0
 
 RUN echo "deb http://$MONGO_REPO/apt/ubuntu xenial/${MONGO_PACKAGE%-unstable}/$MONGO_MAJOR multiverse" | tee "/etc/apt/sources.list.d/${MONGO_PACKAGE%-unstable}.list"
 
