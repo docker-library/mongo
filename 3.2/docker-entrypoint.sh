@@ -180,6 +180,8 @@ _dbPath() {
 if [ "$originalArgOne" = 'mongod' ]; then
 	file_env 'MONGO_INITDB_ROOT_USERNAME'
 	file_env 'MONGO_INITDB_ROOT_PASSWORD'
+	file_env 'MONGO_INITDB_USERNAME'
+	file_env 'MONGO_INITDB_PASSWORD'
 	# pre-check a few factors to see if it's even worth bothering with initdb
 	shouldPerformInitdb=
 	if [ "$MONGO_INITDB_ROOT_USERNAME" ] && [ "$MONGO_INITDB_ROOT_PASSWORD" ]; then
@@ -300,6 +302,16 @@ if [ "$originalArgOne" = 'mongod' ]; then
 		fi
 
 		export MONGO_INITDB_DATABASE="${MONGO_INITDB_DATABASE:-test}"
+
+		if [ "$MONGO_INITDB_USERNAME" ] && [ "$MONGO_INITDB_PASSWORD" ]; then
+			"${mongo[@]}" "$MONGO_INITDB_DATABASE" <<-EOJS
+				db.createUser({
+					user: $(_js_escape "$MONGO_INITDB_USERNAME"),
+					pwd: $(_js_escape "$MONGO_INITDB_PASSWORD"),
+					roles: [ { role: 'dbOwner', db: $(_js_escape "$MONGO_INITDB_DATABASE") } ]
+				})
+			EOJS
+		fi
 
 		echo
 		for f in /docker-entrypoint-initdb.d/*; do
