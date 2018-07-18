@@ -59,30 +59,31 @@ for version in "${versions[@]}"; do
 	)
 
 	if [ -d "$version/windows" ]; then
-		windowsUrlPrefix='http://downloads.mongodb.org/win32/mongodb-win32-x86_64-2008plus-ssl-'
-		windowsUrlSuffix='-signed.msi'
 		windowsVersions="$(
-			curl -fsSL 'https://www.mongodb.org/dl/win32/x86_64-2008plus-ssl' \
-				| grep --extended-regexp --only-matching '"'"${windowsUrlPrefix}${rcVersion//./\\.}"'\.[^"]+'"${windowsUrlSuffix}"'"' \
+			curl -fsSL 'https://www.mongodb.org/dl/win32/x86_64' \
+				| grep --extended-regexp --only-matching '"https?://[^"]+/win32/mongodb-win32-x86_64-(2008plus-ssl|2012plus)-'"${rcVersion//./\\.}"'\.[^"]+-signed.msi"' \
 				| sed \
-					-e 's!^"'"$windowsUrlPrefix"'!!' \
-					-e 's!'"$windowsUrlSuffix"'"$!!' \
-				| grep $rcGrepV -- '-rc'
+					-e 's!^"!!' \
+					-e 's!"$!!' \
+					-e 's!http://downloads.mongodb.org/!https://downloads.mongodb.org/!' \
+				| grep $rcGrepV -E -- '-rc[0-9]'
 		)"
 		windowsLatest="$(echo "$windowsVersions" | head -1)"
-		windowsSha256="$(curl -fsSL "${windowsUrlPrefix}${windowsLatest}${windowsUrlSuffix}.sha256" | cut -d' ' -f1)"
+		windowsSha256="$(curl -fsSL "$windowsLatest.sha256" | cut -d' ' -f1)"
+		windowsVersion="$(echo "$windowsLatest" | sed -r -e "s!^https?://.+(${rcVersion//./\\.}\.[^\"]+)-signed.msi\$!\1!")"
 
 		(
 			set -x
 			sed -ri \
-				-e 's/^(ENV MONGO_VERSION) .*/\1 '"$windowsLatest"'/' \
+				-e 's/^(ENV MONGO_VERSION) .*/\1 '"$windowsVersion"'/' \
+				-e 's!^(ENV MONGO_DOWNLOAD_URL) .*!\1 '"$windowsLatest"'!' \
 				-e 's/^(ENV MONGO_DOWNLOAD_SHA256) .*/\1 '"$windowsSha256"'/' \
 				"$version/windows/"*"/Dockerfile"
 		)
 
 		for winVariant in \
-			nanoserver-{1709,sac2016} \
-			windowsservercore-{1709,ltsc2016} \
+			nanoserver-{1803,1709,sac2016} \
+			windowsservercore-{1803,1709,ltsc2016} \
 		; do
 			[ -f "$version/windows/$winVariant/Dockerfile" ] || continue
 
@@ -91,7 +92,7 @@ for version in "${versions[@]}"; do
 				"$version/windows/$winVariant/Dockerfile"
 
 			case "$winVariant" in
-				*-1709) ;; # no AppVeyor support for 1709 yet: https://github.com/appveyor/ci/issues/1885
+				*-1709 | *-1803) ;; # no AppVeyor support for 1709+ yet: https://github.com/appveyor/ci/issues/1885
 				*) appveyorEnv='\n    - version: '"$version"'\n      variant: '"$winVariant$appveyorEnv" ;;
 			esac
 		done

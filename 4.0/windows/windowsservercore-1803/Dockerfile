@@ -1,10 +1,10 @@
-FROM microsoft/windowsservercore:1709
+FROM microsoft/windowsservercore:1803
 
 SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop';"]
 
-ENV MONGO_VERSION 3.4.16
-ENV MONGO_DOWNLOAD_URL https://downloads.mongodb.org/win32/mongodb-win32-x86_64-2008plus-ssl-3.4.16-signed.msi
-ENV MONGO_DOWNLOAD_SHA256 d8be8b5b65d265f7dbdc38ffc2d07f26cb5613d9d50c21dd9dbb7000ff0ba967
+ENV MONGO_VERSION 4.0.0
+ENV MONGO_DOWNLOAD_URL https://downloads.mongodb.org/win32/mongodb-win32-x86_64-2008plus-ssl-4.0.0-signed.msi
+ENV MONGO_DOWNLOAD_SHA256 bf370d32e956eb5849cf92f3d092739a930531378091ea8f9237bd902368ae69
 
 RUN Write-Host ('Downloading {0} ...' -f $env:MONGO_DOWNLOAD_URL); \
 	(New-Object System.Net.WebClient).DownloadFile($env:MONGO_DOWNLOAD_URL, 'mongo.msi'); \
@@ -45,4 +45,4 @@ VOLUME C:\\data\\db C:\\data\\configdb
 # TODO docker-entrypoint.ps1 ? (for "docker run <image> --flag --flag --flag")
 
 EXPOSE 27017
-CMD ["mongod"]
+CMD ["mongod", "--bind_ip_all"]
