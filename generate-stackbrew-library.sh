@@ -115,6 +115,22 @@ for version in "${versions[@]}"; do
 
 		commit="$(dirCommit "$dir")"
 
+		fullVersion="$(git show "$commit":"$dir/Dockerfile" | awk '$1 == "ENV" && $2 == "MONGO_VERSION" { gsub(/~/, "-", $3); print $3; exit }')"
+
+		versionAliases=()
+		if [ "$version" = "$rcVersion" ]; then
+			while [ "$fullVersion" != "$version" -a "${fullVersion%[.-]*}" != "$fullVersion" ]; do
+				versionAliases+=( $fullVersion )
+				fullVersion="${fullVersion%[.-]*}"
+			done
+		else
+			versionAliases+=( $fullVersion )
+		fi
+		versionAliases+=(
+			$version
+			${aliases[$version]:-}
+		)
+
 		variantAliases=( "${versionAliases[@]/%/-$variant}" )
 		variantAliases=( "${variantAliases[@]//latest-/}" )
 
