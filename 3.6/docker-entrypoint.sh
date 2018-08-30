@@ -312,7 +312,7 @@ if [ "$originalArgOne" = 'mongod' ]; then
 			echo
 		done
 
-		"$@" --pidfilepath="$pidfile" --shutdown
+		"${mongodHackedArgs[@]}" --shutdown
 		rm -f "$pidfile"
 
 		echo
