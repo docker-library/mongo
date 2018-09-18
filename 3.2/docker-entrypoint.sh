@@ -168,7 +168,7 @@ _dbPath() {
 
 	if ! dbPath="$(_mongod_hack_get_arg_val --dbpath "$@")"; then
 		if _parse_config "$@"; then
-			dbPath="$(jq -r '.storage.dbPath' "$jsonConfigFile")"
+			dbPath="$(jq -r '.storage.dbPath // empty' "$jsonConfigFile")"
 		fi
 	fi
 
