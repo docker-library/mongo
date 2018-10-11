@@ -1,21 +1,33 @@
 language: bash
 services: docker
 
-env:
-  - VERSION=4.1
-  - VERSION=4.0
-  - VERSION=3.6
-  - VERSION=3.4
-  - VERSION=3.2
+matrix:
+  include:
+    - os: linux
+      env: VERSION=4.1
+    - os: windows
+      dist: 1803-containers
+      env: VERSION=4.1 VARIANT=windows/windowsservercore-1803
+    - os: linux
+      env: VERSION=4.0
+    - os: windows
+      dist: 1803-containers
+      env: VERSION=4.0 VARIANT=windows/windowsservercore-1803
+    - os: linux
+      env: VERSION=3.6
+    - os: linux
+      env: VERSION=3.4
+    - os: linux
+      env: VERSION=3.2
 
 install:
   - git clone https://github.com/docker-library/official-images.git ~/official-images
+  - if [ "$TRAVIS_OS_NAME" = 'linux' ]; then wget -qO- 'https://github.com/tianon/pgp-happy-eyeballs/raw/master/hack-my-builds.sh' | bash; fi
 
 before_script:
   - env | sort
-  - wget -qO- 'https://github.com/tianon/pgp-happy-eyeballs/raw/master/hack-my-builds.sh' | bash
-  - cd "$VERSION"
-  - image="mongo:$VERSION"
+  - cd "$VERSION${VARIANT:+/$VARIANT}"
+  - image="mongo:$VERSION${VARIANT:+$(basename "$VARIANT")}"
 
 script:
   - |
@@ -23,7 +35,13 @@ script:
       set -Eeuo pipefail
       set -x
       docker build -t "$image" .
-      ~/official-images/test/run.sh "$image"
+      if [ "$TRAVIS_OS_NAME" = 'windows' ]; then
+        # TODO make the tests run successfully on Windows too!
+        docker run --rm "$image" mongod --version
+        docker run --rm "$image" mongo --version
+      else
+        ~/official-images/test/run.sh "$image"
+      fi
     )
 
 after_script:
