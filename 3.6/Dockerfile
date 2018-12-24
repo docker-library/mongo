@@ -3,14 +3,17 @@ FROM debian:stretch-slim
 # add our user and group first to make sure their IDs get assigned consistently, regardless of whatever dependencies get added
 RUN groupadd -r mongodb && useradd -r -g mongodb mongodb
 
-RUN apt-get update \
-	&& apt-get install -y --no-install-recommends \
+RUN set -eux; \
+	apt-get update; \
+	apt-get install -y --no-install-recommends \
 		ca-certificates \
-		gnupg dirmngr \
 		jq \
 		numactl \
-		procps \
-	&& rm -rf /var/lib/apt/lists/*
+	; \
+	if ! command -v ps > /dev/null; then \
+		apt-get install -y --no-install-recommends procps; \
+	fi; \
+	rm -rf /var/lib/apt/lists/*
 
 # grab gosu for easy step-down from root (https://github.com/tianon/gosu/releases)
 ENV GOSU_VERSION 1.10
@@ -23,6 +26,9 @@ RUN set -ex; \
 	apt-get install -y --no-install-recommends \
 		wget \
 	; \
+	if ! command -v gpg > /dev/null; then \
+		apt-get install -y --no-install-recommends gnupg dirmngr; \
+	fi; \
 	rm -rf /var/lib/apt/lists/*; \
 	\
 	dpkgArch="$(dpkg --print-architecture | awk -F- '{ print $NF }')"; \
@@ -31,7 +37,7 @@ RUN set -ex; \
 	export GNUPGHOME="$(mktemp -d)"; \
 	gpg --batch --keyserver ha.pool.sks-keyservers.net --recv-keys B42F6819007F00F88E364FD4036A9C25BF357DD4; \
 	gpg --batch --verify /usr/local/bin/gosu.asc /usr/local/bin/gosu; \
-	gpgconf --kill all; \
+	command -v gpgconf && gpgconf --kill all || :; \
 	rm -r "$GNUPGHOME" /usr/local/bin/gosu.asc; \
 	chmod +x /usr/local/bin/gosu; \
 	gosu nobody true; \
@@ -43,19 +49,14 @@ RUN set -ex; \
 
 RUN mkdir /docker-entrypoint-initdb.d
 
-ENV GPG_KEYS \
-# pub   4096R/91FA4AD5 2016-12-14 [expires: 2018-12-14]
-#       Key fingerprint = 2930 ADAE 8CAF 5059 EE73  BB4B 5871 2A22 91FA 4AD5
-# uid                  MongoDB 3.6 Release Signing Key <packaging@mongodb.com>
-	2930ADAE8CAF5059EE73BB4B58712A2291FA4AD5
-# https://docs.mongodb.com/manual/tutorial/verify-mongodb-packages/#download-then-import-the-key-file
+ENV GPG_KEYS 2930ADAE8CAF5059EE73BB4B58712A2291FA4AD5
 RUN set -ex; \
 	export GNUPGHOME="$(mktemp -d)"; \
 	for key in $GPG_KEYS; do \
 		gpg --batch --keyserver ha.pool.sks-keyservers.net --recv-keys "$key"; \
 	done; \
 	gpg --batch --export $GPG_KEYS > /etc/apt/trusted.gpg.d/mongodb.gpg; \
-	gpgconf --kill all; \
+	command -v gpgconf && gpgconf --kill all || :; \
 	rm -r "$GNUPGHOME"; \
 	apt-key list
 
