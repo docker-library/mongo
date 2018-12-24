@@ -11,8 +11,6 @@ environment:
       variant: windowsservercore-ltsc2016
     - version: 3.4
       variant: windowsservercore-ltsc2016
-    - version: 3.2
-      variant: windowsservercore-ltsc2016
 
 install:
   - ps: |
