@@ -9,8 +9,11 @@ if [ ${#versions[@]} -eq 0 ]; then
 fi
 versions=( "${versions[@]%/}" )
 
-# TODO do something with https://www.mongodb.org/dl/linux/x86_64 instead of scraping the APT repo contents
-# (but then have to solve hard "release candidate" problems; ie, if we have 2.6.4 and 2.6.5-rc0 comes out, we don't want 2.6 to switch over to the RC)
+defaultFrom='ubuntu:xenial'
+declare -A froms=(
+	[3.4]='debian:jessie-slim'
+	[3.6]='debian:stretch-slim'
+)
 
 travisEnv=
 appveyorEnv=
@@ -23,7 +26,7 @@ for version in "${versions[@]}"; do
 		major='testing'
 	fi
 
-	from="$(gawk -F '[[:space:]]+' 'toupper($1) == "FROM" { print $2; exit }' "$version/Dockerfile")" # "debian:xxx"
+	from="${froms[$version]:-$defaultFrom}"
 	distro="${from%%:*}" # "debian", "ubuntu"
 	suite="${from#$distro:}" # "jessie-slim", "xenial"
 	suite="${suite%-slim}" # "jessie", "xenial"
@@ -49,14 +52,32 @@ for version in "${versions[@]}"; do
 	packageName="${fullVersion#*=}"
 	fullVersion="${fullVersion%=$packageName}"
 
-	(
-		set -x
-		sed -ri \
-			-e 's/^(ENV MONGO_MAJOR) .*/\1 '"$major"'/' \
-			-e 's/^(ENV MONGO_VERSION) .*/\1 '"$fullVersion"'/' \
-			-e 's/^(ARG MONGO_PACKAGE)=.*/\1='"$packageName"'/' \
-			"$version/Dockerfile"
-	)
+	gpgKeyVersion="$rcVersion"
+	minor="${major#*.}" # "4.3" -> "3"
+	if [ "$(( minor % 2 ))" = 1 ]; then
+		gpgKeyVersion="${major%.*}.$(( minor + 1 ))"
+	fi
+	gpgKeys="$(grep "^$gpgKeyVersion:" gpg-keys.txt | cut -d: -f2)"
+
+	echo "$version: $fullVersion (linux)"
+
+	sed -r \
+		-e 's/^(ENV MONGO_MAJOR) .*/\1 '"$major"'/' \
+		-e 's/^(ENV MONGO_VERSION) .*/\1 '"$fullVersion"'/' \
+		-e 's/^(ARG MONGO_PACKAGE)=.*/\1='"$packageName"'/' \
+		-e 's/^(FROM) .*/\1 '"$from"'/' \
+		-e 's/%%DISTRO%%/'"$distro"'/' \
+		-e 's/%%SUITE%%/'"$suite"'/' \
+		-e 's/%%COMPONENT%%/'"$component"'/' \
+		-e 's/^(ENV GPG_KEYS) .*/\1 '"$gpgKeys"'/' \
+		Dockerfile-linux.template \
+		> "$version/Dockerfile"
+
+	if [ "$version" != '3.4' ]; then
+		sed -ri -e '/backwards compat/d' "$version/Dockerfile"
+	fi
+
+	cp -a docker-entrypoint.sh "$version/"
 
 	if [ -d "$version/windows" ]; then
 		windowsVersions="$(
@@ -72,24 +93,24 @@ for version in "${versions[@]}"; do
 		windowsSha256="$(curl -fsSL "$windowsLatest.sha256" | cut -d' ' -f1)"
 		windowsVersion="$(echo "$windowsLatest" | sed -r -e "s!^https?://.+(${rcVersion//./\\.}\.[^\"]+)-signed.msi\$!\1!")"
 
-		(
-			set -x
-			sed -ri \
+		echo "$version: $windowsVersion (windows)"
+
+		for winVariant in \
+			windowsservercore-{1803,1709,ltsc2016} \
+		; do
+			[ -d "$version/windows/$winVariant" ] || continue
+
+			sed -r \
 				-e 's/^(ENV MONGO_VERSION) .*/\1 '"$windowsVersion"'/' \
 				-e 's!^(ENV MONGO_DOWNLOAD_URL) .*!\1 '"$windowsLatest"'!' \
 				-e 's/^(ENV MONGO_DOWNLOAD_SHA256) .*/\1 '"$windowsSha256"'/' \
-				"$version/windows/"*"/Dockerfile"
-		)
-
-		for winVariant in \
-			nanoserver-{1803,1709,sac2016} \
-			windowsservercore-{1803,1709,ltsc2016} \
-		; do
-			[ -f "$version/windows/$winVariant/Dockerfile" ] || continue
-
-			sed -ri \
 				-e 's!^FROM .*!FROM microsoft/'"${winVariant%%-*}"':'"${winVariant#*-}"'!' \
-				"$version/windows/$winVariant/Dockerfile"
+				Dockerfile-windows.template \
+				> "$version/windows/$winVariant/Dockerfile"
+
+			if [ "$version" = '3.4' ]; then
+				sed -ri -e 's/, "--bind_ip_all"//' "$version/windows/$winVariant/Dockerfile"
+			fi
 
 			case "$winVariant" in
 				*-1803) travisEnv='\n    - os: windows\n      dist: 1803-containers\n      env: VERSION='"$version VARIANT=windows/$winVariant$travisEnv" ;;

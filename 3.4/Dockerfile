@@ -3,12 +3,17 @@ FROM debian:jessie-slim
 # add our user and group first to make sure their IDs get assigned consistently, regardless of whatever dependencies get added
 RUN groupadd -r mongodb && useradd -r -g mongodb mongodb
 
-RUN apt-get update \
-	&& apt-get install -y --no-install-recommends \
+RUN set -eux; \
+	apt-get update; \
+	apt-get install -y --no-install-recommends \
 		ca-certificates \
 		jq \
 		numactl \
-	&& rm -rf /var/lib/apt/lists/*
+	; \
+	if ! command -v ps > /dev/null; then \
+		apt-get install -y --no-install-recommends procps; \
+	fi; \
+	rm -rf /var/lib/apt/lists/*
 
 # grab gosu for easy step-down from root (https://github.com/tianon/gosu/releases)
 ENV GOSU_VERSION 1.10
@@ -21,6 +26,9 @@ RUN set -ex; \
 	apt-get install -y --no-install-recommends \
 		wget \
 	; \
+	if ! command -v gpg > /dev/null; then \
+		apt-get install -y --no-install-recommends gnupg dirmngr; \
+	fi; \
 	rm -rf /var/lib/apt/lists/*; \
 	\
 	dpkgArch="$(dpkg --print-architecture | awk -F- '{ print $NF }')"; \
@@ -41,12 +49,7 @@ RUN set -ex; \
 
 RUN mkdir /docker-entrypoint-initdb.d
 
-ENV GPG_KEYS \
-# pub   4096R/A15703C6 2016-01-11 [expires: 2018-01-10]
-#       Key fingerprint = 0C49 F373 0359 A145 1858  5931 BC71 1F9B A157 03C6
-# uid                  MongoDB 3.4 Release Signing Key <packaging@mongodb.com>
-	0C49F3730359A14518585931BC711F9BA15703C6
-# https://docs.mongodb.com/manual/tutorial/verify-mongodb-packages/#download-then-import-the-key-file
+ENV GPG_KEYS 0C49F3730359A14518585931BC711F9BA15703C6
 RUN set -ex; \
 	export GNUPGHOME="$(mktemp -d)"; \
 	for key in $GPG_KEYS; do \
@@ -87,7 +90,7 @@ RUN mkdir -p /data/db /data/configdb \
 VOLUME /data/db /data/configdb
 
 COPY docker-entrypoint.sh /usr/local/bin/
-RUN ln -s usr/local/bin/docker-entrypoint.sh /entrypoint.sh # backwards compat
+RUN ln -s usr/local/bin/docker-entrypoint.sh /entrypoint.sh # backwards compat (3.4)
 ENTRYPOINT ["docker-entrypoint.sh"]
 
 EXPOSE 27017

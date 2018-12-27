@@ -321,15 +321,17 @@ if [ "$originalArgOne" = 'mongod' ]; then
 	fi
 
 	# MongoDB 3.6+ defaults to localhost-only binding
-	haveBindIp=
-	if _mongod_hack_have_arg --bind_ip "$@" || _mongod_hack_have_arg --bind_ip_all "$@"; then
-		haveBindIp=1
-	elif _parse_config "$@" && jq --exit-status '.net.bindIp // .net.bindIpAll' "$jsonConfigFile" > /dev/null; then
-		haveBindIp=1
-	fi
-	if [ -z "$haveBindIp" ]; then
-		# so if no "--bind_ip" is specified, let's add "--bind_ip_all"
-		set -- "$@" --bind_ip_all
+	if mongod --help 2>&1 | grep -q -- --bind_ip_all; then # TODO remove this conditional when 3.4 is no longer supported
+		haveBindIp=
+		if _mongod_hack_have_arg --bind_ip "$@" || _mongod_hack_have_arg --bind_ip_all "$@"; then
+			haveBindIp=1
+		elif _parse_config "$@" && jq --exit-status '.net.bindIp // .net.bindIpAll' "$jsonConfigFile" > /dev/null; then
+			haveBindIp=1
+		fi
+		if [ -z "$haveBindIp" ]; then
+			# so if no "--bind_ip" is specified, let's add "--bind_ip_all"
+			set -- "$@" --bind_ip_all
+		fi
 	fi
 
 	unset "${!MONGO_INITDB_@}"
