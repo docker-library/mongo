@@ -180,6 +180,8 @@ _dbPath() {
 if [ "$originalArgOne" = 'mongod' ]; then
 	file_env 'MONGO_INITDB_ROOT_USERNAME'
 	file_env 'MONGO_INITDB_ROOT_PASSWORD'
+	file_env 'MONGO_NON_ROOT_USERNAME'
+	file_env 'MONGO_NON_ROOT_PASSWORD'
 	# pre-check a few factors to see if it's even worth bothering with initdb
 	shouldPerformInitdb=
 	if [ "$MONGO_INITDB_ROOT_USERNAME" ] && [ "$MONGO_INITDB_ROOT_PASSWORD" ]; then
@@ -207,6 +209,11 @@ if [ "$originalArgOne" = 'mongod' ]; then
 					;;
 			esac
 		done
+
+		# we should also initdb if we have set a non-root username and password
+		if [ -n "${MONGO_NON_ROOT_USERNAME:-}" ] && [ -n "${MONGO_NON_ROOT_PASSWORD:-}" ]; then
+			shouldPerformInitdb="$f"
+		fi
 	fi
 
 	# check for a few known paths (to determine whether we've already initialized and should thus skip our initdb scripts)
@@ -300,7 +307,27 @@ if [ "$originalArgOne" = 'mongod' ]; then
 			EOJS
 		fi
 
+		# we use the test database if one was not set and this will be used
+		# if we have specified scripts or a non-root username and password
 		export MONGO_INITDB_DATABASE="${MONGO_INITDB_DATABASE:-test}"
+
+		# we set a default non-root role of readWrite if one is not supplied
+		export MONGO_NON_ROOT_ROLE="${MONGO_NON_ROOT_ROLE:-readWrite}"
+
+		if [ -n "${MONGO_NON_ROOT_USERNAME:-}" ] && [ -n "${MONGO_NON_ROOT_PASSWORD:-}" ]; then
+			"${mongo[@]}" "$MONGO_INITDB_DATABASE" <<-EOJS
+				db.createUser({
+					user: $(_js_escape "$MONGO_NON_ROOT_USERNAME"),
+					pwd: $(_js_escape "$MONGO_NON_ROOT_PASSWORD"),
+					roles: [ { role: $(_js_escape "$MONGO_NON_ROOT_ROLE"), db: $(_js_escape "$MONGO_INITDB_DATABASE") } ]
+					})
+			EOJS
+
+			# we don't need an else here because we checked for a non-root
+			# username and password above and set shouldPerformInitdb so we
+			# are already under the condition where they are set
+			# or /docker-entrypoint-initdb.d/* scripts have been found
+		fi
 
 		echo
 		for f in /docker-entrypoint-initdb.d/*; do
