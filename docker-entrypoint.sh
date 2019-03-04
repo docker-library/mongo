@@ -295,6 +295,10 @@ if [ "$originalArgOne" = 'mongod' ]; then
 			sleep 1
 		done
 
+		# we use the test database if one was not set and this will be used
+		# if we have specified scripts or a non-root username and password
+		export MONGO_INITDB_DATABASE="${MONGO_INITDB_DATABASE:-test}"
+
 		if [ "$MONGO_INITDB_ROOT_USERNAME" ] && [ "$MONGO_INITDB_ROOT_PASSWORD" ]; then
 			rootAuthDatabase='admin'
 
@@ -305,28 +309,24 @@ if [ "$originalArgOne" = 'mongod' ]; then
 					roles: [ { role: 'root', db: $(_js_escape "$rootAuthDatabase") } ]
 				})
 			EOJS
-		fi
 
-		# we use the test database if one was not set and this will be used
-		# if we have specified scripts or a non-root username and password
-		export MONGO_INITDB_DATABASE="${MONGO_INITDB_DATABASE:-test}"
+			if [ -n "${MONGO_NON_ROOT_USERNAME:-}" ] && [ -n "${MONGO_NON_ROOT_PASSWORD:-}" ]; then
+				# we set a default non-root role of readWrite if one is not supplied
+				export MONGO_NON_ROOT_ROLE="${MONGO_NON_ROOT_ROLE:-readWrite}"
 
-		# we set a default non-root role of readWrite if one is not supplied
-		export MONGO_NON_ROOT_ROLE="${MONGO_NON_ROOT_ROLE:-readWrite}"
+				"${mongo[@]}" "$MONGO_INITDB_DATABASE" <<-EOJS
+					db.createUser({
+						user: $(_js_escape "$MONGO_NON_ROOT_USERNAME"),
+						pwd: $(_js_escape "$MONGO_NON_ROOT_PASSWORD"),
+						roles: [ { role: $(_js_escape "$MONGO_NON_ROOT_ROLE"), db: $(_js_escape "$MONGO_INITDB_DATABASE") } ]
+						})
+				EOJS
 
-		if [ -n "${MONGO_NON_ROOT_USERNAME:-}" ] && [ -n "${MONGO_NON_ROOT_PASSWORD:-}" ]; then
-			"${mongo[@]}" "$MONGO_INITDB_DATABASE" <<-EOJS
-				db.createUser({
-					user: $(_js_escape "$MONGO_NON_ROOT_USERNAME"),
-					pwd: $(_js_escape "$MONGO_NON_ROOT_PASSWORD"),
-					roles: [ { role: $(_js_escape "$MONGO_NON_ROOT_ROLE"), db: $(_js_escape "$MONGO_INITDB_DATABASE") } ]
-					})
-			EOJS
-
-			# we don't need an else here because we checked for a non-root
-			# username and password above and set shouldPerformInitdb so we
-			# are already under the condition where they are set
-			# or /docker-entrypoint-initdb.d/* scripts have been found
+				# we don't need an else here because we checked for a non-root
+				# username and password above and set shouldPerformInitdb so we
+				# are already under the condition where they are set
+				# or /docker-entrypoint-initdb.d/* scripts have been found
+			fi
 		fi
 
 		echo
