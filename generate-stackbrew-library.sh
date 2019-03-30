@@ -11,6 +11,8 @@ declare -A aliases=(
 self="$(basename "$BASH_SOURCE")"
 cd "$(dirname "$(readlink -f "$BASH_SOURCE")")"
 
+source '.architectures-lib'
+
 versions=( */ )
 versions=( "${versions[@]%/}" )
 
@@ -88,18 +90,12 @@ for version in "${versions[@]}"; do
 
 	major="$(git show "$commit":"$version/Dockerfile" | awk '$1 == "ENV" && $2 == "MONGO_MAJOR" { print $3 }')"
 
-	variantArches=( amd64 )
-	if [ "$distro" = 'ubuntu' ]; then
-		variantArches+=( arm64v8 )
-	fi
-
 	echo
 	cat <<-EOE
 		Tags: $(join ', ' "${variantAliases[@]}")
 		SharedTags: $(join ', ' "${versionAliases[@]}")
 		# see http://repo.mongodb.org/apt/$distro/dists/$suite/mongodb-org/$major/$component/
-		# (i386, ppc64el, s390x are empty)
-		Architectures: $(join ', ' "${variantArches[@]}")
+		Architectures: $(join ', ' $(versionArches "$version"))
 		GitCommit: $commit
 		Directory: $version
 	EOE

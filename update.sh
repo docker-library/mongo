@@ -11,8 +11,19 @@ versions=( "${versions[@]%/}" )
 
 defaultFrom='ubuntu:xenial'
 declare -A froms=(
-	[3.4]='debian:jessie-slim'
-	[3.6]='debian:stretch-slim'
+	#[3.4]='debian:jessie-slim'
+	#[3.6]='debian:stretch-slim'
+	[4.1]='ubuntu:bionic'
+)
+
+declare -A dpkgArchToBashbrew=(
+	[amd64]='amd64'
+	[armel]='arm32v5'
+	[armhf]='arm32v7'
+	[arm64]='arm64v8'
+	[i386]='i386'
+	[ppc64el]='ppc64le'
+	[s390x]='s390x'
 )
 
 travisEnv=
@@ -36,9 +47,10 @@ for version in "${versions[@]}"; do
 		component='main'
 	fi
 
-	packagesUrl="https://repo.mongodb.org/apt/$distro/dists/$suite/mongodb-org/$major/$component/binary-amd64/Packages"
+	repoUrlBase="https://repo.mongodb.org/apt/$distro/dists/$suite/mongodb-org/$major/$component"
+
 	fullVersion="$(
-		curl -fsSL "$packagesUrl.gz" \
+		curl -fsSL "$repoUrlBase/binary-amd64/Packages.gz" \
 			| gunzip \
 			| awk -F ': ' '
 				$1 == "Package" { pkg = $2 }
@@ -51,6 +63,24 @@ for version in "${versions[@]}"; do
 	)"
 	packageName="${fullVersion#*=}"
 	fullVersion="${fullVersion%=$packageName}"
+	if [ -z "$fullVersion" ]; then
+		echo >&2 "error: failed to get full version for '$version' (from '$repoUrlBase')"
+		exit 1
+	fi
+
+	arches=()
+	for dpkgArch in "${!dpkgArchToBashbrew[@]}"; do
+		bashbrewArch="${dpkgArchToBashbrew[$dpkgArch]}"
+		if [ "$bashbrewArch" = 'amd64' ] || {
+			# curl doesn't like to be hung up on (which is exactly what "grep -q" will do)
+			curl -fsSL "$repoUrlBase/binary-$dpkgArch/Packages.gz" 2>/dev/null \
+				| gunzip 2>/dev/null \
+				|| :
+		} | grep -qE '^Package: mongodb-(org(-unstable)?|10gen)$'; then
+			arches+=( "$bashbrewArch" )
+		fi
+	done
+	sortedArches="$(xargs -n1 <<<"${arches[*]}" | sort | xargs)"
 
 	gpgKeyVersion="$rcVersion"
 	minor="${major#*.}" # "4.3" -> "3"
@@ -69,6 +99,7 @@ for version in "${versions[@]}"; do
 		-e 's/%%DISTRO%%/'"$distro"'/' \
 		-e 's/%%SUITE%%/'"$suite"'/' \
 		-e 's/%%COMPONENT%%/'"$component"'/' \
+		-e 's!%%ARCHES%%!'"$sortedArches"'!g' \
 		-e 's/^(ENV GPG_KEYS) .*/\1 '"$gpgKeys"'/' \
 		Dockerfile-linux.template \
 		> "$version/Dockerfile"
