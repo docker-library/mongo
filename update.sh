@@ -127,7 +127,7 @@ for version in "${versions[@]}"; do
 		echo "$version: $windowsVersion (windows)"
 
 		for winVariant in \
-			windowsservercore-{1803,1709,ltsc2016} \
+			windowsservercore-{1803,ltsc2016} \
 		; do
 			[ -d "$version/windows/$winVariant" ] || continue
 
@@ -145,7 +145,6 @@ for version in "${versions[@]}"; do
 
 			case "$winVariant" in
 				*-1803) travisEnv='\n    - os: windows\n      dist: 1803-containers\n      env: VERSION='"$version VARIANT=windows/$winVariant$travisEnv" ;;
-				*-1709) ;; # no AppVeyor or Travis support for 1709: https://github.com/appveyor/ci/issues/1885
 				*) appveyorEnv='\n    - version: '"$version"'\n      variant: '"$winVariant$appveyorEnv" ;;
 			esac
 		done
