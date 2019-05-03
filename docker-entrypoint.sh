@@ -176,7 +176,7 @@ _dbPath() {
 		if _mongod_hack_have_arg --configsvr "$@" || {
 			_parse_config "$@" \
 			&& clusterRole="$(jq -r '.sharding.clusterRole // empty' "$jsonConfigFile")" \
-			&& [ "$clusterRole" = 'configsvr']
+			&& [ "$clusterRole" = 'configsvr' ]
 		}; then
 			# if running as config server, then the default dbpath is /data/configdb
 			# https://docs.mongodb.com/manual/reference/program/mongod/#cmdoption-mongod-configsvr
