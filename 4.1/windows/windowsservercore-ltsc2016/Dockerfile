@@ -4,7 +4,7 @@ SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop';"]
 
 ENV MONGO_VERSION 4.1.12
 ENV MONGO_DOWNLOAD_URL https://downloads.mongodb.org/win32/mongodb-win32-x86_64-2012plus-4.1.12-signed.msi
-ENV MONGO_DOWNLOAD_SHA256 3bbc33a5db84d15de37259ae1f9d5e890a0c97573041c9b017631a776157089e
+ENV MONGO_DOWNLOAD_SHA256 63b5e99ceacb6dcd6936b5558eb147e567ed02c5aab6790440d301f1f514427a
 
 RUN Write-Host ('Downloading {0} ...' -f $env:MONGO_DOWNLOAD_URL); \
 	[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; \
