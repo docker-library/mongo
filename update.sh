@@ -9,11 +9,11 @@ if [ ${#versions[@]} -eq 0 ]; then
 fi
 versions=( "${versions[@]%/}" )
 
-defaultFrom='ubuntu:xenial'
+defaultFrom='ubuntu:bionic'
 declare -A froms=(
-	#[3.4]='debian:jessie-slim'
-	#[3.6]='debian:stretch-slim'
-	[4.1]='ubuntu:bionic'
+	[3.4]='ubuntu:xenial'
+	[3.6]='ubuntu:xenial'
+	[4.0]='ubuntu:xenial'
 )
 
 declare -A dpkgArchToBashbrew=(
@@ -83,9 +83,9 @@ for version in "${versions[@]}"; do
 	sortedArches="$(xargs -n1 <<<"${arches[*]}" | sort | xargs)"
 
 	gpgKeyVersion="$rcVersion"
-	minor="${major#*.}" # "4.3" -> "3"
+	minor="${rcVersion#*.}" # "4.3" -> "3"
 	if [ "$(( minor % 2 ))" = 1 ]; then
-		gpgKeyVersion="${major%.*}.$(( minor + 1 ))"
+		gpgKeyVersion="${rcVersion%.*}.$(( minor + 1 ))"
 	fi
 	gpgKeys="$(grep "^$gpgKeyVersion:" gpg-keys.txt | cut -d: -f2)"
 
