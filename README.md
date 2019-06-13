@@ -2,27 +2,24 @@
 
 ## Maintained by: [the Docker Community](https://github.com/docker-library/mongo)
 
-This is the Git repo of the [Docker "Official Image"](https://docs.docker.com/docker-hub/official_repos/) for [mongo](https://hub.docker.com/_/mongo/) (not to be confused with any official mongo image provided by mongo upstream). See [the Docker Hub page](https://hub.docker.com/_/mongo/) for the full readme on how to use this Docker image and for information regarding contributing and issues.
+This is the Git repo of the [Docker "Official Image"](https://github.com/docker-library/official-images#what-are-official-images) for [`mongo`](https://hub.docker.com/_/mongo/) (not to be confused with any official `mongo` image provided by `mongo` upstream). See [the Docker Hub page](https://hub.docker.com/_/mongo/) for the full readme on how to use this Docker image and for information regarding contributing and issues.
 
-The [full description from Docker Hub](https://hub.docker.com/_/mongo/) is generated over in [docker-library/docs](https://github.com/docker-library/docs), specifically in [docker-library/docs/mongo](https://github.com/docker-library/docs/tree/master/mongo).
+The [full image description on Docker Hub](https://hub.docker.com/_/mongo/) is generated/maintained over in [the docker-library/docs repository](https://github.com/docker-library/docs), specifically in [the `mongo` directory](https://github.com/docker-library/docs/tree/master/mongo).
 
 ## See a change merged here that doesn't show up on Docker Hub yet?
 
-Check [the "library/mongo" manifest file in the docker-library/official-images repo](https://github.com/docker-library/official-images/blob/master/library/mongo), especially [PRs with the "library/mongo" label on that repo](https://github.com/docker-library/official-images/labels/library%2Fmongo).
+For more information about the full official images change lifecycle, see [the "An image's source changed in Git, now what?" FAQ entry](https://github.com/docker-library/faq#an-images-source-changed-in-git-now-what).
 
-For more information about the official images process, see the [docker-library/official-images readme](https://github.com/docker-library/official-images/blob/master/README.md).
+For outstanding `mongo` image PRs, check [PRs with the "library/mongo" label on the official-images repository](https://github.com/docker-library/official-images/labels/library%2Fmongo). For the current "source of truth" for [`mongo`](https://hub.docker.com/_/mongo/), see [the `library/mongo` file in the official-images repository](https://github.com/docker-library/official-images/blob/master/library/mongo).
 
 ---
 
--	[Travis CI:  
-	![build status badge](https://img.shields.io/travis/docker-library/mongo/master.svg)](https://travis-ci.org/docker-library/mongo/branches)
--	[AppVeyor (Windows):  
-	![build status badge](https://ci.appveyor.com/api/projects/status/github/docker-library/mongo?branch=master&svg=true)](https://ci.appveyor.com/project/docker-library/mongo)
--	[Automated `update.sh`:  
-	![build status badge](https://doi-janky.infosiftr.net/job/update.sh/job/mongo/badge/icon)](https://doi-janky.infosiftr.net/job/update.sh/job/mongo)
+-	[![build status badge](https://img.shields.io/travis/docker-library/mongo/master.svg?label=Travis%20CI)](https://travis-ci.org/docker-library/mongo/branches)
+-	[![build status badge](https://img.shields.io/appveyor/ci/docker-library/mongo/master.svg?label=AppVeyor)](https://ci.appveyor.com/project/docker-library/mongo)
+-	[![build status badge](https://img.shields.io/jenkins/s/https/doi-janky.infosiftr.net/job/update.sh/job/mongo.svg?label=Automated%20update.sh)](https://doi-janky.infosiftr.net/job/update.sh/job/mongo)
 
 | Build | Status | Badges | (per-arch) |
 |:-:|:-:|:-:|:-:|
-| [`amd64`<br />![build status badge](https://doi-janky.infosiftr.net/job/multiarch/job/amd64/job/mongo/badge/icon)](https://doi-janky.infosiftr.net/job/multiarch/job/amd64/job/mongo) | [`arm64v8`<br />![build status badge](https://doi-janky.infosiftr.net/job/multiarch/job/arm64v8/job/mongo/badge/icon)](https://doi-janky.infosiftr.net/job/multiarch/job/arm64v8/job/mongo) | [`windows-amd64`<br />![build status badge](https://doi-janky.infosiftr.net/job/multiarch/job/windows-amd64/job/mongo/badge/icon)](https://doi-janky.infosiftr.net/job/multiarch/job/windows-amd64/job/mongo) |
+| [![amd64 build status badge](https://img.shields.io/jenkins/s/https/doi-janky.infosiftr.net/job/multiarch/job/amd64/job/mongo.svg?label=amd64)](https://doi-janky.infosiftr.net/job/multiarch/job/amd64/job/mongo) | [![arm64v8 build status badge](https://img.shields.io/jenkins/s/https/doi-janky.infosiftr.net/job/multiarch/job/arm64v8/job/mongo.svg?label=arm64v8)](https://doi-janky.infosiftr.net/job/multiarch/job/arm64v8/job/mongo) | [![s390x build status badge](https://img.shields.io/jenkins/s/https/doi-janky.infosiftr.net/job/multiarch/job/s390x/job/mongo.svg?label=s390x)](https://doi-janky.infosiftr.net/job/multiarch/job/s390x/job/mongo) | [![windows-amd64 build status badge](https://img.shields.io/jenkins/s/https/doi-janky.infosiftr.net/job/multiarch/job/windows-amd64/job/mongo.svg?label=windows-amd64)](https://doi-janky.infosiftr.net/job/multiarch/job/windows-amd64/job/mongo) |
 
 <!-- THIS FILE IS GENERATED BY https://github.com/docker-library/docs/blob/master/generate-repo-stub-readme.sh -->
