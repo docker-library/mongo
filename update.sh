@@ -49,9 +49,10 @@ for version in "${versions[@]}"; do
 
 	repoUrlBase="https://repo.mongodb.org/apt/$distro/dists/$suite/mongodb-org/$major/$component"
 
-	fullVersion="$(
-		curl -fsSL "$repoUrlBase/binary-amd64/Packages.gz" \
-			| gunzip \
+	_arch_versions() {
+		local arch="$1"; shift
+		curl -fsSL "$repoUrlBase/binary-$arch/Packages.gz" 2>/dev/null \
+			| gunzip 2>/dev/null \
 			| awk -F ': ' '
 				$1 == "Package" { pkg = $2 }
 				pkg ~ /^mongodb-(org(-unstable)?|10gen)$/ && $1 == "Version" { print $2 "=" pkg }
@@ -59,8 +60,10 @@ for version in "${versions[@]}"; do
 			| grep "^$rcVersion\." \
 			| grep -v '~pre~$' \
 			| sort -V \
-			| tail -1
-	)"
+			| tac|tac
+	}
+
+	fullVersion="$(_arch_versions 'amd64' | tail -1)"
 	packageName="${fullVersion#*=}"
 	fullVersion="${fullVersion%=$packageName}"
 	if [ -z "$fullVersion" ]; then
@@ -71,12 +74,10 @@ for version in "${versions[@]}"; do
 	arches=()
 	for dpkgArch in "${!dpkgArchToBashbrew[@]}"; do
 		bashbrewArch="${dpkgArchToBashbrew[$dpkgArch]}"
-		if [ "$bashbrewArch" = 'amd64' ] || {
-			# curl doesn't like to be hung up on (which is exactly what "grep -q" will do)
-			curl -fsSL "$repoUrlBase/binary-$dpkgArch/Packages.gz" 2>/dev/null \
-				| gunzip 2>/dev/null \
-				|| :
-		} | grep -qE '^Package: mongodb-(org(-unstable)?|10gen)$'; then
+		if \
+			[ "$bashbrewArch" = 'amd64' ] \
+			|| grep -qx "$fullVersion=$packageName" <(_arch_versions "$dpkgArch") \
+		; then
 			arches+=( "$bashbrewArch" )
 		fi
 	done
@@ -89,7 +90,7 @@ for version in "${versions[@]}"; do
 	fi
 	gpgKeys="$(grep "^$gpgKeyVersion:" gpg-keys.txt | cut -d: -f2)"
 
-	echo "$version: $fullVersion (linux)"
+	echo "$version: $fullVersion (linux; $sortedArches)"
 
 	sed -r \
 		-e 's/^(ENV MONGO_MAJOR) .*/\1 '"$major"'/' \
