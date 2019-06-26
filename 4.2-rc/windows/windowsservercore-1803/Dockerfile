@@ -2,9 +2,9 @@ FROM microsoft/windowsservercore:1803
 
 SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop';"]
 
-ENV MONGO_VERSION 4.2.0-rc1
-ENV MONGO_DOWNLOAD_URL https://downloads.mongodb.org/win32/mongodb-win32-x86_64-2012plus-4.2.0-rc1-signed.msi
-ENV MONGO_DOWNLOAD_SHA256 379bcf1725c19c6ff2f2f159ef4e22c9a4ba32692a994e809457f1053c50066f
+ENV MONGO_VERSION 4.2.0-rc2
+ENV MONGO_DOWNLOAD_URL https://downloads.mongodb.org/win32/mongodb-win32-x86_64-2012plus-4.2.0-rc2-signed.msi
+ENV MONGO_DOWNLOAD_SHA256 88e3ffc38a89f775c1dec6d5c20df3604b95c7058b60317e6ea497a8aae0a90e
 
 RUN Write-Host ('Downloading {0} ...' -f $env:MONGO_DOWNLOAD_URL); \
 	[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; \
