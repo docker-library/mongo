@@ -109,17 +109,6 @@ for version in "${versions[@]}"; do
 		sed -ri -e '/backwards compat/d' "$version/Dockerfile"
 	fi
 
-	if [ "$suite" = 'xenial' ]; then
-		# TODO for some reason, "keys.openpgp.org" keys don't seem to be fetchable in Xenial
-		#   https://travis-ci.org/docker-library/mongo/jobs/553490131#L652-L661
-		#   https://travis-ci.org/docker-library/mongo/jobs/553490129#L845-L850
-		#   https://travis-ci.org/docker-library/mongo/jobs/551895832#L650-L658
-		# "gpg: keyserver communications error: keyserver helper general error"
-		# "gpg: keyserver communications error: unknown pubkey algorithm"
-		# "gpg: keyserver receive failed: unknown pubkey algorithm"
-		sed -ri -e 's/keys.openpgp.org/ha.pool.sks-keyservers.net/g' "$version/Dockerfile"
-	fi
-
 	cp -a docker-entrypoint.sh "$version/"
 
 	if [ -d "$version/windows" ]; then
