@@ -83,12 +83,17 @@ for version in "${versions[@]}"; do
 	done
 	sortedArches="$(xargs -n1 <<<"${arches[*]}" | sort | xargs)"
 
-	gpgKeyVersion="$rcVersion"
-	minor="${rcVersion#*.}" # "4.3" -> "3"
-	if [ "$(( minor % 2 ))" = 1 ]; then
-		gpgKeyVersion="${rcVersion%.*}.$(( minor + 1 ))"
+	if [ "$major" != 'testing' ]; then
+		gpgKeyVersion="$rcVersion"
+		minor="${rcVersion#*.}" # "4.3" -> "3"
+		if [ "$(( minor % 2 ))" = 1 ]; then
+			gpgKeyVersion="${rcVersion%.*}.$(( minor + 1 ))"
+		fi
+		gpgKeys="$(grep "^$gpgKeyVersion:" gpg-keys.txt | cut -d: -f2)"
+	else
+		# the "testing" repository (used for RCs) could be signed by any of the GPG keys used by the project
+		gpgKeys="$(grep -E '^[0-9.]+:' gpg-keys.txt | cut -d: -f2 | xargs)"
 	fi
-	gpgKeys="$(grep "^$gpgKeyVersion:" gpg-keys.txt | cut -d: -f2)"
 
 	echo "$version: $fullVersion (linux; $sortedArches)"
 
