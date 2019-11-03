@@ -311,9 +311,8 @@ if [ "$originalArgOne" = 'mongod' ]; then
 			sleep 1
 		done
 
+		rootAuthDatabase='admin'
 		if [ "$MONGO_INITDB_ROOT_USERNAME" ] && [ "$MONGO_INITDB_ROOT_PASSWORD" ]; then
-			rootAuthDatabase='admin'
-
 			"${mongo[@]}" "$rootAuthDatabase" <<-EOJS
 				db.createUser({
 					user: $(_js_escape "$MONGO_INITDB_ROOT_USERNAME"),
@@ -324,6 +323,16 @@ if [ "$originalArgOne" = 'mongod' ]; then
 		fi
 
 		export MONGO_INITDB_DATABASE="${MONGO_INITDB_DATABASE:-test}"
+
+		if [ "$MONGO_USERNAME" ] && [ "$MONGO_PASSWORD" ]; then
+			"${mongo[@]}" "$rootAuthDatabase" <<-EOJS
+			db.createUser({
+			    user: $(_js_escape "$MONGO_USERNAME"),
+			    pwd: $(_js_escape "$MONGO_PASSWORD"),
+			    roles: [ { role: 'readWrite', db: $(_js_escape "$MONGO_INITDB_DATABASE") } ]
+			})
+		    EOJS
+		fi
 
 		echo
 		for f in /docker-entrypoint-initdb.d/*; do
