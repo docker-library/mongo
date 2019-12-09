@@ -5,14 +5,8 @@ matrix:
   include:
     - os: linux
       env: VERSION=4.2
-    - os: windows
-      dist: 1803-containers
-      env: VERSION=4.2 VARIANT=windows/windowsservercore-1803
     - os: linux
       env: VERSION=4.0
-    - os: windows
-      dist: 1803-containers
-      env: VERSION=4.0 VARIANT=windows/windowsservercore-1803
     - os: linux
       env: VERSION=3.6
     - os: linux
