@@ -18,9 +18,6 @@ environment:
     - version: 3.6
       variant: windowsservercore-ltsc2016
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-    - version: 3.4
-      variant: windowsservercore-ltsc2016
-      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
 
 install:
   - ps: |
