@@ -82,6 +82,8 @@ ENV MONGO_VERSION 3.4.23
 RUN echo "deb http://$MONGO_REPO/apt/ubuntu xenial/${MONGO_PACKAGE%-unstable}/$MONGO_MAJOR multiverse" | tee "/etc/apt/sources.list.d/${MONGO_PACKAGE%-unstable}.list"
 
 RUN set -x \
+# installing "mongodb-enterprise" pulls in "tzdata" which prompts for input
+	&& export DEBIAN_FRONTEND=noninteractive \
 	&& apt-get update \
 	&& apt-get install -y \
 		${MONGO_PACKAGE}=$MONGO_VERSION \
