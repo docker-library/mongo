@@ -1,4 +1,4 @@
-FROM microsoft/windowsservercore:placeholder
+FROM mcr.microsoft.com/windows/servercore:placeholder
 
 SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop';"]
 

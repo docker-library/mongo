@@ -141,7 +141,7 @@ for version in "${versions[@]}"; do
 				-e 's/^(ENV MONGO_VERSION) .*/\1 '"$windowsVersion"'/' \
 				-e 's!^(ENV MONGO_DOWNLOAD_URL) .*!\1 '"$windowsLatest"'!' \
 				-e 's/^(ENV MONGO_DOWNLOAD_SHA256) .*/\1 '"$windowsSha256"'/' \
-				-e 's!^FROM .*!FROM microsoft/'"${winVariant%%-*}"':'"${winVariant#*-}"'!' \
+				-e 's!^(FROM .+):.+!\1:'"${winVariant#*-}"'!' \
 				Dockerfile-windows.template \
 				> "$version/windows/$winVariant/Dockerfile"
 

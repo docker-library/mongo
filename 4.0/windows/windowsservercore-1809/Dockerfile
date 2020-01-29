@@ -1,4 +1,4 @@
-FROM microsoft/windowsservercore:1809
+FROM mcr.microsoft.com/windows/servercore:1809
 
 SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop';"]
 
