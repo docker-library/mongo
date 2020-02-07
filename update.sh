@@ -11,7 +11,6 @@ versions=( "${versions[@]%/}" )
 
 defaultFrom='ubuntu:bionic'
 declare -A froms=(
-	[3.4]='ubuntu:xenial'
 	[3.6]='ubuntu:xenial'
 	[4.0]='ubuntu:xenial'
 )
@@ -110,10 +109,6 @@ for version in "${versions[@]}"; do
 		Dockerfile-linux.template \
 		> "$version/Dockerfile"
 
-	if [ "$version" != '3.4' ]; then
-		sed -ri -e '/backwards compat/d' "$version/Dockerfile"
-	fi
-
 	cp -a docker-entrypoint.sh "$version/"
 
 	if [ -d "$version/windows" ]; then
@@ -144,10 +139,6 @@ for version in "${versions[@]}"; do
 				-e 's!^(FROM .+):.+!\1:'"${winVariant#*-}"'!' \
 				Dockerfile-windows.template \
 				> "$version/windows/$winVariant/Dockerfile"
-
-			if [ "$version" = '3.4' ]; then
-				sed -ri -e 's/, "--bind_ip_all"//' "$version/windows/$winVariant/Dockerfile"
-			fi
 
 			case "$winVariant" in
 				# https://www.appveyor.com/docs/windows-images-software/
