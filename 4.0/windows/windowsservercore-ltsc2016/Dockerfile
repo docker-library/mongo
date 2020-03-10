@@ -3,17 +3,19 @@ FROM mcr.microsoft.com/windows/servercore:ltsc2016
 SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop';"]
 
 ENV MONGO_VERSION 4.0.16
-ENV MONGO_DOWNLOAD_URL https://downloads.mongodb.org/win32/mongodb-win32-x86_64-2008plus-ssl-4.0.16-signed.msi
-ENV MONGO_DOWNLOAD_SHA256 d871d52110ed3c6600273d44e557ab63fc4104aa84b6115ad4dc0b68f90c062d
+ENV MONGO_DOWNLOAD_URL https://fastdl.mongodb.org/win32/mongodb-win32-x86_64-2008plus-ssl-4.0.16-signed.msi
+ENV MONGO_DOWNLOAD_SHA256=d871d52110ed3c6600273d44e557ab63fc4104aa84b6115ad4dc0b68f90c062d
 
 RUN Write-Host ('Downloading {0} ...' -f $env:MONGO_DOWNLOAD_URL); \
 	[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; \
 	(New-Object System.Net.WebClient).DownloadFile($env:MONGO_DOWNLOAD_URL, 'mongo.msi'); \
 	\
-	Write-Host ('Verifying sha256 ({0}) ...' -f $env:MONGO_DOWNLOAD_SHA256); \
-	if ((Get-FileHash mongo.msi -Algorithm sha256).Hash -ne $env:MONGO_DOWNLOAD_SHA256) { \
-		Write-Host 'FAILED!'; \
-		exit 1; \
+	if ($env:MONGO_DOWNLOAD_SHA256) { \
+		Write-Host ('Verifying sha256 ({0}) ...' -f $env:MONGO_DOWNLOAD_SHA256); \
+		if ((Get-FileHash mongo.msi -Algorithm sha256).Hash -ne $env:MONGO_DOWNLOAD_SHA256) { \
+			Write-Host 'FAILED!'; \
+			exit 1; \
+		}; \
 	}; \
 	\
 	Write-Host 'Installing ...'; \
