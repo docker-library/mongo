@@ -57,7 +57,7 @@ for version in "${versions[@]}"; do
 				pkg ~ /^mongodb-(org(-unstable)?|10gen)$/ && $1 == "Version" { print $2 "=" pkg }
 			' \
 			| grep "^$rcVersion\." \
-			| grep -v '~pre~$' \
+			| grep -vE '~pre~$' \
 			| sort -V \
 			| tac|tac
 	}
@@ -112,18 +112,29 @@ for version in "${versions[@]}"; do
 	cp -a docker-entrypoint.sh "$version/"
 
 	if [ -d "$version/windows" ]; then
-		windowsVersions="$(
-			curl -fsSL 'https://www.mongodb.org/dl/win32/x86_64' \
-				| grep --extended-regexp --only-matching '"https?://[^"]+/win32/mongodb-win32-x86_64-(2008plus-ssl|2012plus)-'"${rcVersion//./\\.}"'\.[^"]+-signed.msi"' \
-				| sed \
-					-e 's!^"!!' \
-					-e 's!"$!!' \
-					-e 's!http://downloads.mongodb.org/!https://downloads.mongodb.org/!' \
-				| grep $rcGrepV -E -- '-rc[0-9]'
+		# https://github.com/mkevenaar/chocolatey-packages/blob/8c38398f695e86c55793ee9d61f4e541a25ce0be/automatic/mongodb.install/update.ps1#L15-L31
+		windowsDownloads="$(
+			curl -fsSL 'https://www.mongodb.com/download-center/community' \
+				| grep -oiE '"server-data">window[.]__serverData = {(.+?)}<' \
+				| cut -d= -f2- | cut -d'<' -f1 \
+				| jq -r --arg rcVersion "$rcVersion" '
+					.community.versions[]
+					| select(.version | startswith($rcVersion + "."))
+					| .downloads[]
+					| select(
+						.edition == "base"
+						and .arch == "x86_64"
+						and (.target // "" | test("^windows(_x86_64-(2008plus-ssl|2012plus))?$"))
+					)
+					| .msi
+				' \
+				| grep -vE -- '-rc'
 		)"
-		windowsLatest="$(echo "$windowsVersions" | head -1)"
-		windowsSha256="$(curl -fsSL "$windowsLatest.sha256" | cut -d' ' -f1)"
-		windowsVersion="$(echo "$windowsLatest" | sed -r -e "s!^https?://.+(${rcVersion//./\\.}\.[^\"]+)-signed.msi\$!\1!")"
+		windowsLatest="$(head -1 <<<"$windowsDownloads")"
+		windowsVersion="$(sed -r -e "s!^https?://.+-(${rcVersion//./\\.}\.[^\"]+)-signed.msi\$!\1!" <<<"$windowsLatest")"
+
+		# 4.3 doesn't seem to have a sha256 file (403 forbidden), so this has to be optional :(
+		windowsSha256="$(curl -fsSL "$windowsLatest.sha256" | cut -d' ' -f1 || :)"
 
 		echo "$version: $windowsVersion (windows)"
 
@@ -135,7 +146,7 @@ for version in "${versions[@]}"; do
 			sed -r \
 				-e 's/^(ENV MONGO_VERSION) .*/\1 '"$windowsVersion"'/' \
 				-e 's!^(ENV MONGO_DOWNLOAD_URL) .*!\1 '"$windowsLatest"'!' \
-				-e 's/^(ENV MONGO_DOWNLOAD_SHA256) .*/\1 '"$windowsSha256"'/' \
+				-e 's/^(ENV MONGO_DOWNLOAD_SHA256)=.*/\1='"$windowsSha256"'/' \
 				-e 's!^(FROM .+):.+!\1:'"${winVariant#*-}"'!' \
 				Dockerfile-windows.template \
 				> "$version/windows/$winVariant/Dockerfile"
