@@ -15,6 +15,11 @@ declare -A froms=(
 	[4.0]='ubuntu:xenial'
 )
 
+declare -A fromToCommunityVersionsTarget=(
+	[ubuntu:bionic]='ubuntu1804'
+	[ubuntu:xenial]='ubuntu1604'
+)
+
 declare -A dpkgArchToBashbrew=(
 	[amd64]='amd64'
 	[armel]='arm32v5'
@@ -25,14 +30,22 @@ declare -A dpkgArchToBashbrew=(
 	[s390x]='s390x'
 )
 
+# https://github.com/mkevenaar/chocolatey-packages/blob/8c38398f695e86c55793ee9d61f4e541a25ce0be/automatic/mongodb.install/update.ps1#L15-L31
+communityVersions="$(
+	curl -fsSL 'https://www.mongodb.com/download-center/community' \
+		| grep -oiE '"server-data">window[.]__serverData = {(.+?)}<' \
+		| cut -d= -f2- | cut -d'<' -f1 \
+		| jq -c '.community.versions[]'
+)"
+
 travisEnv=
 appveyorEnv=
 for version in "${versions[@]}"; do
 	rcVersion="${version%-rc}"
 	major="$rcVersion"
-	rcGrepV='-v'
+	rcJqNot='| not'
 	if [ "$rcVersion" != "$version" ]; then
-		rcGrepV=
+		rcJqNot=
 		major='testing'
 	fi
 
@@ -41,46 +54,85 @@ for version in "${versions[@]}"; do
 	suite="${from#$distro:}" # "jessie-slim", "xenial"
 	suite="${suite%-slim}" # "jessie", "xenial"
 
+	downloads="$(
+		jq -c --arg rcVersion "$rcVersion" '
+			select(
+				(.version | startswith($rcVersion + "."))
+				and (.version | contains("-rc") '"$rcJqNot"')
+			)
+			| .version as $version
+			| .downloads[]
+			| select(.arch == "x86_64")
+			| .version = $version
+		' <<<"$communityVersions"
+	)"
+	versions="$(
+		jq -r --arg target "${fromToCommunityVersionsTarget[$from]}" '
+			select(.edition == "targeted" and .target // "" == $target)
+			| .version
+		' <<<"$downloads"
+	)"
+	windowsDownloads="$(
+		jq -c '
+			select(
+				.edition == "base"
+				and (.target // "" | test("^windows(_x86_64-(2008plus-ssl|2012plus))?$"))
+			)
+		' <<<"$downloads"
+	)"
+	windowsVersions="$(
+		jq -r '.version' <<<"$windowsDownloads"
+	)"
+	commonVersions="$(
+		comm -12 \
+			<(sort -u <<<"$versions") \
+			<(sort -u <<<"$windowsVersions")
+	)"
+	fullVersion="$(sort -V <<< "$commonVersions" | tail -1)"
+
+	if [ -z "$fullVersion" ]; then
+		echo >&2 "error: failed to find full version for $version"
+		exit 1
+	fi
+
+	echo "$version: $fullVersion"
+
 	component='multiverse'
 	if [ "$distro" = 'debian' ]; then
 		component='main'
 	fi
-
 	repoUrlBase="https://repo.mongodb.org/apt/$distro/dists/$suite/mongodb-org/$major/$component"
 
-	_arch_versions() {
+	_arch_has_version() {
 		local arch="$1"; shift
+		local version="$1"; shift
 		curl -fsSL "$repoUrlBase/binary-$arch/Packages.gz" 2>/dev/null \
 			| gunzip 2>/dev/null \
-			| awk -F ': ' '
+			| awk -F ': ' -v version="$version" '
+				BEGIN { ret = 1 }
 				$1 == "Package" { pkg = $2 }
-				pkg ~ /^mongodb-(org(-unstable)?|10gen)$/ && $1 == "Version" { print $2 "=" pkg }
-			' \
-			| grep "^$rcVersion\." \
-			| grep -vE '~pre~$' \
-			| sort -V \
-			| tac|tac
+				pkg ~ /^mongodb-(org(-unstable)?|10gen)$/ && $1 == "Version" && $2 == version { print pkg; ret = 0; last }
+				END { exit(ret) }
+			'
 	}
 
-	fullVersion="$(_arch_versions 'amd64' | tail -1)"
-	packageName="${fullVersion#*=}"
-	fullVersion="${fullVersion%=$packageName}"
-	if [ -z "$fullVersion" ]; then
-		echo >&2 "error: failed to get full version for '$version' (from '$repoUrlBase')"
-		exit 1
-	fi
-
 	arches=()
+	packageName=
 	for dpkgArch in "${!dpkgArchToBashbrew[@]}"; do
 		bashbrewArch="${dpkgArchToBashbrew[$dpkgArch]}"
-		if \
-			[ "$bashbrewArch" = 'amd64' ] \
-			|| grep -qx "$fullVersion=$packageName" <(_arch_versions "$dpkgArch") \
-		; then
+		if archPackageName="$(_arch_has_version "$dpkgArch" "$fullVersion")"; then
+			if [ -z "$packageName" ]; then
+				packageName="$archPackageName"
+			elif [ "$archPackageName" != "$packageName" ]; then
+				echo >&2 "error: package name for $dpkgArch ($archPackageName) does not match other arches ($packageName)"
+				exit 1
+			fi
 			arches+=( "$bashbrewArch" )
 		fi
 	done
 	sortedArches="$(xargs -n1 <<<"${arches[*]}" | sort | xargs)"
+
+	echo "- $sortedArches"
 
 	if [ "$major" != 'testing' ]; then
 		gpgKeyVersion="$rcVersion"
@@ -93,8 +145,6 @@ for version in "${versions[@]}"; do
 		# the "testing" repository (used for RCs) could be signed by any of the GPG keys used by the project
 		gpgKeys="$(grep -E '^[0-9.]+:' gpg-keys.txt | cut -d: -f2 | xargs)"
 	fi
-
-	echo "$version: $fullVersion (linux; $sortedArches)"
 
 	sed -r \
 		-e 's/^(ENV MONGO_MAJOR) .*/\1 '"$major"'/' \
@@ -111,57 +161,40 @@ for version in "${versions[@]}"; do
 
 	cp -a docker-entrypoint.sh "$version/"
 
-	if [ -d "$version/windows" ]; then
-		# https://github.com/mkevenaar/chocolatey-packages/blob/8c38398f695e86c55793ee9d61f4e541a25ce0be/automatic/mongodb.install/update.ps1#L15-L31
-		windowsDownloads="$(
-			curl -fsSL 'https://www.mongodb.com/download-center/community' \
-				| grep -oiE '"server-data">window[.]__serverData = {(.+?)}<' \
-				| cut -d= -f2- | cut -d'<' -f1 \
-				| jq -r --arg rcVersion "$rcVersion" '
-					.community.versions[]
-					| select(.version | startswith($rcVersion + "."))
-					| .downloads[]
-					| select(
-						.edition == "base"
-						and .arch == "x86_64"
-						and (.target // "" | test("^windows(_x86_64-(2008plus-ssl|2012plus))?$"))
-					)
-					| .msi
-				' \
-				| grep -vE -- '-rc'
-		)"
-		windowsLatest="$(head -1 <<<"$windowsDownloads")"
-		windowsVersion="$(sed -r -e "s!^https?://.+-(${rcVersion//./\\.}\.[^\"]+)-signed.msi\$!\1!" <<<"$windowsLatest")"
+	windowsMsi="$(
+		jq -r --arg version "$fullVersion" '
+			select(.version == $version)
+			| .msi
+		' <<<"$windowsDownloads" | head -1
+	)"
+	[ -n "$windowsMsi" ]
 
-		# 4.3 doesn't seem to have a sha256 file (403 forbidden), so this has to be optional :(
-		windowsSha256="$(curl -fsSL "$windowsLatest.sha256" | cut -d' ' -f1 || :)"
+	# 4.3 doesn't seem to have a sha256 file (403 forbidden), so this has to be optional :(
+	windowsSha256="$(curl -fsSL "$windowsMsi.sha256" | cut -d' ' -f1 || :)"
 
-		echo "$version: $windowsVersion (windows)"
+	for winVariant in \
+		windowsservercore-{1809,ltsc2016} \
+	; do
+		mkdir -p "$version/windows/$winVariant"
 
-		for winVariant in \
-			windowsservercore-{1809,ltsc2016} \
-		; do
-			[ -d "$version/windows/$winVariant" ] || continue
+		sed -r \
+			-e 's/^(ENV MONGO_VERSION) .*/\1 '"$fullVersion"'/' \
+			-e 's!^(ENV MONGO_DOWNLOAD_URL) .*!\1 '"$windowsMsi"'!' \
+			-e 's/^(ENV MONGO_DOWNLOAD_SHA256)=.*/\1='"$windowsSha256"'/' \
+			-e 's!^(FROM .+):.+!\1:'"${winVariant#*-}"'!' \
+			Dockerfile-windows.template \
+			> "$version/windows/$winVariant/Dockerfile"
 
-			sed -r \
-				-e 's/^(ENV MONGO_VERSION) .*/\1 '"$windowsVersion"'/' \
-				-e 's!^(ENV MONGO_DOWNLOAD_URL) .*!\1 '"$windowsLatest"'!' \
-				-e 's/^(ENV MONGO_DOWNLOAD_SHA256)=.*/\1='"$windowsSha256"'/' \
-				-e 's!^(FROM .+):.+!\1:'"${winVariant#*-}"'!' \
-				Dockerfile-windows.template \
-				> "$version/windows/$winVariant/Dockerfile"
-
-			case "$winVariant" in
-				# https://www.appveyor.com/docs/windows-images-software/
-				*-1809)
-					appveyorEnv='\n    - version: '"$version"'\n      variant: '"$winVariant"'\n      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019'"$appveyorEnv"
-					;;
-				*-ltsc2016)
-					appveyorEnv='\n    - version: '"$version"'\n      variant: '"$winVariant"'\n      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017'"$appveyorEnv"
-					;;
-			esac
-		done
-	fi
+		case "$winVariant" in
+			# https://www.appveyor.com/docs/windows-images-software/
+			*-1809)
+				appveyorEnv='\n    - version: '"$version"'\n      variant: '"$winVariant"'\n      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019'"$appveyorEnv"
+				;;
+			*-ltsc2016)
+				appveyorEnv='\n    - version: '"$version"'\n      variant: '"$winVariant"'\n      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017'"$appveyorEnv"
+				;;
+		esac
+	done
 
 	travisEnv='\n    - os: linux\n      env: VERSION='"$version$travisEnv"
 done
