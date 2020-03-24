@@ -131,6 +131,10 @@ for version in "${versions[@]}"; do
 		fi
 	done
 	sortedArches="$(xargs -n1 <<<"${arches[*]}" | sort | xargs)"
+	if [ -z "$sortedArches" ]; then
+		echo >&2 "error: version $version is missing $distro ($suite) packages!"
+		exit 1
+	fi
 
 	echo "- $sortedArches"
 
