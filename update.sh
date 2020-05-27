@@ -95,6 +95,8 @@ for version in "${versions[@]}"; do
 
 	echo "$version: $fullVersion"
 
+	tilde='~'
+	debVersion="${fullVersion//-/$tilde}"
 	component='multiverse'
 	if [ "$distro" = 'debian' ]; then
 		component='main'
@@ -118,7 +120,7 @@ for version in "${versions[@]}"; do
 	packageName=
 	for dpkgArch in "${!dpkgArchToBashbrew[@]}"; do
 		bashbrewArch="${dpkgArchToBashbrew[$dpkgArch]}"
-		if archPackageName="$(_arch_has_version "$dpkgArch" "$fullVersion")"; then
+		if archPackageName="$(_arch_has_version "$dpkgArch" "$debVersion")"; then
 			if [ -z "$packageName" ]; then
 				packageName="$archPackageName"
 			elif [ "$archPackageName" != "$packageName" ]; then
@@ -150,7 +152,7 @@ for version in "${versions[@]}"; do
 
 	sed -r \
 		-e 's/^(ENV MONGO_MAJOR) .*/\1 '"$major"'/' \
-		-e 's/^(ENV MONGO_VERSION) .*/\1 '"$fullVersion"'/' \
+		-e 's/^(ENV MONGO_VERSION) .*/\1 '"$debVersion"'/' \
 		-e 's/^(ARG MONGO_PACKAGE)=.*/\1='"$packageName"'/' \
 		-e 's/^(FROM) .*/\1 '"$from"'/' \
 		-e 's/%%DISTRO%%/'"$distro"'/' \
@@ -160,6 +162,13 @@ for version in "${versions[@]}"; do
 		-e 's/^(ENV GPG_KEYS) .*/\1 '"$gpgKeys"'/' \
 		Dockerfile-linux.template \
 		> "$version/Dockerfile"
+
+	# starting with MongoDB 4.3, the postinst for server includes "systemctl daemon-reload" (and we don't have "systemctl")
+	case "$version" in
+		3.6 | 4.0 | 4.2)
+			sed -i -e '/systemctl/d' "$version/Dockerfile"
+			;;
+	esac
 
 	cp -a docker-entrypoint.sh "$version/"
 
