@@ -30,12 +30,9 @@ declare -A dpkgArchToBashbrew=(
 	[s390x]='s390x'
 )
 
-# https://github.com/mkevenaar/chocolatey-packages/blob/8c38398f695e86c55793ee9d61f4e541a25ce0be/automatic/mongodb.install/update.ps1#L15-L31
 communityVersions="$(
-	curl -fsSL 'https://www.mongodb.com/download-center/community' \
-		| grep -oiE '"server-data">window[.]__serverData = {(.+?)}<' \
-		| cut -d= -f2- | cut -d'<' -f1 \
-		| jq -c '.community.versions[]'
+	curl -fsSL 'http://downloads.mongodb.org.s3.amazonaws.com/current.json' \
+		| jq -c '.versions[]'
 )"
 
 for version in "${versions[@]}"; do
