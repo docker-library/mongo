@@ -355,6 +355,19 @@ if [ "$originalArgOne" = 'mongod' ]; then
 		set -- "$@" --bind_ip_all
 	fi
 
+	# Automaticaly add --keyFile when --replSet and MONGO_INITDB_ROOT_USERNAME and MONGO_INITDB_ROOT_PASSWORD are configured 
+	DEFAULT_KEY_FILE="$HOME/.keyFile"
+	if _mongod_hack_have_arg --replSet "$@" && [ "$MONGO_INITDB_ROOT_USERNAME" ] && [ "$MONGO_INITDB_ROOT_PASSWORD" ] && ! _mongod_hack_have_arg --keyFile "$@"; then
+		_mongod_hack_ensure_arg_val --keyFile "${DEFAULT_KEY_FILE}" "$@"
+		set -- "${mongodHackedArgs[@]}"
+	fi
+	# add default content
+	KEY_FILE="$(_mongod_hack_get_arg_val --keyFile "$@")"
+	if [ "$KEY_FILE" -a -r "$KEY_FILE" ]; then
+		cat > "$KEY_FILE" <<< "$MONGO_INITDB_ROOT_PASSWORD"
+		chmod 0400 "$KEY_FILE"
+	fi
+
 	unset "${!MONGO_INITDB_@}"
 fi
 
