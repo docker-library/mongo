@@ -356,16 +356,18 @@ if [ "$originalArgOne" = 'mongod' ]; then
 	fi
 
 	# Automaticaly add --keyFile when --replSet and MONGO_INITDB_ROOT_USERNAME and MONGO_INITDB_ROOT_PASSWORD are configured 
-	DEFAULT_KEY_FILE="$HOME/.keyFile"
+	[ -d "$HOME" -a -w "$HOME" ] && DEFAULT_KEY_FILE="$HOME/.keyFile" || DEFAULT_KEY_FILE="$(mktemp --suffix=.keyFile)"
 	if _mongod_hack_have_arg --replSet "$@" && [ "$MONGO_INITDB_ROOT_USERNAME" ] && [ "$MONGO_INITDB_ROOT_PASSWORD" ] && ! _mongod_hack_have_arg --keyFile "$@"; then
 		_mongod_hack_ensure_arg_val --keyFile "${DEFAULT_KEY_FILE}" "$@"
 		set -- "${mongodHackedArgs[@]}"
 	fi
 	# add default content
 	KEY_FILE="$(_mongod_hack_get_arg_val --keyFile "$@")"
-	if [ "$KEY_FILE" ] && ! [ -r "$KEY_FILE" ]; then
-		cat > "$KEY_FILE" <<< "$MONGO_INITDB_ROOT_PASSWORD"
-		chmod 0400 "$KEY_FILE"
+	if [ "$KEY_FILE" ] && ! [ -r "$KEY_FILE" -a "$(stat --format=%s "$KEY_FILE")" -ge 6 ]; then
+		[ -a "$KEY_FILE" ] || touch "$KEY_FILE"
+		[ -w "$KEY_FILE" ] || chmod 0600 "$KEY_FILE"
+		KEY="$(echo -n "$MONGO_INITDB_ROOT_PASSWORD" | openssl dgst -sha256 -binary | openssl base64 -A)"
+		cat > "$KEY_FILE" <<< "$KEY"
 	fi
 
 	unset "${!MONGO_INITDB_@}"
