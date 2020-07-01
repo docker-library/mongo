@@ -368,6 +368,7 @@ if [ "$originalArgOne" = 'mongod' ]; then
 		[ -w "$KEY_FILE" ] || chmod 0600 "$KEY_FILE"
 		KEY="$(echo -n "$MONGO_INITDB_ROOT_PASSWORD" | openssl dgst -sha256 -binary | openssl base64 -A)"
 		cat > "$KEY_FILE" <<< "$KEY"
+		chmod 0400 "$KEY_FILE"
 	fi
 
 	unset "${!MONGO_INITDB_@}"

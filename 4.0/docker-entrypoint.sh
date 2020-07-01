@@ -363,8 +363,11 @@ if [ "$originalArgOne" = 'mongod' ]; then
 	fi
 	# add default content
 	KEY_FILE="$(_mongod_hack_get_arg_val --keyFile "$@")"
-	if [ "$KEY_FILE" ] && ! [ -r "$KEY_FILE" ]; then
-		cat > "$KEY_FILE" <<< "$MONGO_INITDB_ROOT_PASSWORD"
+	if [ "$KEY_FILE" ] && ! [ -r "$KEY_FILE" -a "$(stat --format=%s "$KEY_FILE")" -ge 6 ]; then
+		[ -a "$KEY_FILE" ] || touch "$KEY_FILE"
+		[ -w "$KEY_FILE" ] || chmod 0600 "$KEY_FILE"
+		KEY="$(echo -n "$MONGO_INITDB_ROOT_PASSWORD" | openssl dgst -sha256 -binary | openssl base64 -A)"
+		cat > "$KEY_FILE" <<< "$KEY"
 		chmod 0400 "$KEY_FILE"
 	fi
 
