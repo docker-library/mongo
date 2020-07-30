@@ -3,9 +3,8 @@ set -eu
 
 declare -A aliases=(
 	[3.6]='3'
-	[4.2]='4 latest'
-	[4.3]='unstable'
-	[4.3-rc]='rc'
+	[4.4]='4 latest'
+	[4.5]='unstable'
 )
 
 self="$(basename "$BASH_SOURCE")"
