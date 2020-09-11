@@ -37,7 +37,6 @@ RUN Write-Host ('Downloading {0} ...' -f $env:MONGO_DOWNLOAD_URL); \
 	Write-Host '  mongod --version'; mongod --version; \
 	\
 	Write-Host 'Removing ...'; \
-	Remove-Item C:\mongodb\bin\*.pdb -Force; \
 	Remove-Item C:\windows\installer\*.msi -Force; \
 	Remove-Item mongo.msi -Force; \
 	\
