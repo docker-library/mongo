@@ -31,7 +31,7 @@ declare -A dpkgArchToBashbrew=(
 )
 
 communityVersions="$(
-	curl -fsSL 'http://downloads.mongodb.org.s3.amazonaws.com/current.json' \
+	curl -fsSL 'https://downloads.mongodb.org/current.json' \
 		| jq -c '.versions[]'
 )"
 
