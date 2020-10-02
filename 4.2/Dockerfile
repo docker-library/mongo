@@ -79,8 +79,8 @@ ARG MONGO_REPO=repo.mongodb.org
 ENV MONGO_PACKAGE=${MONGO_PACKAGE} MONGO_REPO=${MONGO_REPO}
 
 ENV MONGO_MAJOR 4.2
-ENV MONGO_VERSION 4.2.9
-# bashbrew-architectures:amd64 arm64v8 s390x
+ENV MONGO_VERSION 4.2.10
+# bashbrew-architectures:amd64 arm64v8
 RUN echo "deb http://$MONGO_REPO/apt/ubuntu bionic/${MONGO_PACKAGE%-unstable}/$MONGO_MAJOR multiverse" | tee "/etc/apt/sources.list.d/${MONGO_PACKAGE%-unstable}.list"
 
 RUN set -x \
