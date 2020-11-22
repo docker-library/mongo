@@ -160,7 +160,7 @@ for version in "${versions[@]}"; do
 		Dockerfile-linux.template \
 		> "$version/Dockerfile"
 
-	# starting with MongoDB 4.3 (and backported to 4.0 and 4.2??), the postinst for server includes an unconditional "systemctl daemon-reload" (and we don't have anything for "systemctl" to talk to leading to dbus errors and failed package installs)
+	# starting with MongoDB 4.3 (and backported to 4.2), the postinst for server includes an unconditional "systemctl daemon-reload" (and we don't have anything for "systemctl" to talk to leading to dbus errors and failed package installs)
 	case "$version" in
 		3.6)
 			sed -i -e '/systemctl/d' "$version/Dockerfile"
