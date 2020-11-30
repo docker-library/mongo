@@ -180,6 +180,18 @@ for version in "${versions[@]}"; do
 	# 4.3 doesn't seem to have a sha256 file (403 forbidden), so this has to be optional :(
 	windowsSha256="$(curl -fsSL "$windowsMsi.sha256" | cut -d' ' -f1 || :)"
 
+	# https://github.com/mongodb/mongo/blob/r4.4.2/src/mongo/installer/msi/wxs/FeatureFragment.wxs#L9-L92 (no MonitoringTools,ImportExportTools)
+	# https://github.com/mongodb/mongo/blob/r4.2.11/src/mongo/installer/msi/wxs/FeatureFragment.wxs#L9-L116
+	# https://github.com/mongodb/mongo/blob/r4.0.21/src/mongo/installer/msi/wxs/FeatureFragment.wxs#L9-L128
+	# https://github.com/mongodb/mongo/blob/r3.6.21/src/mongo/installer/msi/wxs/FeatureFragment.wxs#L9-L102 (no ServerNoService, only Server)
+	windowsFeatures='ServerNoService,Client,Router,MiscellaneousTools'
+	case "$rcVersion" in
+		4.2 | 4.0 | 3.6) windowsFeatures+=',MonitoringTools,ImportExportTools' ;;
+	esac
+	if [ "$rcVersion" = '3.6' ]; then
+		windowsFeatures="${windowsFeatures//ServerNoService/Server}"
+	fi
+
 	for winVariant in \
 		windowsservercore-{1809,ltsc2016} \
 	; do
@@ -190,6 +202,7 @@ for version in "${versions[@]}"; do
 			-e 's!^(ENV MONGO_DOWNLOAD_URL) .*!\1 '"$windowsMsi"'!' \
 			-e 's/^(ENV MONGO_DOWNLOAD_SHA256)=.*/\1='"$windowsSha256"'/' \
 			-e 's!^(FROM .+):.+!\1:'"${winVariant#*-}"'!' \
+			-e 's!(ADDLOCAL)=placeholder!\1='"$windowsFeatures"'!' \
 			Dockerfile-windows.template \
 			> "$version/windows/$winVariant/Dockerfile"
 	done
