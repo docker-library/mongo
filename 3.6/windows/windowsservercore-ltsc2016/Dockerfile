@@ -26,9 +26,18 @@ RUN Write-Host ('Downloading {0} ...' -f $env:MONGO_DOWNLOAD_URL); \
 			'mongo.msi', \
 			'/quiet', \
 			'/qn', \
+			'/l*v', 'install.log', \
+# https://docs.mongodb.com/manual/tutorial/install-mongodb-on-windows-unattended/#run-the-windows-installer-from-the-windows-command-interpreter
 			'INSTALLLOCATION=C:\mongodb', \
-			'ADDLOCAL=all' \
+			'ADDLOCAL=Server,Client,Router,MiscellaneousTools,MonitoringTools,ImportExportTools' \
 		); \
+	if (-Not (Test-Path C:\mongodb\bin\mongo.exe -PathType Leaf)) { \
+		Write-Host 'Installer failed!'; \
+		Get-Content install.log; \
+		exit 1; \
+	}; \
+	Remove-Item install.log; \
+	\
 	$env:PATH = 'C:\mongodb\bin;' + $env:PATH; \
 	[Environment]::SetEnvironmentVariable('PATH', $env:PATH, [EnvironmentVariableTarget]::Machine); \
 	\
