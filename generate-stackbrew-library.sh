@@ -100,8 +100,8 @@ for version in "${versions[@]}"; do
 	EOE
 
 	for v in \
-		windows/windowsservercore-{ltsc2016,1809} \
-		windows/nanoserver-{sac2016,1809} \
+		windows/windowsservercore-{1809,ltsc2016} \
+		windows/nanoserver-{1809,sac2016} \
 	; do
 		dir="$version/$v"
 		variant="$(basename "$v")"
