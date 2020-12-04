@@ -153,6 +153,12 @@ _parse_config() {
 		# if --config is specified, parse it into a JSON file so we can remove a few problematic keys (especially SSL-related keys)
 		# see https://docs.mongodb.com/manual/reference/configuration-options/
 		mongo --norc --nodb --quiet --eval "load('/js-yaml.js'); printjson(jsyaml.load(cat($(_js_escape "$configPath"))))" > "$jsonConfigFile"
+		if [ "$(head -c1 "$jsonConfigFile")" != '{' ] || [ "$(tail -c2 "$jsonConfigFile")" != '}' ]; then
+			# if the file doesn't start with "{" and end with "}", it's *probably* an error ("uncaught exception: YAMLException: foo" for example), so we should print it out
+			echo >&2 'error: unexpected "js-yaml.js" output while parsing config:'
+			cat >&2 "$jsonConfigFile"
+			exit 1
+		fi
 		jq 'del(.systemLog, .processManagement, .net, .security)' "$jsonConfigFile" > "$tempConfigFile"
 		return 0
 	fi
