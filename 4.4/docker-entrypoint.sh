@@ -141,8 +141,9 @@ _js_escape() {
 	jq --null-input --arg 'str' "$1" '$str'
 }
 
-jsonConfigFile="${TMPDIR:-/tmp}/docker-entrypoint-config.json"
-tempConfigFile="${TMPDIR:-/tmp}/docker-entrypoint-temp-config.json"
+: "${TMPDIR:=/tmp}"
+jsonConfigFile="$TMPDIR/docker-entrypoint-config.json"
+tempConfigFile="$TMPDIR/docker-entrypoint-temp-config.json"
 _parse_config() {
 	if [ -s "$tempConfigFile" ]; then
 		return 0
@@ -260,9 +261,11 @@ if [ "$originalArgOne" = 'mongod' ]; then
 		if _parse_config "$@"; then
 			_mongod_hack_ensure_arg_val --config "$tempConfigFile" "${mongodHackedArgs[@]}"
 		fi
-		_mongod_hack_ensure_arg_val --bind_ip 127.0.0.1 "${mongodHackedArgs[@]}"
+		_mongod_hack_ensure_arg_val --bind_ip '' "${mongodHackedArgs[@]}"
 		_mongod_hack_ensure_arg_val --port 27017 "${mongodHackedArgs[@]}"
+		_mongod_hack_ensure_arg_val --unixSocketPrefix "$TMPDIR" "${mongodHackedArgs[@]}"
 		_mongod_hack_ensure_no_arg --bind_ip_all "${mongodHackedArgs[@]}"
+		_mongod_hack_ensure_no_arg --nounixsocket "${mongodHackedArgs[@]}"
 
 		# remove "--auth" and "--replSet" for our initial startup (see https://docs.mongodb.com/manual/tutorial/enable-authentication/#start-mongodb-without-access-control)
 		# https://github.com/docker-library/mongo/issues/211
@@ -296,13 +299,13 @@ if [ "$originalArgOne" = 'mongod' ]; then
 		fi
 		_mongod_hack_ensure_arg --logappend "${mongodHackedArgs[@]}"
 
-		pidfile="${TMPDIR:-/tmp}/docker-entrypoint-temp-mongod.pid"
+		pidfile="$TMPDIR/docker-entrypoint-temp-mongod.pid"
 		rm -f "$pidfile"
 		_mongod_hack_ensure_arg_val --pidfilepath "$pidfile" "${mongodHackedArgs[@]}"
 
 		"${mongodHackedArgs[@]}" --fork
 
-		mongo=( mongo --host 127.0.0.1 --port 27017 --quiet )
+		mongo=( mongo --host "$TMPDIR/mongodb-27017.sock" --quiet )
 
 		# check to see that our "mongod" actually did start up (catches "--help", "--version", MongoDB 3.2 being silly, slow prealloc, etc)
 		# https://jira.mongodb.org/browse/SERVER-16292
