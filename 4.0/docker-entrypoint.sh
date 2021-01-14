@@ -261,11 +261,9 @@ if [ "$originalArgOne" = 'mongod' ]; then
 		if _parse_config "$@"; then
 			_mongod_hack_ensure_arg_val --config "$tempConfigFile" "${mongodHackedArgs[@]}"
 		fi
-		_mongod_hack_ensure_arg_val --bind_ip '' "${mongodHackedArgs[@]}"
+		_mongod_hack_ensure_arg_val --bind_ip 127.0.0.1 "${mongodHackedArgs[@]}"
 		_mongod_hack_ensure_arg_val --port 27017 "${mongodHackedArgs[@]}"
-		_mongod_hack_ensure_arg_val --unixSocketPrefix "$TMPDIR" "${mongodHackedArgs[@]}"
 		_mongod_hack_ensure_no_arg --bind_ip_all "${mongodHackedArgs[@]}"
-		_mongod_hack_ensure_no_arg --nounixsocket "${mongodHackedArgs[@]}"
 
 		# remove "--auth" and "--replSet" for our initial startup (see https://docs.mongodb.com/manual/tutorial/enable-authentication/#start-mongodb-without-access-control)
 		# https://github.com/docker-library/mongo/issues/211
@@ -305,7 +303,7 @@ if [ "$originalArgOne" = 'mongod' ]; then
 
 		"${mongodHackedArgs[@]}" --fork
 
-		mongo=( mongo --host "$TMPDIR/mongodb-27017.sock" --quiet )
+		mongo=( mongo --host 127.0.0.1 --port 27017 --quiet )
 
 		# check to see that our "mongod" actually did start up (catches "--help", "--version", MongoDB 3.2 being silly, slow prealloc, etc)
 		# https://jira.mongodb.org/browse/SERVER-16292
