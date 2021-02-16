@@ -150,7 +150,7 @@ _parse_config() {
 	fi
 
 	local configPath
-	if configPath="$(_mongod_hack_get_arg_val --config "$@")"; then
+	if configPath="$(_mongod_hack_get_arg_val --config "$@")" && [ -s "$configPath" ]; then
 		# if --config is specified, parse it into a JSON file so we can remove a few problematic keys (especially SSL-related keys)
 		# see https://docs.mongodb.com/manual/reference/configuration-options/
 		if grep -vEm1 '^[[:space:]]*(#|$)' "$configPath" | grep -qE '^[[:space:]]*[^=:]+[[:space:]]*='; then
