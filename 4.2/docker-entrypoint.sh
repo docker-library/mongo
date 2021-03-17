@@ -211,6 +211,8 @@ _dbPath() {
 if [ "$originalArgOne" = 'mongod' ]; then
 	file_env 'MONGO_INITDB_ROOT_USERNAME'
 	file_env 'MONGO_INITDB_ROOT_PASSWORD'
+	DOCKER_ENTRYPOINT_INITDB_DIR=${DOCKER_ENTRYPOINT_INITDB_DIR:-/docker-entrypoint-initdb.d}
+	echo "using db init dir: $DOCKER_ENTRYPOINT_INITDB_DIR"
 	# pre-check a few factors to see if it's even worth bothering with initdb
 	shouldPerformInitdb=
 	if [ "$MONGO_INITDB_ROOT_USERNAME" ] && [ "$MONGO_INITDB_ROOT_PASSWORD" ]; then
@@ -230,7 +232,7 @@ if [ "$originalArgOne" = 'mongod' ]; then
 
 	if [ -z "$shouldPerformInitdb" ]; then
 		# if we've got any /docker-entrypoint-initdb.d/* files to parse later, we should initdb
-		for f in /docker-entrypoint-initdb.d/*; do
+		for f in ${DOCKER_ENTRYPOINT_INITDB_DIR}/*; do
 			case "$f" in
 				*.sh|*.js) # this should match the set of files we check for below
 					shouldPerformInitdb="$f"
@@ -345,7 +347,7 @@ if [ "$originalArgOne" = 'mongod' ]; then
 		export MONGO_INITDB_DATABASE="${MONGO_INITDB_DATABASE:-test}"
 
 		echo
-		for f in /docker-entrypoint-initdb.d/*; do
+		for f in ${DOCKER_ENTRYPOINT_INITDB_DIR}/*; do
 			case "$f" in
 				*.sh) echo "$0: running $f"; . "$f" ;;
 				*.js) echo "$0: running $f"; "${mongo[@]}" "$MONGO_INITDB_DATABASE" "$f"; echo ;;
