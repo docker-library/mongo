@@ -172,7 +172,7 @@ _parse_config() {
 			cat >&2 "$jsonConfigFile"
 			exit 1
 		fi
-		jq 'del(.systemLog, .processManagement, .net, .security)' "$jsonConfigFile" > "$tempConfigFile"
+		jq 'del(.systemLog, .processManagement, .net, .security, .replication)' "$jsonConfigFile" > "$tempConfigFile"
 		return 0
 	fi
 
