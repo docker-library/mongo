@@ -9,13 +9,15 @@ if [ ${#versions[@]} -eq 0 ]; then
 fi
 versions=( "${versions[@]%/}" )
 
-defaultFrom='ubuntu:bionic'
+defaultFrom='ubuntu:focal'
 declare -A froms=(
 	[3.6]='ubuntu:xenial'
 	[4.0]='ubuntu:xenial'
+	[4.2]='ubuntu:bionic'
 )
 
 declare -A fromToCommunityVersionsTarget=(
+	[ubuntu:focal]='ubuntu2004'
 	[ubuntu:bionic]='ubuntu1804'
 	[ubuntu:xenial]='ubuntu1604'
 )
