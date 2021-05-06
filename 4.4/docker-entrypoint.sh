@@ -268,6 +268,9 @@ if [ "$originalArgOne" = 'mongod' ]; then
 		# remove "--auth" and "--replSet" for our initial startup (see https://docs.mongodb.com/manual/tutorial/enable-authentication/#start-mongodb-without-access-control)
 		# https://github.com/docker-library/mongo/issues/211
 		_mongod_hack_ensure_no_arg --auth "${mongodHackedArgs[@]}"
+		# "keyFile implies security.authorization"
+		# https://docs.mongodb.com/manual/reference/configuration-options/#mongodb-setting-security.keyFile
+		_mongod_hack_ensure_no_arg_val --keyFile "${mongodHackedArgs[@]}"
 		if [ "$MONGO_INITDB_ROOT_USERNAME" ] && [ "$MONGO_INITDB_ROOT_PASSWORD" ]; then
 			_mongod_hack_ensure_no_arg_val --replSet "${mongodHackedArgs[@]}"
 		fi
