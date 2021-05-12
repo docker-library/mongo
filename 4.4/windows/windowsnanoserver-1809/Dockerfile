@@ -1,8 +1,5 @@
-ARG COPY_FROM=library/mongo:4.4-windowsservercore-1809
-ARG FROM_IMAGE=mcr.microsoft.com/windows/nanoserver:1809
-
-FROM ${COPY_FROM} AS servercore
-FROM ${FROM_IMAGE} AS nanoserver
+FROM library/mongo:4.4-windowsservercore-1809 AS servercore
+FROM mcr.microsoft.com/windows/nanoserver:1809 AS nanoserver
 
 COPY --from=servercore /mongodb /mongodb
 COPY --from=servercore /Windows/System32/MSVCP140.dll /Windows/System32/MSVCP140.dll
