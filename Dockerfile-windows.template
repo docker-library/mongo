@@ -1,5 +1,6 @@
 FROM mcr.microsoft.com/windows/{{ env.windowsVariant }}:{{ env.windowsRelease }}
 
+{{ if env.windowsVariant == "servercore" then ( -}}
 SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop';"]
 
 {{ if .notes then ( -}}
@@ -58,9 +59,39 @@ RUN Write-Host ('Downloading {0} ...' -f $env:MONGO_DOWNLOAD_URL); \
 	\
 	Write-Host 'Complete.';
 
-VOLUME C:\\data\\db C:\\data\\configdb
-
 # TODO docker-entrypoint.ps1 ? (for "docker run <image> --flag --flag --flag")
+{{ ) else ( -}}
+SHELL ["cmd", "/S", "/C"]
+
+# PATH isn't actually set in the Docker image, so we have to set it from within the container
+USER ContainerAdministrator
+RUN setx /m PATH "C:\mongodb\bin;%PATH%"
+USER ContainerUser
+# doing this first to share cache across versions more aggressively
+
+{{ def copy_from: "mongo:" + .version + "-windowsservercore-" + env.windowsRelease -}}
+COPY --from={{ copy_from }} \
+	C:\\Windows\\System32\\msvcp140.dll \
+	C:\\Windows\\System32\\vcruntime140.dll \
+{{ if [ "4.0", "4.2" ] | index(env.version) then "" else ( -}}
+{{ # https://github.com/docker-library/mongo/pull/470#discussion_r633701963 -}}
+	C:\\Windows\\System32\\vcruntime140_1.dll \
+{{ ) end -}}
+	C:\\Windows\\System32\\
+
+{{ if .notes then ( -}}
+# {{ .notes }}
+{{ ) else "" end -}}
+ENV MONGO_VERSION {{ .version }}
+{{ if .date or .githash then ( -}}
+# {{ [ .date // empty, "https://github.com/mongodb/mongo/tree/" + .githash // empty ] | join(", ") }}
+{{ ) else "" end -}}
+
+COPY --from={{ copy_from }} C:\\mongodb C:\\mongodb
+RUN mongo --version && mongod --version
+{{ ) end -}}
+
+VOLUME C:\\data\\db C:\\data\\configdb
 
 EXPOSE 27017
 CMD ["mongod", "--bind_ip_all"]

@@ -158,7 +158,8 @@ for version in "${versions[@]}"; do
 					sha256: env.msiSha256,
 					variants: [
 						"windowsservercore-1809",
-						"windowsservercore-ltsc2016"
+						"windowsservercore-ltsc2016",
+						"nanoserver-1809"
 					],
 					features: ([
 						# https://github.com/mongodb/mongo/blob/r4.4.2/src/mongo/installer/msi/wxs/FeatureFragment.wxs#L9-L92 (no MonitoringTools,ImportExportTools)
