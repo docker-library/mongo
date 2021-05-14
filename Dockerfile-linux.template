@@ -1,4 +1,5 @@
-FROM placeholder
+{{ def target: .targets[.linux] -}}
+FROM {{ target.image }}
 
 # add our user and group first to make sure their IDs get assigned consistently, regardless of whatever dependencies get added
 RUN groupadd -r mongodb && useradd -r -g mongodb mongodb
@@ -59,13 +60,13 @@ RUN set -ex; \
 
 RUN mkdir /docker-entrypoint-initdb.d
 
-ENV GPG_KEYS placeholder
 RUN set -ex; \
 	export GNUPGHOME="$(mktemp -d)"; \
-	for key in $GPG_KEYS; do \
+	set -- {{ .gpg | map(@sh) | join(" ") }}; \
+	for key; do \
 		gpg --batch --keyserver ha.pool.sks-keyservers.net --recv-keys "$key"; \
 	done; \
-	gpg --batch --export $GPG_KEYS > /etc/apt/trusted.gpg.d/mongodb.gpg; \
+	gpg --batch --export "$@" > /etc/apt/trusted.gpg.d/mongodb.gpg; \
 	command -v gpgconf && gpgconf --kill all || :; \
 	rm -r "$GNUPGHOME"; \
 	apt-key list
@@ -74,14 +75,19 @@ RUN set -ex; \
 # Options for MONGO_PACKAGE: mongodb-org OR mongodb-enterprise
 # Options for MONGO_REPO: repo.mongodb.org OR repo.mongodb.com
 # Example: docker build --build-arg MONGO_PACKAGE=mongodb-enterprise --build-arg MONGO_REPO=repo.mongodb.com .
-ARG MONGO_PACKAGE=placeholder
-ARG MONGO_REPO=repo.mongodb.org
+ARG MONGO_PACKAGE=mongodb-org{{ if env.version | test("-rc$") then "-unstable" else "" end }} MONGO_REPO=repo.mongodb.org
 ENV MONGO_PACKAGE=${MONGO_PACKAGE} MONGO_REPO=${MONGO_REPO}
 
-ENV MONGO_MAJOR placeholder
-ENV MONGO_VERSION placeholder
-# bashbrew-architectures:%%ARCHES%%
-RUN echo "deb http://$MONGO_REPO/apt/%%DISTRO%% %%SUITE%%/${MONGO_PACKAGE%-unstable}/$MONGO_MAJOR %%COMPONENT%%" | tee "/etc/apt/sources.list.d/${MONGO_PACKAGE%-unstable}.list"
+ENV MONGO_MAJOR {{ if env.version | test("-rc$") then "testing" else env.version end }}
+RUN echo "deb http://$MONGO_REPO/apt/{{ target.image | gsub(":.*$"; "") }} {{ target.suite }}/${MONGO_PACKAGE%-unstable}/$MONGO_MAJOR {{ if target.image | test("^debian") then "main" else "multiverse" end }}" | tee "/etc/apt/sources.list.d/${MONGO_PACKAGE%-unstable}.list"
+
+{{ if .notes then ( -}}
+# {{ .notes }}
+{{ ) else "" end -}}
+ENV MONGO_VERSION {{ .version | gsub("-"; "~") }}
+{{ if .date or .githash then ( -}}
+# {{ [ .date // empty, "https://github.com/mongodb/mongo/tree/" + .githash // empty ] | join(", ") }}
+{{ ) else "" end -}}
 
 RUN set -x \
 # installing "mongodb-enterprise" pulls in "tzdata" which prompts for input

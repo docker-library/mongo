@@ -1,5 +1,5 @@
-#!/bin/bash
-set -eu
+#!/usr/bin/env bash
+set -Eeuo pipefail
 
 declare -A aliases=(
 	[4.4]='4 latest'
@@ -9,10 +9,13 @@ declare -A aliases=(
 self="$(basename "$BASH_SOURCE")"
 cd "$(dirname "$(readlink -f "$BASH_SOURCE")")"
 
-source '.architectures-lib'
+if [ "$#" -eq 0 ]; then
+	versions="$(jq -r 'keys | map(@sh) | join(" ")' versions.json)"
+	eval "set -- $versions"
+fi
 
-versions=( */ )
-versions=( "${versions[@]%/}" )
+# sort version numbers with highest first
+IFS=$'\n'; set -- $(sort -rV <<<"$*"); unset IFS
 
 # get the most recent commit which modified any of "$@"
 fileCommit() {
@@ -36,6 +39,22 @@ dirCommit() {
 	)
 }
 
+getArches() {
+	local repo="$1"; shift
+	local officialImagesUrl='https://github.com/docker-library/official-images/raw/master/library/'
+
+	eval "declare -g -A parentRepoToArches=( $(
+		find -name 'Dockerfile' -exec awk '
+				toupper($1) == "FROM" && $2 !~ /^('"$repo"'|scratch|.*\/.*)(:|$)/ {
+					print "'"$officialImagesUrl"'" $2
+				}
+			' '{}' + \
+			| sort -u \
+			| xargs bashbrew cat --format '[{{ .RepoName }}:{{ .TagName }}]="{{ join " " .TagEntry.Architectures }}"'
+	) )"
+}
+getArches 'mongo'
+
 cat <<-EOH
 # this file is generated via https://github.com/docker-library/mongo/blob/$(fileCommit "$self")/$self
 
@@ -51,79 +70,29 @@ join() {
 	echo "${out#$sep}"
 }
 
-for version in "${versions[@]}"; do
-	rcVersion="${version%-rc}"
+for version; do
+	export version
 
-	commit="$(dirCommit "$version")"
+	fullVersion="$(jq -r '.[env.version].version' versions.json)"
 
-	fullVersion="$(git show "$commit":"$version/Dockerfile" | awk '$1 == "ENV" && $2 == "MONGO_VERSION" { gsub(/~/, "-", $3); print $3; exit }')"
-
-	versionAliases=()
-	if [ "$version" = "$rcVersion" ]; then
-		while [ "$fullVersion" != "$version" -a "${fullVersion%[.-]*}" != "$fullVersion" ]; do
-			versionAliases+=( $fullVersion )
-			fullVersion="${fullVersion%[.-]*}"
-		done
-	else
-		versionAliases+=( $fullVersion )
-	fi
-	versionAliases+=(
+	versionAliases=(
+		$fullVersion
 		$version
 		${aliases[$version]:-}
 	)
 
-	from="$(git show "$commit":"$version/Dockerfile" | awk '$1 == "FROM" { print $2; exit }')"
-	distro="${from%%:*}" # "debian", "ubuntu"
-	suite="${from#$distro:}" # "jessie-slim", "xenial"
-	suite="${suite%-slim}" # "jessie", "xenial"
+	variants="$(jq -r '.[env.version].targets.windows.variants | [""] + map("windows/" + .) | map(@sh) | join(" ")' versions.json)"
+	eval "variants=( $variants )"
 
-	component='multiverse'
-	if [ "$distro" = 'debian' ]; then
-		component='main'
-	fi
-
-	variant="$suite"
-	variantAliases=( "${versionAliases[@]/%/-$variant}" )
-	variantAliases=( "${variantAliases[@]//latest-/}" )
-
-	major="$(git show "$commit":"$version/Dockerfile" | awk '$1 == "ENV" && $2 == "MONGO_MAJOR" { print $3 }')"
-
-	echo
-	cat <<-EOE
-		Tags: $(join ', ' "${variantAliases[@]}")
-		SharedTags: $(join ', ' "${versionAliases[@]}")
-		# see http://repo.mongodb.org/apt/$distro/dists/$suite/mongodb-org/$major/$component/
-		Architectures: $(join ', ' $(versionArches "$version"))
-		GitCommit: $commit
-		Directory: $version
-	EOE
-
-	for v in \
-		windows/windowsservercore-{1809,ltsc2016} \
-		windows/nanoserver-{1809,sac2016} \
-	; do
-		dir="$version/$v"
-		variant="$(basename "$v")"
-
-		[ -f "$dir/Dockerfile" ] || continue
-
+	for v in "${variants[@]}"; do
+		dir="$version${v:+/$v}"
 		commit="$(dirCommit "$dir")"
 
-		fullVersion="$(git show "$commit":"$dir/Dockerfile" | awk '$1 == "ENV" && $2 == "MONGO_VERSION" { gsub(/~/, "-", $3); print $3; exit }')"
-
-		versionAliases=()
-		if [ "$version" = "$rcVersion" ]; then
-			while [ "$fullVersion" != "$version" -a "${fullVersion%[.-]*}" != "$fullVersion" ]; do
-				versionAliases+=( $fullVersion )
-				fullVersion="${fullVersion%[.-]*}"
-			done
+		if [ -z "$v" ]; then
+			variant="$(jq -r '.[env.version] | .targets[.linux].suite' versions.json)" # "bionic", etc.
 		else
-			versionAliases+=( $fullVersion )
+			variant="$(basename "$v")" # windowsservercore-1809, etc.
 		fi
-		versionAliases+=(
-			$version
-			${aliases[$version]:-}
-		)
 
 		variantAliases=( "${versionAliases[@]/%/-$variant}" )
 		variantAliases=( "${variantAliases[@]//latest-/}" )
@@ -136,9 +105,20 @@ for version in "${versions[@]}"; do
 				break
 			fi
 		done
-		if [[ "$variant" == 'windowsservercore'* ]]; then
+		if [[ "$variant" == 'windowsservercore'* ]] || [ -z "$v" ]; then
 			sharedTags+=( "${versionAliases[@]}" )
 		fi
+
+		case "$v" in
+			windows/*)
+				# this is the really long way to say "windows-amd64"
+				variantArches="$(jq -r '.[env.version] | .targets.windows.arches | map("windows-" + . | @sh) | join(" ")' versions.json)"
+				;;
+			*)
+				variantArches="$(jq -r '.[env.version] | .targets[.linux].arches | map(@sh) | join(" ")' versions.json)"
+				;;
+		esac
+		eval "variantArches=( $variantArches )"
 
 		echo
 		echo "Tags: $(join ', ' "${variantAliases[@]}")"
@@ -146,10 +126,10 @@ for version in "${versions[@]}"; do
 			echo "SharedTags: $(join ', ' "${sharedTags[@]}")"
 		fi
 		cat <<-EOE
-			Architectures: windows-amd64
+			Architectures: $(join ', ' "${variantArches[@]}")
 			GitCommit: $commit
 			Directory: $dir
 		EOE
-		[ "$variant" = "$v" ] || echo "Constraints: $variant"
+		[ -z "$v" ] || echo "Constraints: $variant"
 	done
 done

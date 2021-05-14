@@ -1,8 +1,17 @@
+#
+# NOTE: THIS DOCKERFILE IS GENERATED VIA "apply-templates.sh"
+#
+# PLEASE DO NOT EDIT IT DIRECTLY.
+#
+
 FROM mcr.microsoft.com/windows/servercore:ltsc2016
 
 SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop';"]
 
+# http://docs.mongodb.org/master/release-notes/4.0/
 ENV MONGO_VERSION 4.0.24
+# 04/15/2021, https://github.com/mongodb/mongo/tree/9df1b3a80f39cf7e7ccd6264a207518426a524f6
+
 ENV MONGO_DOWNLOAD_URL https://fastdl.mongodb.org/win32/mongodb-win32-x86_64-2008plus-ssl-4.0.24-signed.msi
 ENV MONGO_DOWNLOAD_SHA256=e17a25bc51b6bdcf6da0fe6b0ba22075b43566119c656b454542735133cd9f1e
 
@@ -29,7 +38,7 @@ RUN Write-Host ('Downloading {0} ...' -f $env:MONGO_DOWNLOAD_URL); \
 			'/l*v', 'install.log', \
 # https://docs.mongodb.com/manual/tutorial/install-mongodb-on-windows-unattended/#run-the-windows-installer-from-the-windows-command-interpreter
 			'INSTALLLOCATION=C:\mongodb', \
-			'ADDLOCAL=ServerNoService,Client,Router,MiscellaneousTools,MonitoringTools,ImportExportTools' \
+			'ADDLOCAL=Client,ImportExportTools,MiscellaneousTools,MonitoringTools,Router,ServerNoService' \
 		); \
 	if (-Not (Test-Path C:\mongodb\bin\mongo.exe -PathType Leaf)) { \
 		Write-Host 'Installer failed!'; \
