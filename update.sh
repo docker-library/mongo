@@ -11,7 +11,6 @@ versions=( "${versions[@]%/}" )
 
 defaultFrom='ubuntu:bionic'
 declare -A froms=(
-	[3.6]='ubuntu:xenial'
 	[4.0]='ubuntu:xenial'
 )
 
@@ -176,14 +175,10 @@ for version in "${versions[@]}"; do
 	# https://github.com/mongodb/mongo/blob/r4.4.2/src/mongo/installer/msi/wxs/FeatureFragment.wxs#L9-L92 (no MonitoringTools,ImportExportTools)
 	# https://github.com/mongodb/mongo/blob/r4.2.11/src/mongo/installer/msi/wxs/FeatureFragment.wxs#L9-L116
 	# https://github.com/mongodb/mongo/blob/r4.0.21/src/mongo/installer/msi/wxs/FeatureFragment.wxs#L9-L128
-	# https://github.com/mongodb/mongo/blob/r3.6.21/src/mongo/installer/msi/wxs/FeatureFragment.wxs#L9-L102 (no ServerNoService, only Server)
 	windowsFeatures='ServerNoService,Client,Router,MiscellaneousTools'
 	case "$rcVersion" in
-		4.2 | 4.0 | 3.6) windowsFeatures+=',MonitoringTools,ImportExportTools' ;;
+		4.2 | 4.0) windowsFeatures+=',MonitoringTools,ImportExportTools' ;;
 	esac
-	if [ "$rcVersion" = '3.6' ]; then
-		windowsFeatures="${windowsFeatures//ServerNoService/Server}"
-	fi
 
 	for winVariant in \
 		windowsservercore-{1809,ltsc2016} \
