@@ -1,3 +1,9 @@
+#
+# NOTE: THIS DOCKERFILE IS GENERATED VIA "apply-templates.sh"
+#
+# PLEASE DO NOT EDIT IT DIRECTLY.
+#
+
 FROM ubuntu:bionic
 
 # add our user and group first to make sure their IDs get assigned consistently, regardless of whatever dependencies get added
@@ -59,13 +65,13 @@ RUN set -ex; \
 
 RUN mkdir /docker-entrypoint-initdb.d
 
-ENV GPG_KEYS E162F504A20CDF15827F718D4B7C549A058F8B6B
 RUN set -ex; \
 	export GNUPGHOME="$(mktemp -d)"; \
-	for key in $GPG_KEYS; do \
+	set -- 'E162F504A20CDF15827F718D4B7C549A058F8B6B'; \
+	for key; do \
 		gpg --batch --keyserver ha.pool.sks-keyservers.net --recv-keys "$key"; \
 	done; \
-	gpg --batch --export $GPG_KEYS > /etc/apt/trusted.gpg.d/mongodb.gpg; \
+	gpg --batch --export "$@" > /etc/apt/trusted.gpg.d/mongodb.gpg; \
 	command -v gpgconf && gpgconf --kill all || :; \
 	rm -r "$GNUPGHOME"; \
 	apt-key list
@@ -74,14 +80,15 @@ RUN set -ex; \
 # Options for MONGO_PACKAGE: mongodb-org OR mongodb-enterprise
 # Options for MONGO_REPO: repo.mongodb.org OR repo.mongodb.com
 # Example: docker build --build-arg MONGO_PACKAGE=mongodb-enterprise --build-arg MONGO_REPO=repo.mongodb.com .
-ARG MONGO_PACKAGE=mongodb-org
-ARG MONGO_REPO=repo.mongodb.org
+ARG MONGO_PACKAGE=mongodb-org MONGO_REPO=repo.mongodb.org
 ENV MONGO_PACKAGE=${MONGO_PACKAGE} MONGO_REPO=${MONGO_REPO}
 
 ENV MONGO_MAJOR 4.2
-ENV MONGO_VERSION 4.2.14
-# bashbrew-architectures:amd64 arm64v8
 RUN echo "deb http://$MONGO_REPO/apt/ubuntu bionic/${MONGO_PACKAGE%-unstable}/$MONGO_MAJOR multiverse" | tee "/etc/apt/sources.list.d/${MONGO_PACKAGE%-unstable}.list"
+
+# http://docs.mongodb.org/master/release-notes/4.2/
+ENV MONGO_VERSION 4.2.14
+# 05/03/2021, https://github.com/mongodb/mongo/tree/0e6db36e92d82cc81cbd40ffd607eae88dc1f09d
 
 RUN set -x \
 # installing "mongodb-enterprise" pulls in "tzdata" which prompts for input

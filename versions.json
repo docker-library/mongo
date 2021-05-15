@@ -1,0 +1,164 @@
+{
+  "4.0": {
+    "changes": "https://jira.mongodb.org/issues/?jql=project%20%3D%20SERVER%20AND%20fixVersion%20%3D%20%224.0.24%22%20ORDER%20BY%20status%20DESC%2C%20priority%20DESC",
+    "date": "04/15/2021",
+    "githash": "9df1b3a80f39cf7e7ccd6264a207518426a524f6",
+    "gpg": [
+      "9DA31620334BD75D9DCB49F368818C72E52529D4"
+    ],
+    "linux": "ubuntu1604",
+    "notes": "http://docs.mongodb.org/master/release-notes/4.0/",
+    "targets": {
+      "ubuntu1604": {
+        "arches": [
+          "amd64",
+          "arm64v8"
+        ],
+        "image": "ubuntu:xenial",
+        "suite": "xenial"
+      },
+      "ubuntu1804": {
+        "arches": [
+          "amd64"
+        ],
+        "image": "ubuntu:bionic",
+        "suite": "bionic"
+      },
+      "windows": {
+        "arches": [
+          "amd64"
+        ],
+        "features": [
+          "Client",
+          "ImportExportTools",
+          "MiscellaneousTools",
+          "MonitoringTools",
+          "Router",
+          "ServerNoService"
+        ],
+        "msi": "https://fastdl.mongodb.org/win32/mongodb-win32-x86_64-2008plus-ssl-4.0.24-signed.msi",
+        "sha256": "e17a25bc51b6bdcf6da0fe6b0ba22075b43566119c656b454542735133cd9f1e",
+        "variants": [
+          "windowsservercore-1809",
+          "windowsservercore-ltsc2016"
+        ]
+      }
+    },
+    "version": "4.0.24"
+  },
+  "4.2": {
+    "changes": "https://jira.mongodb.org/issues/?jql=project%20%3D%20SERVER%20AND%20fixVersion%20%3D%20%224.2.14%22%20ORDER%20BY%20status%20DESC%2C%20priority%20DESC",
+    "date": "05/03/2021",
+    "githash": "0e6db36e92d82cc81cbd40ffd607eae88dc1f09d",
+    "gpg": [
+      "E162F504A20CDF15827F718D4B7C549A058F8B6B"
+    ],
+    "linux": "ubuntu1804",
+    "notes": "http://docs.mongodb.org/master/release-notes/4.2/",
+    "targets": {
+      "debian10": {
+        "arches": [
+          "amd64"
+        ],
+        "image": "debian:buster-slim",
+        "suite": "buster"
+      },
+      "ubuntu1604": {
+        "arches": [
+          "amd64"
+        ],
+        "image": "ubuntu:xenial",
+        "suite": "xenial"
+      },
+      "ubuntu1804": {
+        "arches": [
+          "amd64",
+          "arm64v8"
+        ],
+        "image": "ubuntu:bionic",
+        "suite": "bionic"
+      },
+      "windows": {
+        "arches": [
+          "amd64"
+        ],
+        "features": [
+          "Client",
+          "ImportExportTools",
+          "MiscellaneousTools",
+          "MonitoringTools",
+          "Router",
+          "ServerNoService"
+        ],
+        "msi": "https://fastdl.mongodb.org/win32/mongodb-win32-x86_64-2012plus-4.2.14-signed.msi",
+        "sha256": "706610f96ae74963d5348aafe34f976e7b1c02ef1a9f3596862e1e5ba3437e76",
+        "variants": [
+          "windowsservercore-1809",
+          "windowsservercore-ltsc2016"
+        ]
+      }
+    },
+    "version": "4.2.14"
+  },
+  "4.4": {
+    "changes": "https://jira.mongodb.org/issues/?jql=project%20%3D%20SERVER%20AND%20fixVersion%20%3D%20%224.4.6%22%20ORDER%20BY%20status%20DESC%2C%20priority%20DESC",
+    "date": "05/07/2021",
+    "githash": "72e66213c2c3eab37d9358d5e78ad7f5c1d0d0d7",
+    "gpg": [
+      "20691EEC35216C63CAF66CE1656408E390CFB1F5"
+    ],
+    "linux": "ubuntu1804",
+    "notes": "http://docs.mongodb.org/master/release-notes/4.4/",
+    "targets": {
+      "debian10": {
+        "arches": [
+          "amd64"
+        ],
+        "image": "debian:buster-slim",
+        "suite": "buster"
+      },
+      "ubuntu1604": {
+        "arches": [
+          "amd64"
+        ],
+        "image": "ubuntu:xenial",
+        "suite": "xenial"
+      },
+      "ubuntu1804": {
+        "arches": [
+          "amd64",
+          "arm64v8",
+          "s390x"
+        ],
+        "image": "ubuntu:bionic",
+        "suite": "bionic"
+      },
+      "ubuntu2004": {
+        "arches": [
+          "amd64",
+          "arm64v8"
+        ],
+        "image": "ubuntu:focal",
+        "suite": "focal"
+      },
+      "windows": {
+        "arches": [
+          "amd64"
+        ],
+        "features": [
+          "Client",
+          "MiscellaneousTools",
+          "Router",
+          "ServerNoService"
+        ],
+        "msi": "https://fastdl.mongodb.org/windows/mongodb-windows-x86_64-4.4.6-signed.msi",
+        "sha256": "ede50e8f8d8c9d23a8ca2cc1c96cdb9bcc1f617930e8bd1d46f21d95d0b555f8",
+        "variants": [
+          "windowsservercore-1809",
+          "windowsservercore-ltsc2016"
+        ]
+      }
+    },
+    "version": "4.4.6"
+  }
+}
