@@ -120,6 +120,15 @@ for version; do
 		esac
 		eval "variantArches=( $variantArches )"
 
+		constraints=
+		if [ "$variant" != "$v" ]; then
+			constraints="$variant"
+			if [[ "$variant" == nanoserver-* ]]; then
+				# nanoserver variants "COPY --from=...:...-windowsservercore-... ..."
+				constraints+=", windowsservercore-${variant#nanoserver-}"
+			fi
+		fi
+
 		echo
 		echo "Tags: $(join ', ' "${variantAliases[@]}")"
 		if [ "${#sharedTags[@]}" -gt 0 ]; then
@@ -130,6 +139,6 @@ for version; do
 			GitCommit: $commit
 			Directory: $dir
 		EOE
-		[ -z "$v" ] || echo "Constraints: $variant"
+		[ -z "$constraints" ] || echo "Constraints: $constraints"
 	done
 done
