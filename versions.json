@@ -40,7 +40,8 @@
         "sha256": "e17a25bc51b6bdcf6da0fe6b0ba22075b43566119c656b454542735133cd9f1e",
         "variants": [
           "windowsservercore-1809",
-          "windowsservercore-ltsc2016"
+          "windowsservercore-ltsc2016",
+          "nanoserver-1809"
         ]
       }
     },
@@ -94,7 +95,8 @@
         "sha256": "706610f96ae74963d5348aafe34f976e7b1c02ef1a9f3596862e1e5ba3437e76",
         "variants": [
           "windowsservercore-1809",
-          "windowsservercore-ltsc2016"
+          "windowsservercore-ltsc2016",
+          "nanoserver-1809"
         ]
       }
     },
@@ -155,7 +157,8 @@
         "sha256": "ede50e8f8d8c9d23a8ca2cc1c96cdb9bcc1f617930e8bd1d46f21d95d0b555f8",
         "variants": [
           "windowsservercore-1809",
-          "windowsservercore-ltsc2016"
+          "windowsservercore-ltsc2016",
+          "nanoserver-1809"
         ]
       }
     },
@@ -210,7 +213,8 @@
         "sha256": "67c8bf03590c7ecbaf793db559f7f7fea44eb0481a2c4e486756ee4ea9ed575c",
         "variants": [
           "windowsservercore-1809",
-          "windowsservercore-ltsc2016"
+          "windowsservercore-ltsc2016",
+          "nanoserver-1809"
         ]
       }
     },

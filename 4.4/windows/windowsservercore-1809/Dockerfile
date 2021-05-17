@@ -60,9 +60,9 @@ RUN Write-Host ('Downloading {0} ...' -f $env:MONGO_DOWNLOAD_URL); \
 	\
 	Write-Host 'Complete.';
 
-VOLUME C:\\data\\db C:\\data\\configdb
-
 # TODO docker-entrypoint.ps1 ? (for "docker run <image> --flag --flag --flag")
+
+VOLUME C:\\data\\db C:\\data\\configdb
 
 EXPOSE 27017
 CMD ["mongod", "--bind_ip_all"]
