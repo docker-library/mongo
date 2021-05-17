@@ -121,7 +121,7 @@ for version; do
 		eval "variantArches=( $variantArches )"
 
 		constraints=
-		if [ "$variant" != "$v" ]; then
+		if [ -n "$v" ]; then
 			constraints="$variant"
 			if [[ "$variant" == nanoserver-* ]]; then
 				# nanoserver variants "COPY --from=...:...-windowsservercore-... ..."
