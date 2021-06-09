@@ -1,18 +1,19 @@
-FROM mcr.microsoft.com/windows/{{ env.windowsVariant }}:{{ env.windowsRelease }}
+#
+# NOTE: THIS DOCKERFILE IS GENERATED VIA "apply-templates.sh"
+#
+# PLEASE DO NOT EDIT IT DIRECTLY.
+#
 
-{{ if env.windowsVariant == "servercore" then ( -}}
+FROM mcr.microsoft.com/windows/servercore:1809
+
 SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop';"]
 
-{{ if .notes then ( -}}
-# {{ .notes }}
-{{ ) else "" end -}}
-ENV MONGO_VERSION {{ .version }}
-{{ if .date or .githash then ( -}}
-# {{ [ .date // empty, "https://github.com/mongodb/mongo/tree/" + .githash // empty ] | join(", ") }}
-{{ ) else "" end -}}
+# http://docs.mongodb.org/master/release-notes/5.0/
+ENV MONGO_VERSION 5.0.0-rc0
+# 05/25/2021, https://github.com/mongodb/mongo/tree/9a324616c6557efc15ee6bf0c42587c0f475e573
 
-ENV MONGO_DOWNLOAD_URL {{ .targets.windows.msi }}
-ENV MONGO_DOWNLOAD_SHA256={{ .targets.windows.sha256 }}
+ENV MONGO_DOWNLOAD_URL https://fastdl.mongodb.org/windows/mongodb-windows-x86_64-5.0.0-rc0-signed.msi
+ENV MONGO_DOWNLOAD_SHA256=9aaa777b5b3a6aac7ca076e8b563db9c6c5ed95394b74f6700bc0e2d8d308145
 
 RUN Write-Host ('Downloading {0} ...' -f $env:MONGO_DOWNLOAD_URL); \
 	[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; \
@@ -37,7 +38,7 @@ RUN Write-Host ('Downloading {0} ...' -f $env:MONGO_DOWNLOAD_URL); \
 			'/l*v', 'install.log', \
 # https://docs.mongodb.com/manual/tutorial/install-mongodb-on-windows-unattended/#run-the-windows-installer-from-the-windows-command-interpreter
 			'INSTALLLOCATION=C:\mongodb', \
-			'ADDLOCAL={{ .targets.windows.features | join(",") }}' \
+			'ADDLOCAL=Client,MiscellaneousTools,Router,ServerNoService' \
 		); \
 	if (-Not (Test-Path C:\mongodb\bin\mongo.exe -PathType Leaf)) { \
 		Write-Host 'Installer failed!'; \
@@ -60,36 +61,6 @@ RUN Write-Host ('Downloading {0} ...' -f $env:MONGO_DOWNLOAD_URL); \
 	Write-Host 'Complete.';
 
 # TODO docker-entrypoint.ps1 ? (for "docker run <image> --flag --flag --flag")
-{{ ) else ( -}}
-SHELL ["cmd", "/S", "/C"]
-
-# PATH isn't actually set in the Docker image, so we have to set it from within the container
-USER ContainerAdministrator
-RUN setx /m PATH "C:\mongodb\bin;%PATH%"
-USER ContainerUser
-# doing this first to share cache across versions more aggressively
-
-{{ def copy_from: "mongo:" + .version + "-windowsservercore-" + env.windowsRelease -}}
-COPY --from={{ copy_from }} \
-	C:\\Windows\\System32\\msvcp140.dll \
-	C:\\Windows\\System32\\vcruntime140.dll \
-{{ if [ "4.0", "4.2" ] | index(env.rcVersion) then "" else ( -}}
-{{ # https://github.com/docker-library/mongo/pull/470#discussion_r633701963 -}}
-	C:\\Windows\\System32\\vcruntime140_1.dll \
-{{ ) end -}}
-	C:\\Windows\\System32\\
-
-{{ if .notes then ( -}}
-# {{ .notes }}
-{{ ) else "" end -}}
-ENV MONGO_VERSION {{ .version }}
-{{ if .date or .githash then ( -}}
-# {{ [ .date // empty, "https://github.com/mongodb/mongo/tree/" + .githash // empty ] | join(", ") }}
-{{ ) else "" end -}}
-
-COPY --from={{ copy_from }} C:\\mongodb C:\\mongodb
-RUN mongo --version && mongod --version
-{{ ) end -}}
 
 VOLUME C:\\data\\db C:\\data\\configdb
 

@@ -77,6 +77,12 @@ fi
 
 for version in "${versions[@]}"; do
 	export version
+
+	if [ -z "${versionMeta[$version]:+foo}" ]; then
+		echo >&2 "warning: skipping/removing '$version' (does not appear to exist upstream)"
+		json="$(jq <<<"$json" -c '.[env.version] = null')"
+		continue
+	fi
 	_jq() { jq <<<"${versionMeta[$version]}" "$@"; }
 
 	#echo "$version: $fullVersion"

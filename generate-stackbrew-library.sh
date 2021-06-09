@@ -3,14 +3,13 @@ set -Eeuo pipefail
 
 declare -A aliases=(
 	[4.4]='4 latest'
-	[4.5]='unstable'
 )
 
 self="$(basename "$BASH_SOURCE")"
 cd "$(dirname "$(readlink -f "$BASH_SOURCE")")"
 
 if [ "$#" -eq 0 ]; then
-	versions="$(jq -r 'keys | map(@sh) | join(" ")' versions.json)"
+	versions="$(jq -r 'to_entries | map(if .value then .key | @sh else empty end) | join(" ")' versions.json)"
 	eval "set -- $versions"
 fi
 
@@ -71,9 +70,20 @@ join() {
 }
 
 for version; do
-	export version
+	rcVersion="${version%-rc}"
+	export version rcVersion
 
 	fullVersion="$(jq -r '.[env.version].version' versions.json)"
+
+	if [ "$rcVersion" != "$version" ] && [ -e "$rcVersion/Dockerfile" ]; then
+		# if this is a "-rc" release, let's make sure the release it contains isn't already GA (and thus something we should not publish anymore)
+		rcFullVersion="$(jq -r '.[env.rcVersion].version' versions.json)"
+		latestVersion="$({ echo "$fullVersion"; echo "$rcFullVersion"; } | sort -V | tail -1)"
+		if [[ "$fullVersion" == "$rcFullVersion"* ]] || [ "$latestVersion" = "$rcFullVersion" ]; then
+			# "x.y.z-rc1" == x.y.z*
+			continue
+		fi
+	fi
 
 	versionAliases=(
 		$fullVersion
