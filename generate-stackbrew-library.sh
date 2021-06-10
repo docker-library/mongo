@@ -73,7 +73,9 @@ for version; do
 	rcVersion="${version%-rc}"
 	export version rcVersion
 
-	fullVersion="$(jq -r '.[env.version].version' versions.json)"
+	if ! fullVersion="$(jq -er '.[env.version] | if . then .version else empty end' versions.json)"; then
+		continue
+	fi
 
 	if [ "$rcVersion" != "$version" ] && [ -e "$rcVersion/Dockerfile" ]; then
 		# if this is a "-rc" release, let's make sure the release it contains isn't already GA (and thus something we should not publish anymore)
