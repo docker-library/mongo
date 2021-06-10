@@ -28,7 +28,14 @@ generated_warning() {
 }
 
 for version; do
-	export version
+	rcVersion="${version%-rc}"
+	export version rcVersion
+
+	if jq -e '.[env.version] | not' versions.json > /dev/null; then
+		echo "deleting $version ..."
+		rm -rf "$version"
+		continue
+	fi
 
 	echo "processing $version ..."
 

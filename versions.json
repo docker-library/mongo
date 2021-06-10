@@ -47,6 +47,55 @@
     },
     "version": "4.0.24"
   },
+  "4.0-rc": {
+    "changes": "https://jira.mongodb.org/issues/?jql=project%20%3D%20SERVER%20AND%20fixVersion%20%3D%20%224.0.25%22%20ORDER%20BY%20status%20DESC%2C%20priority%20DESC",
+    "date": "06/04/2021",
+    "githash": "89306fde6167fa12ea6e30d61e05791e8e214e55",
+    "gpg": [
+      "20691EEC35216C63CAF66CE1656408E390CFB1F5",
+      "9DA31620334BD75D9DCB49F368818C72E52529D4",
+      "E162F504A20CDF15827F718D4B7C549A058F8B6B",
+      "F5679A222C647C87527C2F8CB00A0BD1E2C63C11"
+    ],
+    "linux": "ubuntu1604",
+    "notes": "http://docs.mongodb.org/master/release-notes/4.0/",
+    "targets": {
+      "ubuntu1604": {
+        "arches": [
+          "amd64",
+          "arm64v8"
+        ],
+        "image": "ubuntu:xenial",
+        "suite": "xenial"
+      },
+      "ubuntu1804": {
+        "arches": [
+          "amd64"
+        ],
+        "image": "ubuntu:bionic",
+        "suite": "bionic"
+      },
+      "windows": {
+        "arches": [
+          "amd64"
+        ],
+        "features": [
+          "Client",
+          "MiscellaneousTools",
+          "Router",
+          "ServerNoService"
+        ],
+        "msi": "https://fastdl.mongodb.org/win32/mongodb-win32-x86_64-2008plus-ssl-4.0.25-rc1-signed.msi",
+        "sha256": "8b4a066f43e281bf5b905535dc63bb250b86521ca2207da3f80c4e61f21df31d",
+        "variants": [
+          "windowsservercore-1809",
+          "windowsservercore-ltsc2016",
+          "nanoserver-1809"
+        ]
+      }
+    },
+    "version": "4.0.25-rc1"
+  },
   "4.2": {
     "changes": "https://jira.mongodb.org/issues/?jql=project%20%3D%20SERVER%20AND%20fixVersion%20%3D%20%224.2.14%22%20ORDER%20BY%20status%20DESC%2C%20priority%20DESC",
     "date": "05/03/2021",
@@ -102,6 +151,7 @@
     },
     "version": "4.2.14"
   },
+  "4.2-rc": null,
   "4.4": {
     "changes": "https://jira.mongodb.org/issues/?jql=project%20%3D%20SERVER%20AND%20fixVersion%20%3D%20%224.4.6%22%20ORDER%20BY%20status%20DESC%2C%20priority%20DESC",
     "date": "05/07/2021",
@@ -164,17 +214,20 @@
     },
     "version": "4.4.6"
   },
-  "4.9-rc": {
-    "changes": "https://jira.mongodb.org/issues/?jql=project%20%3D%20SERVER%20AND%20fixVersion%20%3D%20%224.9.0%22%20ORDER%20BY%20status%20DESC%2C%20priority%20DESC",
-    "date": "05/03/2021",
-    "githash": "a58447691485ec04d39d7b9d42dc28cd6900da6c",
+  "4.4-rc": null,
+  "5.0": null,
+  "5.0-rc": {
+    "changes": "https://jira.mongodb.org/issues/?jql=project%20%3D%20SERVER%20AND%20fixVersion%20%3D%20%225.0.0-rc0%22%20ORDER%20BY%20status%20DESC%2C%20priority%20DESC",
+    "date": "05/25/2021",
+    "githash": "9a324616c6557efc15ee6bf0c42587c0f475e573",
     "gpg": [
       "20691EEC35216C63CAF66CE1656408E390CFB1F5",
-      "99DC630F00A2F97F27C6A02A253612A09571B484",
       "9DA31620334BD75D9DCB49F368818C72E52529D4",
-      "E162F504A20CDF15827F718D4B7C549A058F8B6B"
+      "E162F504A20CDF15827F718D4B7C549A058F8B6B",
+      "F5679A222C647C87527C2F8CB00A0BD1E2C63C11"
     ],
     "linux": "ubuntu2004",
+    "notes": "http://docs.mongodb.org/master/release-notes/5.0/",
     "targets": {
       "debian10": {
         "arches": [
@@ -209,8 +262,8 @@
           "Router",
           "ServerNoService"
         ],
-        "msi": "https://fastdl.mongodb.org/windows/mongodb-windows-x86_64-4.9.0-rc1-signed.msi",
-        "sha256": "67c8bf03590c7ecbaf793db559f7f7fea44eb0481a2c4e486756ee4ea9ed575c",
+        "msi": "https://fastdl.mongodb.org/windows/mongodb-windows-x86_64-5.0.0-rc0-signed.msi",
+        "sha256": "9aaa777b5b3a6aac7ca076e8b563db9c6c5ed95394b74f6700bc0e2d8d308145",
         "variants": [
           "windowsservercore-1809",
           "windowsservercore-ltsc2016",
@@ -218,6 +271,6 @@
         ]
       }
     },
-    "version": "4.9.0-rc1"
+    "version": "5.0.0-rc0"
   }
 }
