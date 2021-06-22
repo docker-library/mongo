@@ -69,7 +69,7 @@ RUN set -ex; \
 	export GNUPGHOME="$(mktemp -d)"; \
 	set -- '9DA31620334BD75D9DCB49F368818C72E52529D4'; \
 	for key; do \
-		gpg --batch --keyserver ha.pool.sks-keyservers.net --recv-keys "$key"; \
+		gpg --batch --keyserver keyserver.ubuntu.com --recv-keys "$key"; \
 	done; \
 	gpg --batch --export "$@" > /etc/apt/trusted.gpg.d/mongodb.gpg; \
 	command -v gpgconf && gpgconf --kill all || :; \
