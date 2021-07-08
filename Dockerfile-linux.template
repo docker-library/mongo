@@ -81,6 +81,10 @@ ENV MONGO_PACKAGE=${MONGO_PACKAGE} MONGO_REPO=${MONGO_REPO}
 
 ENV MONGO_MAJOR {{ if env.version != env.rcVersion then "testing" else env.version end }}
 RUN echo "deb http://$MONGO_REPO/apt/{{ target.image | gsub(":.*$"; "") }} {{ target.suite }}/${MONGO_PACKAGE%-unstable}/$MONGO_MAJOR {{ if target.image | test("^debian") then "main" else "multiverse" end }}" | tee "/etc/apt/sources.list.d/${MONGO_PACKAGE%-unstable}.list"
+{{ if env.version == "5.0-rc" then ( -}}
+# https://jira.mongodb.org/browse/SERVER-57939?focusedCommentId=3923033&page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-3923033
+RUN echo "deb http://$MONGO_REPO/apt/{{ target.image | gsub(":.*$"; "") }} {{ target.suite }}/${MONGO_PACKAGE%-unstable}/{{ env.rcVersion }} {{ if target.image | test("^debian") then "main" else "multiverse" end }}" | tee "/etc/apt/sources.list.d/${MONGO_PACKAGE%-unstable}-mongosh.list"
+{{ ) else "" end -}}
 
 {{ if .notes then ( -}}
 # {{ .notes }}

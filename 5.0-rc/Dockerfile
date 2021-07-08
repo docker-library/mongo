@@ -86,6 +86,8 @@ ENV MONGO_PACKAGE=${MONGO_PACKAGE} MONGO_REPO=${MONGO_REPO}
 
 ENV MONGO_MAJOR testing
 RUN echo "deb http://$MONGO_REPO/apt/ubuntu focal/${MONGO_PACKAGE%-unstable}/$MONGO_MAJOR multiverse" | tee "/etc/apt/sources.list.d/${MONGO_PACKAGE%-unstable}.list"
+# https://jira.mongodb.org/browse/SERVER-57939?focusedCommentId=3923033&page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-3923033
+RUN echo "deb http://$MONGO_REPO/apt/ubuntu focal/${MONGO_PACKAGE%-unstable}/5.0 multiverse" | tee "/etc/apt/sources.list.d/${MONGO_PACKAGE%-unstable}-mongosh.list"
 
 # http://docs.mongodb.org/master/release-notes/5.0/
 ENV MONGO_VERSION 5.0.0~rc4
