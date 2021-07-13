@@ -88,8 +88,8 @@ ENV MONGO_MAJOR testing
 RUN echo "deb http://$MONGO_REPO/apt/ubuntu focal/${MONGO_PACKAGE%-unstable}/$MONGO_MAJOR multiverse" | tee "/etc/apt/sources.list.d/${MONGO_PACKAGE%-unstable}.list"
 
 # http://docs.mongodb.org/master/release-notes/4.4/
-ENV MONGO_VERSION 4.4.7~rc0
-# 06/22/2021, https://github.com/mongodb/mongo/tree/0752572374c79198dc9fce439a18e89ea3c7c328
+ENV MONGO_VERSION 4.4.7~rc1
+# 07/07/2021, https://github.com/mongodb/mongo/tree/abb6b9c2bf675e9e2aeaecba05f0f8359d99e203
 
 RUN set -x \
 # installing "mongodb-enterprise" pulls in "tzdata" which prompts for input
