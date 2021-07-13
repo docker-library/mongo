@@ -1,5 +1,10 @@
-{{ def target: .targets[.linux] -}}
-FROM {{ target.image }}
+#
+# NOTE: THIS DOCKERFILE IS GENERATED VIA "apply-templates.sh"
+#
+# PLEASE DO NOT EDIT IT DIRECTLY.
+#
+
+FROM ubuntu:focal
 
 # add our user and group first to make sure their IDs get assigned consistently, regardless of whatever dependencies get added
 RUN groupadd -r mongodb && useradd -r -g mongodb mongodb
@@ -62,7 +67,7 @@ RUN mkdir /docker-entrypoint-initdb.d
 
 RUN set -ex; \
 	export GNUPGHOME="$(mktemp -d)"; \
-	set -- {{ .gpg | map(@sh) | join(" ") }}; \
+	set -- '20691EEC35216C63CAF66CE1656408E390CFB1F5'; \
 	for key; do \
 		gpg --batch --keyserver keyserver.ubuntu.com --recv-keys "$key"; \
 	done; \
@@ -75,20 +80,16 @@ RUN set -ex; \
 # Options for MONGO_PACKAGE: mongodb-org OR mongodb-enterprise
 # Options for MONGO_REPO: repo.mongodb.org OR repo.mongodb.com
 # Example: docker build --build-arg MONGO_PACKAGE=mongodb-enterprise --build-arg MONGO_REPO=repo.mongodb.com .
-ARG MONGO_PACKAGE=mongodb-org{{ if (env.version != env.rcVersion) and (env.rcVersion | split(".")[1] | tonumber % 2 == 1) then "-unstable" else "" end }}
+ARG MONGO_PACKAGE=mongodb-org
 ARG MONGO_REPO=repo.mongodb.org
 ENV MONGO_PACKAGE=${MONGO_PACKAGE} MONGO_REPO=${MONGO_REPO}
 
-ENV MONGO_MAJOR {{ if env.version != env.rcVersion then "testing" else env.version end }}
-RUN echo "deb http://$MONGO_REPO/apt/{{ target.image | gsub(":.*$"; "") }} {{ target.suite }}/${MONGO_PACKAGE%-unstable}/$MONGO_MAJOR {{ if target.image | test("^debian") then "main" else "multiverse" end }}" | tee "/etc/apt/sources.list.d/${MONGO_PACKAGE%-unstable}.list"
+ENV MONGO_MAJOR 5.0
+RUN echo "deb http://$MONGO_REPO/apt/ubuntu focal/${MONGO_PACKAGE%-unstable}/$MONGO_MAJOR multiverse" | tee "/etc/apt/sources.list.d/${MONGO_PACKAGE%-unstable}.list"
 
-{{ if .notes then ( -}}
-# {{ .notes }}
-{{ ) else "" end -}}
-ENV MONGO_VERSION {{ .version | gsub("-"; "~") }}
-{{ if .date or .githash then ( -}}
-# {{ [ .date // empty, "https://github.com/mongodb/mongo/tree/" + .githash // empty ] | join(", ") }}
-{{ ) else "" end -}}
+# http://docs.mongodb.org/master/release-notes/5.0/
+ENV MONGO_VERSION 5.0.0
+# 07/08/2021, https://github.com/mongodb/mongo/tree/1184f004a99660de6f5e745573419bda8a28c0e9
 
 RUN set -x \
 # installing "mongodb-enterprise" pulls in "tzdata" which prompts for input
