@@ -67,7 +67,7 @@ RUN mkdir /docker-entrypoint-initdb.d
 
 RUN set -ex; \
 	export GNUPGHOME="$(mktemp -d)"; \
-	set -- '20691EEC35216C63CAF66CE1656408E390CFB1F5'; \
+	set -- 'F5679A222C647C87527C2F8CB00A0BD1E2C63C11'; \
 	for key; do \
 		gpg --batch --keyserver keyserver.ubuntu.com --recv-keys "$key"; \
 	done; \
