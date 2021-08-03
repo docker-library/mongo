@@ -22,6 +22,17 @@ if [[ "$originalArgOne" == mongo* ]] && [ "$(id -u)" = '0' ]; then
 	exec gosu mongodb "$BASH_SOURCE" "$@"
 fi
 
+if dpkgArch="$(dpkg --print-architecture)" && [ "$dpkgArch" = 'amd64' ] && ! grep -qE '^flags.* avx( .*|$)' /proc/cpuinfo; then
+	# https://github.com/docker-library/mongo/issues/485#issuecomment-891991814
+	{
+		echo
+		echo 'WARNING: MongoDB 5.0+ requires a CPU with AVX support, and your current system does not appear to have that!'
+		echo '  see https://www.mongodb.com/community/forums/t/mongodb-5-0-cpu-intel-g4650-compatibility/116610/2'
+		echo '  see also https://github.com/docker-library/mongo/issues/485#issuecomment-891991814'
+		echo
+	} >&2
+fi
+
 # you should use numactl to start your mongod instances, including the config servers, mongos instances, and any clients.
 # https://docs.mongodb.com/manual/administration/production-notes/#configuring-numa-on-linux
 if [[ "$originalArgOne" == mongo* ]]; then
