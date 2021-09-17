@@ -144,7 +144,9 @@
         ],
         "features": [
           "Client",
+          "ImportExportTools",
           "MiscellaneousTools",
+          "MonitoringTools",
           "Router",
           "ServerNoService"
         ],
