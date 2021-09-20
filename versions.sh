@@ -175,7 +175,7 @@ for version in "${versions[@]}"; do
 						"Client",
 						"Router",
 						"MiscellaneousTools",
-						if [ "4.2", "4.0" ] | index(env.version) then
+						if [ "4.2", "4.0" ] | index(env.version | rtrimstr("-rc")) then
 							"ImportExportTools",
 							"MonitoringTools"
 						else empty end
