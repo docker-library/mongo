@@ -79,8 +79,28 @@ ARG MONGO_PACKAGE=mongodb-org{{ if (env.version != env.rcVersion) and (env.rcVer
 ARG MONGO_REPO=repo.mongodb.org
 ENV MONGO_PACKAGE=${MONGO_PACKAGE} MONGO_REPO=${MONGO_REPO}
 
-ENV MONGO_MAJOR {{ if env.version != env.rcVersion then "testing" else env.version end }}
-RUN echo "deb http://$MONGO_REPO/apt/{{ target.image | gsub(":.*$"; "") }} {{ target.suite }}/${MONGO_PACKAGE%-unstable}/$MONGO_MAJOR {{ if target.image | test("^debian") then "main" else "multiverse" end }}" | tee "/etc/apt/sources.list.d/${MONGO_PACKAGE%-unstable}.list"
+RUN set -eux; \
+	{ \
+{{
+	[
+		[
+			# without adding *both*, RCs will often fail to find the "mongodb-mongosh" package (because it's not in the "testing" repository)
+			if env.version == "5.1-rc" then
+				"5.0" # just to get the elusive "mongodb-mongosh" package because "5.1" doesn't exist yet and "testing" does not include it 😩
+			else
+				env.rcVersion
+			end,
+			if env.version != env.rcVersion then
+				"testing"
+			else empty end
+		][] as $major | (
+-}}
+		echo "deb http://$MONGO_REPO/apt/{{ target.image | gsub(":.*$"; "") }} {{ target.suite }}/${MONGO_PACKAGE%-unstable}/{{ $major }} {{ if target.image | test("^debian") then "main" else "multiverse" end }}"; \
+{{
+		)
+	] | add
+-}}
+	} | tee "/etc/apt/sources.list.d/${MONGO_PACKAGE%-unstable}.list"
 
 {{ if .notes then ( -}}
 # {{ .notes }}

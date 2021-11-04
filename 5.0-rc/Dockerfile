@@ -67,7 +67,7 @@ RUN mkdir /docker-entrypoint-initdb.d
 
 RUN set -ex; \
 	export GNUPGHOME="$(mktemp -d)"; \
-	set -- '20691EEC35216C63CAF66CE1656408E390CFB1F5'; \
+	set -- '20691EEC35216C63CAF66CE1656408E390CFB1F5' '9DA31620334BD75D9DCB49F368818C72E52529D4' 'E162F504A20CDF15827F718D4B7C549A058F8B6B' 'F5679A222C647C87527C2F8CB00A0BD1E2C63C11'; \
 	for key; do \
 		gpg --batch --keyserver keyserver.ubuntu.com --recv-keys "$key"; \
 	done; \
@@ -86,12 +86,13 @@ ENV MONGO_PACKAGE=${MONGO_PACKAGE} MONGO_REPO=${MONGO_REPO}
 
 RUN set -eux; \
 	{ \
-		echo "deb http://$MONGO_REPO/apt/ubuntu focal/${MONGO_PACKAGE%-unstable}/4.4 multiverse"; \
+		echo "deb http://$MONGO_REPO/apt/ubuntu focal/${MONGO_PACKAGE%-unstable}/5.0 multiverse"; \
+		echo "deb http://$MONGO_REPO/apt/ubuntu focal/${MONGO_PACKAGE%-unstable}/testing multiverse"; \
 	} | tee "/etc/apt/sources.list.d/${MONGO_PACKAGE%-unstable}.list"
 
-# http://docs.mongodb.org/master/release-notes/4.4/
-ENV MONGO_VERSION 4.4.10
-# 10/13/2021, https://github.com/mongodb/mongo/tree/58971da1ef93435a9f62bf4708a81713def6e88c
+# http://docs.mongodb.org/master/release-notes/5.0/
+ENV MONGO_VERSION 5.0.4~rc0
+# 11/03/2021, https://github.com/mongodb/mongo/tree/62a84ede3cc9a334e8bc82160714df71e7d3a29e
 
 RUN set -x \
 # installing "mongodb-enterprise" pulls in "tzdata" which prompts for input
