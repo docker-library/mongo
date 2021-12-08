@@ -1,5 +1,10 @@
-{{ def target: .targets[.linux] -}}
-FROM {{ target.image }}
+#
+# NOTE: THIS DOCKERFILE IS GENERATED VIA "apply-templates.sh"
+#
+# PLEASE DO NOT EDIT IT DIRECTLY.
+#
+
+FROM ubuntu:focal
 
 # add our user and group first to make sure their IDs get assigned consistently, regardless of whatever dependencies get added
 RUN groupadd -r mongodb && useradd -r -g mongodb mongodb
@@ -62,7 +67,7 @@ RUN mkdir /docker-entrypoint-initdb.d
 
 RUN set -ex; \
 	export GNUPGHOME="$(mktemp -d)"; \
-	set -- {{ .gpg | map(@sh) | join(" ") }}; \
+	set -- 'F5679A222C647C87527C2F8CB00A0BD1E2C63C11'; \
 	for key; do \
 		gpg --batch --keyserver keyserver.ubuntu.com --recv-keys "$key"; \
 	done; \
@@ -71,52 +76,31 @@ RUN set -ex; \
 	rm -r "$GNUPGHOME"; \
 	apt-key list
 
-{{
-	def major:
-		env.rcVersion | split(".")[0] | tonumber
-	;
-	def minor:
-		env.rcVersion | split(".")[1] | tonumber
-	;
-	def is_rapid:
-		# https://docs.mongodb.com/upcoming/reference/versioning/
-		major >= 5 and minor > 0
-	;
-	def is_unstable:
-		# https://docs.mongodb.com/upcoming/reference/versioning/#historical-releases
-		is_rapid or (env.version != env.rcVersion and major < 5 and minor % 2 == 1)
--}}
 # Allow build-time overrides (eg. to build image with MongoDB Enterprise version)
 # Options for MONGO_PACKAGE: mongodb-org OR mongodb-enterprise
 # Options for MONGO_REPO: repo.mongodb.org OR repo.mongodb.com
 # Example: docker build --build-arg MONGO_PACKAGE=mongodb-enterprise --build-arg MONGO_REPO=repo.mongodb.com .
-ARG MONGO_PACKAGE=mongodb-org{{ if is_unstable then "-unstable" else "" end }}
+ARG MONGO_PACKAGE=mongodb-org-unstable
 ARG MONGO_REPO=repo.mongodb.org
 ENV MONGO_PACKAGE=${MONGO_PACKAGE} MONGO_REPO=${MONGO_REPO}
 
-ENV MONGO_MAJOR {{ if env.version != env.rcVersion then "testing" elif is_rapid then "development" else env.version end }}
-RUN echo "deb http://$MONGO_REPO/apt/{{ target.image | gsub(":.*$"; "") }} {{ target.suite }}/${MONGO_PACKAGE%-unstable}/$MONGO_MAJOR {{ if target.image | test("^debian") then "main" else "multiverse" end }}" | tee "/etc/apt/sources.list.d/${MONGO_PACKAGE%-unstable}.list"
-{{ if is_rapid then ( -}}
+ENV MONGO_MAJOR development
+RUN echo "deb http://$MONGO_REPO/apt/ubuntu focal/${MONGO_PACKAGE%-unstable}/$MONGO_MAJOR multiverse" | tee "/etc/apt/sources.list.d/${MONGO_PACKAGE%-unstable}.list"
 # add stable repository for access to the "mongosh" package
-RUN echo "deb http://$MONGO_REPO/apt/{{ target.image | gsub(":.*$"; "") }} {{ target.suite }}/${MONGO_PACKAGE%-unstable}/{{ major | tostring }}.0 {{ if target.image | test("^debian") then "main" else "multiverse" end }}" | tee -a "/etc/apt/sources.list.d/${MONGO_PACKAGE%-unstable}.list"
+RUN echo "deb http://$MONGO_REPO/apt/ubuntu focal/${MONGO_PACKAGE%-unstable}/5.0 multiverse" | tee -a "/etc/apt/sources.list.d/${MONGO_PACKAGE%-unstable}.list"
 
 #
 # **WARNING:**
 #
-#   MongoDB {{ env.rcVersion }} is a rapid release and is only supported for MongoDB Atlas.
-#   MongoDB {{ env.rcVersion }} is not supported for use on-premises.
+#   MongoDB 5.1 is a rapid release and is only supported for MongoDB Atlas.
+#   MongoDB 5.1 is not supported for use on-premises.
 #
 #   For more information, see "MongoDB Versioning": https://docs.mongodb.com/upcoming/reference/versioning/
 #
-{{ ) else "" end -}}
 
-{{ if .notes then ( -}}
-# {{ .notes }}
-{{ ) else "" end -}}
-ENV MONGO_VERSION {{ .version | gsub("-"; "~") }}
-{{ if .date or .githash then ( -}}
-# {{ [ .date // empty, "https://github.com/mongodb/mongo/tree/" + .githash // empty ] | join(", ") }}
-{{ ) else "" end -}}
+# http://docs.mongodb.org/master/release-notes/5.1/
+ENV MONGO_VERSION 5.1.1
+# 12/01/2021, https://github.com/mongodb/mongo/tree/a9eb8c3bb3673c2a39cfb047a501771358591809
 
 RUN set -x \
 # installing "mongodb-enterprise" pulls in "tzdata" which prompts for input

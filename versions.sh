@@ -103,9 +103,18 @@ for version in "${versions[@]}"; do
 		gpgKeys="$(grep -E '^[0-9.]+:' gpg-keys.txt | cut -d: -f2 | xargs)"
 	else
 		gpgKeyVersion="$version"
-		minor="${version#*.}" # "4.3" -> "3"
-		if [ "$(( minor % 2 ))" = 1 ]; then
-			gpgKeyVersion="${version%.*}.$(( minor + 1 ))"
+		major="${version%%.*}"
+		if [ "$major" -ge 5 ]; then
+			# https://www.mongodb.com/blog/post/introducing-mongodb-5-1-rapid-release
+			# https://docs.mongodb.com/upcoming/reference/versioning/
+			gpgKeyVersion="$major.0"
+			# TODO so called "rapid" releases probably need the same behavior as RCs since they all live in the "development" bucket together
+		else
+			# https://docs.mongodb.com/upcoming/reference/versioning/#historical-releases
+			minor="${version#*.}" # "4.3" -> "3"
+			if [ "$(( minor % 2 ))" = 1 ]; then
+				gpgKeyVersion="${version%.*}.$(( minor + 1 ))"
+			fi
 		fi
 		gpgKeys="$(grep "^$gpgKeyVersion:" gpg-keys.txt | cut -d: -f2)"
 	fi
