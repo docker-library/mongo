@@ -52,6 +52,14 @@ shell="$(
 				"3.6", # April 2021
 				null # ... so we can have a trailing comma above, making diffs nicer :trollface:
 			] | index($v) | not)
+
+			# filter out so-called "rapid releases": https://docs.mongodb.com/upcoming/reference/versioning/
+			# "Rapid Releases are designed for use with MongoDB Atlas, and are not generally supported for use in an on-premise capacity."
+			| select(
+				(.version | split(".")) as $splitVersion
+				| ($splitVersion[0] | tonumber) >= 5 and ($splitVersion[1] | tonumber) > 0
+				| not
+			)
 		]
 
 		# now convert all that data to a basic shell list + map so we can loop over/use it appropriately
