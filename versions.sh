@@ -56,7 +56,7 @@ shell="$(
 			# filter out so-called "rapid releases": https://docs.mongodb.com/upcoming/reference/versioning/
 			# "Rapid Releases are designed for use with MongoDB Atlas, and are not generally supported for use in an on-premise capacity."
 			| select(
-				(.version | split(".")) as $splitVersion
+				(.version | split("[.-]"; "")) as $splitVersion
 				| ($splitVersion[0] | tonumber) >= 5 and ($splitVersion[1] | tonumber) > 0
 				| not
 			)
