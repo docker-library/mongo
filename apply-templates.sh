@@ -31,9 +31,10 @@ for version; do
 	rcVersion="${version%-rc}"
 	export version rcVersion
 
+	rm -rf "$version"
+
 	if jq -e '.[env.version] | not' versions.json > /dev/null; then
-		echo "deleting $version ..."
-		rm -rf "$version"
+		echo "skipping $version ..."
 		continue
 	fi
 
@@ -51,7 +52,7 @@ for version; do
 	eval "variants=( $variants )"
 	for variant in "${variants[@]}"; do
 		windowsVariant="${variant%%-*}" # "windowsservercore", "nanoserver"
-		windowsRelease="${variant#$windowsVariant-}" # "1809", "ltsc2016", etc
+		windowsRelease="${variant#$windowsVariant-}" # "ltsc2022", "1809", etc
 		windowsVariant="${windowsVariant#windows}" # "servercore", "nanoserver"
 		export windowsVariant windowsRelease
 

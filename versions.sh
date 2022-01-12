@@ -173,7 +173,6 @@ for version in "${versions[@]}"; do
 					variants: [
 						"windowsservercore-ltsc2022",
 						"windowsservercore-1809",
-						"windowsservercore-ltsc2016",
 						"nanoserver-ltsc2022",
 						"nanoserver-1809"
 					],
