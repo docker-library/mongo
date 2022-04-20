@@ -87,7 +87,7 @@ ENV MONGO_PACKAGE=${MONGO_PACKAGE} MONGO_REPO=${MONGO_REPO}
 ENV MONGO_MAJOR testing
 RUN echo "deb [ signed-by=/etc/apt/keyrings/mongodb.gpg ] http://$MONGO_REPO/apt/ubuntu bionic/${MONGO_PACKAGE%-unstable}/$MONGO_MAJOR multiverse" | tee "/etc/apt/sources.list.d/${MONGO_PACKAGE%-unstable}.list"
 
-# http://docs.mongodb.org/master/release-notes/4.2/
+# https://docs.mongodb.org/master/release-notes/4.2/
 ENV MONGO_VERSION 4.2.20~rc0
 # 04/12/2022, https://github.com/mongodb/mongo/tree/15c0712952c356cb711c13a42cb3bca8617d4ebc
 

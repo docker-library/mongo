@@ -116,7 +116,7 @@
       "F5679A222C647C87527C2F8CB00A0BD1E2C63C11"
     ],
     "linux": "ubuntu1804",
-    "notes": "http://docs.mongodb.org/master/release-notes/4.2/",
+    "notes": "https://docs.mongodb.org/master/release-notes/4.2/",
     "targets": {
       "debian10": {
         "arches": [
