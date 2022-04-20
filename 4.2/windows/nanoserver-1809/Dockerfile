@@ -19,7 +19,7 @@ COPY --from=mongo:4.2.19-windowsservercore-1809 \
 	C:\\Windows\\System32\\vcruntime140.dll \
 	C:\\Windows\\System32\\
 
-# http://docs.mongodb.org/master/release-notes/4.2/
+# https://docs.mongodb.org/master/release-notes/4.2/
 ENV MONGO_VERSION 4.2.19
 # 03/02/2022, https://github.com/mongodb/mongo/tree/e68a7d47305e14e090cba9ce3d92533053299996
 

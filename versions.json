@@ -57,7 +57,7 @@
       "E162F504A20CDF15827F718D4B7C549A058F8B6B"
     ],
     "linux": "ubuntu1804",
-    "notes": "http://docs.mongodb.org/master/release-notes/4.2/",
+    "notes": "https://docs.mongodb.org/master/release-notes/4.2/",
     "targets": {
       "debian10": {
         "arches": [
