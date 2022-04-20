@@ -87,7 +87,7 @@ ENV MONGO_PACKAGE=${MONGO_PACKAGE} MONGO_REPO=${MONGO_REPO}
 ENV MONGO_MAJOR 5.0
 RUN echo "deb [ signed-by=/etc/apt/keyrings/mongodb.gpg ] http://$MONGO_REPO/apt/ubuntu focal/${MONGO_PACKAGE%-unstable}/$MONGO_MAJOR multiverse" | tee "/etc/apt/sources.list.d/${MONGO_PACKAGE%-unstable}.list"
 
-# http://docs.mongodb.org/master/release-notes/5.0/
+# https://docs.mongodb.org/master/release-notes/5.0/
 ENV MONGO_VERSION 5.0.7
 # 04/06/2022, https://github.com/mongodb/mongo/tree/b977129dc70eed766cbee7e412d901ee213acbda
 

@@ -20,7 +20,7 @@ COPY --from=mongo:5.0.7-windowsservercore-1809 \
 	C:\\Windows\\System32\\vcruntime140_1.dll \
 	C:\\Windows\\System32\\
 
-# http://docs.mongodb.org/master/release-notes/5.0/
+# https://docs.mongodb.org/master/release-notes/5.0/
 ENV MONGO_VERSION 5.0.7
 # 04/06/2022, https://github.com/mongodb/mongo/tree/b977129dc70eed766cbee7e412d901ee213acbda
 
