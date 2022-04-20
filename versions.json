@@ -7,7 +7,7 @@
       "9DA31620334BD75D9DCB49F368818C72E52529D4"
     ],
     "linux": "ubuntu1604",
-    "notes": "http://docs.mongodb.org/master/release-notes/4.0/",
+    "notes": "https://docs.mongodb.org/master/release-notes/4.0/",
     "targets": {
       "ubuntu1604": {
         "arches": [
