@@ -8,7 +8,7 @@ FROM mcr.microsoft.com/windows/servercore:ltsc2022
 
 SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop';"]
 
-# http://docs.mongodb.org/master/release-notes/4.4/
+# https://docs.mongodb.org/master/release-notes/4.4/
 ENV MONGO_VERSION 4.4.13
 # 03/02/2022, https://github.com/mongodb/mongo/tree/df25c71b8674a78e17468f48bcda5285decb9246
 

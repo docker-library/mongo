@@ -172,7 +172,7 @@
       "20691EEC35216C63CAF66CE1656408E390CFB1F5"
     ],
     "linux": "ubuntu2004",
-    "notes": "http://docs.mongodb.org/master/release-notes/4.4/",
+    "notes": "https://docs.mongodb.org/master/release-notes/4.4/",
     "targets": {
       "debian10": {
         "arches": [
