@@ -105,66 +105,7 @@
     },
     "version": "4.2.20"
   },
-  "4.2-rc": {
-    "changes": "https://jira.mongodb.org/issues/?jql=project%20%3D%20SERVER%20AND%20fixVersion%20%3D%20%224.2.20%22%20ORDER%20BY%20status%20DESC%2C%20priority%20DESC",
-    "date": "04/12/2022",
-    "githash": "15c0712952c356cb711c13a42cb3bca8617d4ebc",
-    "gpg": [
-      "20691EEC35216C63CAF66CE1656408E390CFB1F5",
-      "39BD841E4BE5FB195A65400E6A26B1AE64C3C388",
-      "9DA31620334BD75D9DCB49F368818C72E52529D4",
-      "E162F504A20CDF15827F718D4B7C549A058F8B6B",
-      "F5679A222C647C87527C2F8CB00A0BD1E2C63C11"
-    ],
-    "linux": "ubuntu1804",
-    "notes": "https://docs.mongodb.org/master/release-notes/4.2/",
-    "targets": {
-      "debian10": {
-        "arches": [
-          "amd64"
-        ],
-        "image": "debian:buster-slim",
-        "suite": "buster"
-      },
-      "ubuntu1604": {
-        "arches": [
-          "amd64"
-        ],
-        "image": "ubuntu:xenial",
-        "suite": "xenial"
-      },
-      "ubuntu1804": {
-        "arches": [
-          "amd64",
-          "arm64v8"
-        ],
-        "image": "ubuntu:bionic",
-        "suite": "bionic"
-      },
-      "windows": {
-        "arches": [
-          "amd64"
-        ],
-        "features": [
-          "Client",
-          "ImportExportTools",
-          "MiscellaneousTools",
-          "MonitoringTools",
-          "Router",
-          "ServerNoService"
-        ],
-        "msi": "https://fastdl.mongodb.org/win32/mongodb-win32-x86_64-2012plus-4.2.20-rc0-signed.msi",
-        "sha256": "3cc4447bf10f71ec906463acf6031c84ab658bc7a3d61ce402f4b7b748034d03",
-        "variants": [
-          "windowsservercore-ltsc2022",
-          "windowsservercore-1809",
-          "nanoserver-ltsc2022",
-          "nanoserver-1809"
-        ]
-      }
-    },
-    "version": "4.2.20-rc0"
-  },
+  "4.2-rc": null,
   "4.4": {
     "changes": "https://jira.mongodb.org/issues/?jql=project%20%3D%20SERVER%20AND%20fixVersion%20%3D%20%224.4.13%22%20ORDER%20BY%20status%20DESC%2C%20priority%20DESC",
     "date": "03/02/2022",
