@@ -7,7 +7,11 @@
 FROM ubuntu:bionic
 
 # add our user and group first to make sure their IDs get assigned consistently, regardless of whatever dependencies get added
-RUN groupadd -r mongodb && useradd -r -g mongodb mongodb
+RUN set -eux; \
+	groupadd --gid 999 --system mongodb; \
+	useradd --uid 999 --system --gid mongodb --home-dir /data/db mongodb; \
+	mkdir -p /data/db /data/configdb; \
+	chown -R mongodb:mongodb /data/db /data/configdb
 
 RUN set -eux; \
 	apt-get update; \
@@ -108,9 +112,11 @@ RUN set -x \
 	&& rm -rf /var/lib/mongodb \
 	&& mv /etc/mongod.conf /etc/mongod.conf.orig
 
-RUN mkdir -p /data/db /data/configdb \
-	&& chown -R mongodb:mongodb /data/db /data/configdb
 VOLUME /data/db /data/configdb
+
+# ensure that if running as custom user that "mongosh" has a valid "HOME"
+# https://github.com/docker-library/mongo/issues/524
+ENV HOME /data/db
 
 COPY docker-entrypoint.sh /usr/local/bin/
 ENTRYPOINT ["docker-entrypoint.sh"]
