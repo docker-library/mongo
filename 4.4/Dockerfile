@@ -99,15 +99,12 @@ RUN set -x \
 # installing "mongodb-enterprise" pulls in "tzdata" which prompts for input
 	&& export DEBIAN_FRONTEND=noninteractive \
 	&& apt-get update \
-# starting with MongoDB 4.3 (and backported to 4.0 and 4.2 *and* 3.6??), the postinst for server includes an unconditional "systemctl daemon-reload" (and we don't have anything for "systemctl" to talk to leading to dbus errors and failed package installs)
-	&& ln -s /bin/true /usr/local/bin/systemctl \
 	&& apt-get install -y \
 		${MONGO_PACKAGE}=$MONGO_VERSION \
 		${MONGO_PACKAGE}-server=$MONGO_VERSION \
 		${MONGO_PACKAGE}-shell=$MONGO_VERSION \
 		${MONGO_PACKAGE}-mongos=$MONGO_VERSION \
 		${MONGO_PACKAGE}-tools=$MONGO_VERSION \
-	&& rm -f /usr/local/bin/systemctl \
 	&& rm -rf /var/lib/apt/lists/* \
 	&& rm -rf /var/lib/mongodb \
 	&& mv /etc/mongod.conf /etc/mongod.conf.orig
