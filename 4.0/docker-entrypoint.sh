@@ -337,7 +337,12 @@ if [ "$originalArgOne" = 'mongod' ]; then
 
 		"${mongodHackedArgs[@]}" --fork
 
-		mongo=( mongo --host 127.0.0.1 --port 27017 --quiet )
+		mongoShell='mongo'
+		if ! command -v "$mongoShell" > /dev/null; then
+			mongoShell='mongosh'
+		fi
+
+		mongo=( "$mongoShell" --host 127.0.0.1 --port 27017 --quiet )
 
 		# check to see that our "mongod" actually did start up (catches "--help", "--version", MongoDB 3.2 being silly, slow prealloc, etc)
 		# https://jira.mongodb.org/browse/SERVER-16292

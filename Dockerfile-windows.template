@@ -1,3 +1,7 @@
+{{
+	def has_client:
+		.targets.windows.features | index("Client")
+-}}
 FROM mcr.microsoft.com/windows/{{ env.windowsVariant }}:{{ env.windowsRelease }}
 
 {{ if env.windowsVariant == "servercore" then ( -}}
@@ -39,7 +43,7 @@ RUN Write-Host ('Downloading {0} ...' -f $env:MONGO_DOWNLOAD_URL); \
 			'INSTALLLOCATION=C:\mongodb', \
 			'ADDLOCAL={{ .targets.windows.features | join(",") }}' \
 		); \
-	if (-Not (Test-Path C:\mongodb\bin\mongo.exe -PathType Leaf)) { \
+	if (-Not (Test-Path C:\mongodb\bin\mongod.exe -PathType Leaf)) { \
 		Write-Host 'Installer failed!'; \
 		Get-Content install.log; \
 		exit 1; \
@@ -50,7 +54,9 @@ RUN Write-Host ('Downloading {0} ...' -f $env:MONGO_DOWNLOAD_URL); \
 	[Environment]::SetEnvironmentVariable('PATH', $env:PATH, [EnvironmentVariableTarget]::Machine); \
 	\
 	Write-Host 'Verifying install ...'; \
+{{ if has_client then ( -}}
 	Write-Host '  mongo --version'; mongo --version; \
+{{ ) else "" end -}}
 	Write-Host '  mongod --version'; mongod --version; \
 	\
 	Write-Host 'Removing ...'; \
@@ -88,7 +94,7 @@ ENV MONGO_VERSION {{ .version }}
 {{ ) else "" end -}}
 
 COPY --from={{ copy_from }} C:\\mongodb C:\\mongodb
-RUN mongo --version && mongod --version
+RUN {{ if has_client then ( }}mongo --version && {{ ) else "" end }}mongod --version
 {{ ) end -}}
 
 VOLUME C:\\data\\db C:\\data\\configdb

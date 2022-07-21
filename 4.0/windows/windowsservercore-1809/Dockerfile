@@ -40,7 +40,7 @@ RUN Write-Host ('Downloading {0} ...' -f $env:MONGO_DOWNLOAD_URL); \
 			'INSTALLLOCATION=C:\mongodb', \
 			'ADDLOCAL=Client,ImportExportTools,MiscellaneousTools,MonitoringTools,Router,ServerNoService' \
 		); \
-	if (-Not (Test-Path C:\mongodb\bin\mongo.exe -PathType Leaf)) { \
+	if (-Not (Test-Path C:\mongodb\bin\mongod.exe -PathType Leaf)) { \
 		Write-Host 'Installer failed!'; \
 		Get-Content install.log; \
 		exit 1; \
