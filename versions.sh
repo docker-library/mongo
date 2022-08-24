@@ -179,11 +179,14 @@ for version in "${versions[@]}"; do
 						"nanoserver-1809"
 					],
 					features: ([
+						# https://github.com/mongodb/mongo/blob/r6.0.0/src/mongo/installer/msi/wxs/FeatureFragment.wxs#L9-L85 (no Client)
 						# https://github.com/mongodb/mongo/blob/r4.4.2/src/mongo/installer/msi/wxs/FeatureFragment.wxs#L9-L92 (no MonitoringTools,ImportExportTools)
 						# https://github.com/mongodb/mongo/blob/r4.2.11/src/mongo/installer/msi/wxs/FeatureFragment.wxs#L9-L116
 						# https://github.com/mongodb/mongo/blob/r4.0.21/src/mongo/installer/msi/wxs/FeatureFragment.wxs#L9-L128
 						"ServerNoService",
-						"Client",
+						if [ "4.0", "4.2", "4.4", "5.0" ] | index(env.version | rtrimstr("-rc")) then
+							"Client"
+						else empty end,
 						"Router",
 						"MiscellaneousTools",
 						if [ "4.2", "4.0" ] | index(env.version | rtrimstr("-rc")) then
