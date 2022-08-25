@@ -196,7 +196,12 @@ _parse_config() {
 			echo >&2
 			return 1
 		fi
-		mongo --norc --nodb --quiet --eval "load('/js-yaml.js'); printjson(jsyaml.load(cat($(_js_escape "$configPath"))))" > "$jsonConfigFile"
+		if [ "$mongoShell" = 'mongo' ]; then
+			"$mongoShell" --norc --nodb --quiet --eval "load('/js-yaml.js'); printjson(jsyaml.load(cat($(_js_escape "$configPath"))))" > "$jsonConfigFile"
+		else
+			# https://www.mongodb.com/docs/manual/reference/method/js-native/#std-label-native-in-mongosh
+			"$mongoShell" --norc --nodb --quiet --eval "load('/js-yaml.js'); JSON.stringify(jsyaml.load(fs.readFileSync($(_js_escape "$configPath"), 'utf8')))" > "$jsonConfigFile"
+		fi
 		if [ "$(head -c1 "$jsonConfigFile")" != '{' ] || [ "$(tail -c2 "$jsonConfigFile")" != '}' ]; then
 			# if the file doesn't start with "{" and end with "}", it's *probably* an error ("uncaught exception: YAMLException: foo" for example), so we should print it out
 			echo >&2 'error: unexpected "js-yaml.js" output while parsing config:'
@@ -242,6 +247,12 @@ _dbPath() {
 if [ "$originalArgOne" = 'mongod' ]; then
 	file_env 'MONGO_INITDB_ROOT_USERNAME'
 	file_env 'MONGO_INITDB_ROOT_PASSWORD'
+
+	mongoShell='mongo'
+	if ! command -v "$mongoShell" > /dev/null; then
+		mongoShell='mongosh'
+	fi
+
 	# pre-check a few factors to see if it's even worth bothering with initdb
 	shouldPerformInitdb=
 	if [ "$MONGO_INITDB_ROOT_USERNAME" ] && [ "$MONGO_INITDB_ROOT_PASSWORD" ]; then
@@ -336,11 +347,6 @@ if [ "$originalArgOne" = 'mongod' ]; then
 		_mongod_hack_ensure_arg_val --pidfilepath "$pidfile" "${mongodHackedArgs[@]}"
 
 		"${mongodHackedArgs[@]}" --fork
-
-		mongoShell='mongo'
-		if ! command -v "$mongoShell" > /dev/null; then
-			mongoShell='mongosh'
-		fi
 
 		mongo=( "$mongoShell" --host 127.0.0.1 --port 27017 --quiet )
 
