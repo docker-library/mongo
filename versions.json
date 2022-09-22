@@ -229,8 +229,8 @@
   },
   "4.4-rc": {
     "changes": "https://jira.mongodb.org/issues/?jql=project%20%3D%20SERVER%20AND%20fixVersion%20%3D%20%224.4.17%22%20ORDER%20BY%20status%20DESC%2C%20priority%20DESC",
-    "date": "09/20/2022",
-    "githash": "88049cab6697c2e830a62b45747018f5bd7b7d2b",
+    "date": "09/21/2022",
+    "githash": "85de0cc83f4dc64dbbac7fe028a4866228c1b5d1",
     "gpg": [
       "20691EEC35216C63CAF66CE1656408E390CFB1F5",
       "39BD841E4BE5FB195A65400E6A26B1AE64C3C388",
@@ -281,8 +281,8 @@
           "Router",
           "ServerNoService"
         ],
-        "msi": "https://fastdl.mongodb.org/windows/mongodb-windows-x86_64-4.4.17-rc1-signed.msi",
-        "sha256": "753b50748a82ce9cb6f6098ffb117d8d4f4c75ca17df6fa74fe239fd5828d198",
+        "msi": "https://fastdl.mongodb.org/windows/mongodb-windows-x86_64-4.4.17-rc2-signed.msi",
+        "sha256": "b29301e3f0858b1456b95f060b1dc38ea699b4facc064b1c905a4f2cb5927e18",
         "variants": [
           "windowsservercore-ltsc2022",
           "windowsservercore-1809",
@@ -291,7 +291,7 @@
         ]
       }
     },
-    "version": "4.4.17-rc1"
+    "version": "4.4.17-rc2"
   },
   "5.0": {
     "changes": "https://jira.mongodb.org/issues/?jql=project%20%3D%20SERVER%20AND%20fixVersion%20%3D%20%225.0.12%22%20ORDER%20BY%20status%20DESC%2C%20priority%20DESC",
