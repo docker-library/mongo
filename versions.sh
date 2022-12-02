@@ -50,6 +50,7 @@ shell="$(
 				"3.2", # September 2018
 				"3.4", # January 2020
 				"3.6", # April 2021
+				"4.0", # April 2022
 				null # ... so we can have a trailing comma above, making diffs nicer :trollface:
 			] | index($v) | not)
 
@@ -182,14 +183,13 @@ for version in "${versions[@]}"; do
 						# https://github.com/mongodb/mongo/blob/r6.0.0/src/mongo/installer/msi/wxs/FeatureFragment.wxs#L9-L85 (no Client)
 						# https://github.com/mongodb/mongo/blob/r4.4.2/src/mongo/installer/msi/wxs/FeatureFragment.wxs#L9-L92 (no MonitoringTools,ImportExportTools)
 						# https://github.com/mongodb/mongo/blob/r4.2.11/src/mongo/installer/msi/wxs/FeatureFragment.wxs#L9-L116
-						# https://github.com/mongodb/mongo/blob/r4.0.21/src/mongo/installer/msi/wxs/FeatureFragment.wxs#L9-L128
 						"ServerNoService",
-						if [ "4.0", "4.2", "4.4", "5.0" ] | index(env.version | rtrimstr("-rc")) then
+						if [ "4.2", "4.4", "5.0" ] | index(env.version | rtrimstr("-rc")) then
 							"Client"
 						else empty end,
 						"Router",
 						"MiscellaneousTools",
-						if [ "4.2", "4.0" ] | index(env.version | rtrimstr("-rc")) then
+						if [ "4.2" ] | index(env.version | rtrimstr("-rc")) then
 							"ImportExportTools",
 							"MonitoringTools"
 						else empty end
