@@ -12,12 +12,12 @@ RUN set -eux; \
 	apt-get update; \
 	apt-get install -y --no-install-recommends \
 		ca-certificates \
+		dirmngr \
+		gnupg \
 		jq \
 		numactl \
+		procps \
 	; \
-	if ! command -v ps > /dev/null; then \
-		apt-get install -y --no-install-recommends procps; \
-	fi; \
 	rm -rf /var/lib/apt/lists/*
 
 # grab gosu for easy step-down from root (https://github.com/tianon/gosu/releases)
@@ -32,13 +32,6 @@ RUN set -ex; \
 	apt-get install -y --no-install-recommends \
 		wget \
 	; \
-	if ! command -v gpg > /dev/null; then \
-		apt-get install -y --no-install-recommends gnupg dirmngr; \
-		savedAptMark="$savedAptMark gnupg dirmngr"; \
-	elif gpg --version | grep -q '^gpg (GnuPG) 1\.'; then \
-# "This package provides support for HKPS keyservers." (GnuPG 1.x only)
-		apt-get install -y --no-install-recommends gnupg-curl; \
-	fi; \
 	rm -rf /var/lib/apt/lists/*; \
 	\
 	dpkgArch="$(dpkg --print-architecture | awk -F- '{ print $NF }')"; \
@@ -47,8 +40,8 @@ RUN set -ex; \
 	export GNUPGHOME="$(mktemp -d)"; \
 	gpg --batch --keyserver hkps://keys.openpgp.org --recv-keys B42F6819007F00F88E364FD4036A9C25BF357DD4; \
 	gpg --batch --verify /usr/local/bin/gosu.asc /usr/local/bin/gosu; \
-	command -v gpgconf && gpgconf --kill all || :; \
-	rm -r "$GNUPGHOME" /usr/local/bin/gosu.asc; \
+	gpgconf --kill all; \
+	rm -rf "$GNUPGHOME" /usr/local/bin/gosu.asc; \
 	\
 	wget -O /js-yaml.js "https://github.com/nodeca/js-yaml/raw/${JSYAML_VERSION}/dist/js-yaml.js"; \
 # TODO some sort of download verification here
@@ -72,8 +65,8 @@ RUN set -ex; \
 	done; \
 	mkdir -p /etc/apt/keyrings; \
 	gpg --batch --export "$@" > /etc/apt/keyrings/mongodb.gpg; \
-	command -v gpgconf && gpgconf --kill all || :; \
-	rm -r "$GNUPGHOME"
+	gpgconf --kill all; \
+	rm -rf "$GNUPGHOME"
 
 # Allow build-time overrides (eg. to build image with MongoDB Enterprise version)
 # Options for MONGO_PACKAGE: mongodb-org OR mongodb-enterprise
