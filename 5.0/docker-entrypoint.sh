@@ -184,6 +184,16 @@ _parse_config() {
 	if configPath="$(_mongod_hack_get_arg_val --config "$@")" && [ -s "$configPath" ]; then
 		# if --config is specified, parse it into a JSON file so we can remove a few problematic keys (especially SSL-related keys)
 		# see https://docs.mongodb.com/manual/reference/configuration-options/
+		if grep -vEm1 '^[[:space:]]*(#|$)' "$configPath" | grep -qE '^[[:space:]]*[^=:]+[[:space:]]*='; then
+			# if the first non-comment/non-blank line of the config file looks like "foo = ...", this is probably the 2.4 and older "ini-style config format"
+			# mongod tries to parse config as yaml and then falls back to ini-style parsing
+			# https://github.com/mongodb/mongo/blob/r6.0.3/src/mongo/util/options_parser/options_parser.cpp#L1883-L1894
+			echo >&2
+			echo >&2 "WARNING: it appears that '$configPath' is in the older INI-style format (replaced by YAML in MongoDB 2.6)"
+			echo >&2 '  This script does not parse the older INI-style format, and thus will ignore it.'
+			echo >&2
+			return 1
+		fi
 		if [ "$mongoShell" = 'mongo' ]; then
 			"$mongoShell" --norc --nodb --quiet --eval "load('/js-yaml.js'); printjson(jsyaml.load(cat($(_js_escape "$configPath"))))" > "$jsonConfigFile"
 		else
