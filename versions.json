@@ -312,7 +312,7 @@
     "gpg": [
       "39BD841E4BE5FB195A65400E6A26B1AE64C3C388"
     ],
-    "linux": "ubuntu2004",
+    "linux": "ubuntu2204",
     "notes": "https://docs.mongodb.org/master/release-notes/6.0/",
     "targets": {
       "debian10": {
@@ -344,6 +344,14 @@
         ],
         "image": "ubuntu:focal",
         "suite": "focal"
+      },
+      "ubuntu2204": {
+        "arches": [
+          "amd64",
+          "arm64v8"
+        ],
+        "image": "ubuntu:jammy",
+        "suite": "jammy"
       },
       "windows": {
         "arches": [
