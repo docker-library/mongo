@@ -14,17 +14,17 @@ RUN setx /m PATH "C:\mongodb\bin;%PATH%"
 USER ContainerUser
 # doing this first to share cache across versions more aggressively
 
-COPY --from=mongo:4.4.19-rc0-windowsservercore-1809 \
+COPY --from=mongo:4.4.19-rc1-windowsservercore-1809 \
 	C:\\Windows\\System32\\msvcp140.dll \
 	C:\\Windows\\System32\\vcruntime140.dll \
 	C:\\Windows\\System32\\vcruntime140_1.dll \
 	C:\\Windows\\System32\\
 
 # https://docs.mongodb.org/master/release-notes/4.4/
-ENV MONGO_VERSION 4.4.19-rc0
-# 01/23/2023, https://github.com/mongodb/mongo/tree/605725ecdb59272e989210d066a5e88b091906e7
+ENV MONGO_VERSION 4.4.19-rc1
+# 02/13/2023, https://github.com/mongodb/mongo/tree/cd276c3cb1bf8a9bca55537e1393a52349cccfc8
 
-COPY --from=mongo:4.4.19-rc0-windowsservercore-1809 C:\\mongodb C:\\mongodb
+COPY --from=mongo:4.4.19-rc1-windowsservercore-1809 C:\\mongodb C:\\mongodb
 RUN mongo --version && mongod --version
 
 VOLUME C:\\data\\db C:\\data\\configdb
