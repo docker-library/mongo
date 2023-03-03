@@ -43,7 +43,9 @@ case "$dpkgArch" in
 		if ! grep -qE '^Features.* (fphp|dcpop|sha3|sm3|sm4|asimddp|sha512|sve)( .*|$)' /proc/cpuinfo; then
 			{
 				echo
-				echo 'WARNING: MongoDB 5.0+ requires ARMv8.2-A or higher, and your current system does not appear to implement any of the common features for that!'
+				echo 'WARNING: MongoDB requires ARMv8.2-A or higher, and your current system does not appear to implement any of the common features for that!'
+				echo '  applies to all versions ≥5.0, any of 4.4 ≥4.4.19, and any of 4.2 ≥4.2.19'
+				echo '  see https://jira.mongodb.org/browse/SERVER-71772'
 				echo '  see https://jira.mongodb.org/browse/SERVER-55178'
 				echo '  see also https://en.wikichip.org/wiki/arm/armv8#ARMv8_Extensions_and_Processor_Features'
 				echo '  see also https://github.com/docker-library/mongo/issues/485#issuecomment-970864306'
