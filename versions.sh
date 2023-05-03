@@ -64,7 +64,7 @@ shell="$(
 		]
 
 		# now convert all that data to a basic shell list + map so we can loop over/use it appropriately
-		| "allVersions=( " + (map(.version | @sh) | join(" ")) + " )\n"
+		| "allVersions=( " + (map(.version | select(contains("-rc") | not) | @sh) | join(" ")) + " )\n"
 		+ "declare -A versionMeta=(\n" + (
 			map(
 				"\t[" + (.version | @sh) + "]="
