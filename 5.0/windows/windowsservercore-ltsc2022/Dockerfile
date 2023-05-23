@@ -13,7 +13,7 @@ ENV MONGO_VERSION 5.0.18
 # 05/15/2023, https://github.com/mongodb/mongo/tree/796abe56bfdbca6968ff570311bf72d93632825b
 
 ENV MONGO_DOWNLOAD_URL https://fastdl.mongodb.org/windows/mongodb-windows-x86_64-5.0.18-signed.msi
-ENV MONGO_DOWNLOAD_SHA256=a42c5849ce363ea12cfa2dfa0ae825c302a905378afd8a8c9daf2abe34e93743
+ENV MONGO_DOWNLOAD_SHA256=369e0cdc34c29290bfcc9d47569e1debad1b86010ea5e00aefd7c670717f434b
 
 RUN Write-Host ('Downloading {0} ...' -f $env:MONGO_DOWNLOAD_URL); \
 	[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; \
