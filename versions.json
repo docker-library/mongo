@@ -107,7 +107,7 @@
           "ServerNoService"
         ],
         "msi": "https://fastdl.mongodb.org/windows/mongodb-windows-x86_64-4.4.22-signed.msi",
-        "sha256": "b47270027451a262a3661ead2dc79861edca93efd096526c31c310c1b733851a",
+        "sha256": "95a021db597790008f2e7070fab4a7c3e0d30262f2305c615b95cb7b8afb4eed",
         "variants": [
           "windowsservercore-ltsc2022",
           "windowsservercore-1809",
