@@ -79,10 +79,7 @@ USER ContainerUser
 COPY --from={{ copy_from }} \
 	C:\\Windows\\System32\\msvcp140.dll \
 	C:\\Windows\\System32\\vcruntime140.dll \
-{{ if [ "4.0", "4.2" ] | index(env.rcVersion) then "" else ( -}}
-{{ # https://github.com/docker-library/mongo/pull/470#discussion_r633701963 -}}
 	C:\\Windows\\System32\\vcruntime140_1.dll \
-{{ ) end -}}
 	C:\\Windows\\System32\\
 
 {{ if .notes then ( -}}
