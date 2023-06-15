@@ -25,7 +25,7 @@ shell="$(
 							# a few things old enough we do not want anything to do with them /o\
 							test("^(" + ([
 								"debian[89].*",
-								"ubuntu14.*"
+								"ubuntu1[0-9].*"
 							] | join("|")) + ")$")
 							| not
 						)
@@ -45,12 +45,13 @@ shell="$(
 			# filter out EOL versions
 			# (for some reason "current.json" still lists all these, and as of 2021-05-13 there is not an included way to differentiate them)
 			| select(.version as $v | [
-				# https://www.mongodb.com/support-policy -> "MongoDB Server" -> "End of Life Date"
+				# https://www.mongodb.com/support-policy/lifecycles
 				"3.0", # February 2018
 				"3.2", # September 2018
 				"3.4", # January 2020
 				"3.6", # April 2021
 				"4.0", # April 2022
+				"4.2", # April 2023
 				null # ... so we can have a trailing comma above, making diffs nicer :trollface:
 			] | index($v) | not)
 
@@ -182,17 +183,13 @@ for version in "${versions[@]}"; do
 					features: ([
 						# https://github.com/mongodb/mongo/blob/r6.0.0/src/mongo/installer/msi/wxs/FeatureFragment.wxs#L9-L85 (no Client)
 						# https://github.com/mongodb/mongo/blob/r4.4.2/src/mongo/installer/msi/wxs/FeatureFragment.wxs#L9-L92 (no MonitoringTools,ImportExportTools)
-						# https://github.com/mongodb/mongo/blob/r4.2.11/src/mongo/installer/msi/wxs/FeatureFragment.wxs#L9-L116
 						"ServerNoService",
-						if [ "4.2", "4.4", "5.0" ] | index(env.version | rtrimstr("-rc")) then
+						if [ "4.4", "5.0" ] | index(env.version | rtrimstr("-rc")) then
 							"Client"
 						else empty end,
 						"Router",
 						"MiscellaneousTools",
-						if [ "4.2" ] | index(env.version | rtrimstr("-rc")) then
-							"ImportExportTools",
-							"MonitoringTools"
-						else empty end
+						empty
 					] | sort),
 				}
 				# ignore anything that does not support amd64
