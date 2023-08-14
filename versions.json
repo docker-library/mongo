@@ -214,5 +214,59 @@
     "version": "6.0.9"
   },
   "6.0-rc": null,
+  "7.0": {
+    "changes": "https://jira.mongodb.org/issues/?jql=project%20%3D%20SERVER%20AND%20fixVersion%20%3D%20%227.0.0%22%20ORDER%20BY%20status%20DESC%2C%20priority%20DESC",
+    "date": "08/01/2023",
+    "githash": "37d84072b5c5b9fd723db5fa133fb202ad2317f1",
+    "gpg": [
+      "E58830201F7DD82CD808AA84160D26BB1785BA38"
+    ],
+    "linux": "ubuntu2204",
+    "notes": "https://docs.mongodb.org/master/release-notes/7.0/",
+    "targets": {
+      "debian11": {
+        "arches": [
+          "amd64"
+        ],
+        "image": "debian:bullseye-slim",
+        "suite": "bullseye"
+      },
+      "ubuntu2004": {
+        "arches": [
+          "amd64",
+          "arm64v8"
+        ],
+        "image": "ubuntu:focal",
+        "suite": "focal"
+      },
+      "ubuntu2204": {
+        "arches": [
+          "amd64",
+          "arm64v8"
+        ],
+        "image": "ubuntu:jammy",
+        "suite": "jammy"
+      },
+      "windows": {
+        "arches": [
+          "amd64"
+        ],
+        "features": [
+          "MiscellaneousTools",
+          "Router",
+          "ServerNoService"
+        ],
+        "msi": "https://fastdl.mongodb.org/windows/mongodb-windows-x86_64-7.0.0-signed.msi",
+        "sha256": "2d17e29c39b9b0001bca55ad943c1bc8b9932896d7af4f556c3e54d73ae96da6",
+        "variants": [
+          "windowsservercore-ltsc2022",
+          "windowsservercore-1809",
+          "nanoserver-ltsc2022",
+          "nanoserver-1809"
+        ]
+      }
+    },
+    "version": "7.0.0"
+  },
   "7.0-rc": null
 }
