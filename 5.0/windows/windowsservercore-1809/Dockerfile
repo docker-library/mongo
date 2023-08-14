@@ -9,11 +9,11 @@ FROM mcr.microsoft.com/windows/servercore:1809
 SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop';"]
 
 # https://docs.mongodb.org/master/release-notes/5.0/
-ENV MONGO_VERSION 5.0.19
-# 07/10/2023, https://github.com/mongodb/mongo/tree/0736b66d8cf64847cbd71c5472b0d6f19b1f5daa
+ENV MONGO_VERSION 5.0.20
+# 08/09/2023, https://github.com/mongodb/mongo/tree/2cd626d8148120319d7dca5824e760fe220cb0de
 
-ENV MONGO_DOWNLOAD_URL https://fastdl.mongodb.org/windows/mongodb-windows-x86_64-5.0.19-signed.msi
-ENV MONGO_DOWNLOAD_SHA256=85c99b0b7ddeded924cb937d48fcd1b14c7c43b35c39fbd4d6961d6940f4b538
+ENV MONGO_DOWNLOAD_URL https://fastdl.mongodb.org/windows/mongodb-windows-x86_64-5.0.20-signed.msi
+ENV MONGO_DOWNLOAD_SHA256=0d4aab3972b834d3d75a7c0348c4d788418b485633615cebc96d876c4c48c43b
 
 RUN Write-Host ('Downloading {0} ...' -f $env:MONGO_DOWNLOAD_URL); \
 	[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; \
