@@ -105,6 +105,11 @@ RUN set -x \
 		${MONGO_PACKAGE}-shell=$MONGO_VERSION \
 		${MONGO_PACKAGE}-mongos=$MONGO_VERSION \
 		${MONGO_PACKAGE}-tools=$MONGO_VERSION \
+{{ if (env.rcVersion | tonumber >= 6) then ( -}}
+{{ # TODO: auto update this list of packages or just pin them -}}
+		${MONGO_PACKAGE}-database=$MONGO_VERSION \
+		${MONGO_PACKAGE}-database-tools-extra=$MONGO_VERSION \
+{{ ) else "" end -}}
 	&& rm -rf /var/lib/apt/lists/* \
 	&& rm -rf /var/lib/mongodb \
 	&& mv /etc/mongod.conf /etc/mongod.conf.orig
