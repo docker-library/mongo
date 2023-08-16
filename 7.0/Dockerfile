@@ -1,5 +1,10 @@
-{{ def target: .targets[.linux] -}}
-FROM {{ target.image }}
+#
+# NOTE: THIS DOCKERFILE IS GENERATED VIA "apply-templates.sh"
+#
+# PLEASE DO NOT EDIT IT DIRECTLY.
+#
+
+FROM ubuntu:jammy
 
 # add our user and group first to make sure their IDs get assigned consistently, regardless of whatever dependencies get added
 RUN set -eux; \
@@ -58,7 +63,7 @@ RUN mkdir /docker-entrypoint-initdb.d
 
 RUN set -ex; \
 	export GNUPGHOME="$(mktemp -d)"; \
-	set -- {{ .gpg | map(@sh) | join(" ") }}; \
+	set -- 'E58830201F7DD82CD808AA84160D26BB1785BA38'; \
 	for key; do \
 		gpg --batch --keyserver keyserver.ubuntu.com --recv-keys "$key"; \
 	done; \
@@ -71,29 +76,16 @@ RUN set -ex; \
 # Options for MONGO_PACKAGE: mongodb-org OR mongodb-enterprise
 # Options for MONGO_REPO: repo.mongodb.org OR repo.mongodb.com
 # Example: docker build --build-arg MONGO_PACKAGE=mongodb-enterprise --build-arg MONGO_REPO=repo.mongodb.com .
-ARG MONGO_PACKAGE=mongodb-org{{ if (env.version != env.rcVersion) and (env.rcVersion | split(".")[1] | tonumber % 2 == 1) then "-unstable" else "" end }}
+ARG MONGO_PACKAGE=mongodb-org
 ARG MONGO_REPO=repo.mongodb.org
 ENV MONGO_PACKAGE=${MONGO_PACKAGE} MONGO_REPO=${MONGO_REPO}
 
-ENV MONGO_MAJOR {{ if env.version != env.rcVersion then "testing" else env.version end }}
-RUN echo "deb [ signed-by=/etc/apt/keyrings/mongodb.gpg ] http://$MONGO_REPO/apt/{{ target.image | gsub(":.*$"; "") }} {{ target.suite }}/${MONGO_PACKAGE%-unstable}/$MONGO_MAJOR {{ if target.image | test("^debian") then "main" else "multiverse" end }}" | tee "/etc/apt/sources.list.d/${MONGO_PACKAGE%-unstable}.list"
-{{ if env.version != env.rcVersion and (env.rcVersion | tonumber >= 5) then ( -}}
-{{ if .version | ltrimstr(env.rcVersion) | startswith(".0-") then ( -}}
-# {{ env.rcVersion }} is not GA, so we need the previous release for mongodb-mongosh and mongodb-database-tools
-RUN echo "deb [ signed-by=/etc/apt/keyrings/mongodb.gpg ] http://$MONGO_REPO/apt/{{ target.image | gsub(":.*$"; "") }} {{ target.suite }}/${MONGO_PACKAGE%-unstable}/{{ env.rcVersion | split(".") | .[0] |= (tonumber - 1 | tostring) | join(".") }} {{ if target.image | test("^debian") then "main" else "multiverse" end }}" | tee "/etc/apt/sources.list.d/mongodb-previous.list"
-{{ ) else ( -}}
-# add GA repo for mongodb-mongosh and mongodb-database-tools
-RUN echo "deb [ signed-by=/etc/apt/keyrings/mongodb.gpg ] http://$MONGO_REPO/apt/{{ target.image | gsub(":.*$"; "") }} {{ target.suite }}/${MONGO_PACKAGE%-unstable}/{{ env.rcVersion }} {{ if target.image | test("^debian") then "main" else "multiverse" end }}" | tee "/etc/apt/sources.list.d/mongodb-{{ env.rcVersion }}.list"
-{{ ) end -}}
-{{ ) else "" end -}}
+ENV MONGO_MAJOR 7.0
+RUN echo "deb [ signed-by=/etc/apt/keyrings/mongodb.gpg ] http://$MONGO_REPO/apt/ubuntu jammy/${MONGO_PACKAGE%-unstable}/$MONGO_MAJOR multiverse" | tee "/etc/apt/sources.list.d/${MONGO_PACKAGE%-unstable}.list"
 
-{{ if .notes then ( -}}
-# {{ .notes }}
-{{ ) else "" end -}}
-ENV MONGO_VERSION {{ .version | gsub("-"; "~") }}
-{{ if .date or .githash then ( -}}
-# {{ [ .date // empty, "https://github.com/mongodb/mongo/tree/" + .githash // empty ] | join(", ") }}
-{{ ) else "" end -}}
+# https://docs.mongodb.org/master/release-notes/7.0/
+ENV MONGO_VERSION 7.0.0
+# 08/01/2023, https://github.com/mongodb/mongo/tree/37d84072b5c5b9fd723db5fa133fb202ad2317f1
 
 RUN set -x \
 # installing "mongodb-enterprise" pulls in "tzdata" which prompts for input
@@ -105,11 +97,8 @@ RUN set -x \
 		${MONGO_PACKAGE}-shell=$MONGO_VERSION \
 		${MONGO_PACKAGE}-mongos=$MONGO_VERSION \
 		${MONGO_PACKAGE}-tools=$MONGO_VERSION \
-{{ if (env.rcVersion | tonumber >= 6) then ( -}}
-{{ # TODO: auto update this list of packages or just pin them -}}
 		${MONGO_PACKAGE}-database=$MONGO_VERSION \
 		${MONGO_PACKAGE}-database-tools-extra=$MONGO_VERSION \
-{{ ) else "" end -}}
 	&& rm -rf /var/lib/apt/lists/* \
 	&& rm -rf /var/lib/mongodb \
 	&& mv /etc/mongod.conf /etc/mongod.conf.orig
