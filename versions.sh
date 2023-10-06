@@ -108,17 +108,17 @@ for version in "${versions[@]}"; do
 	export msiUrl msiSha256
 
 	# GPG keys
-	if [[ "$version" == *-rc ]]; then
-		# the "testing" repository (used for RCs) could be signed by any of the GPG keys used by the project
-		gpgKeys="$(grep -E '^[0-9.]+:' gpg-keys.txt | cut -d: -f2 | xargs)"
-	else
-		gpgKeyVersion="$version"
-		minor="${version#*.}" # "4.3" -> "3"
-		if [ "$(( minor % 2 ))" = 1 ]; then
-			gpgKeyVersion="${version%.*}.$(( minor + 1 ))"
-		fi
-		gpgKeys="$(grep "^$gpgKeyVersion:" gpg-keys.txt | cut -d: -f2)"
+	gpgKeyVersion="${version%-rc}"
+	minor="${gpgKeyVersion#*.}" # "4.3" -> "3"
+	if [ "$(( minor % 2 ))" = 1 ]; then
+		gpgKeyVersion="${version%.*}.$(( minor + 1 ))"
 	fi
+	gpgKeys="$(grep "^$gpgKeyVersion:" gpg-keys.txt | cut -d: -f2)"
+	if [[ "$version" == *-rc ]]; then
+		# the "testing" repository (used for RCs) has a dedicated GPG key
+		gpgKeys+=" $(grep -E '^dev:' gpg-keys.txt | cut -d: -f2 | xargs)"
+	fi
+
 	[ -n "$gpgKeys" ]
 	export gpgKeys
 
