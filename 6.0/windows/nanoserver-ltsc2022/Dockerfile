@@ -14,17 +14,17 @@ RUN setx /m PATH "C:\mongodb\bin;%PATH%"
 USER ContainerUser
 # doing this first to share cache across versions more aggressively
 
-COPY --from=mongo:6.0.10-windowsservercore-ltsc2022 \
+COPY --from=mongo:6.0.11-windowsservercore-ltsc2022 \
 	C:\\Windows\\System32\\msvcp140.dll \
 	C:\\Windows\\System32\\vcruntime140.dll \
 	C:\\Windows\\System32\\vcruntime140_1.dll \
 	C:\\Windows\\System32\\
 
 # https://docs.mongodb.org/master/release-notes/6.0/
-ENV MONGO_VERSION 6.0.10
-# 09/11/2023, https://github.com/mongodb/mongo/tree/8e4b5670df9b9fe814e57cb5f3f8ee9407237b5a
+ENV MONGO_VERSION 6.0.11
+# 10/05/2023, https://github.com/mongodb/mongo/tree/f797f841eaf1759c770271ae00c88b92b2766eed
 
-COPY --from=mongo:6.0.10-windowsservercore-ltsc2022 C:\\mongodb C:\\mongodb
+COPY --from=mongo:6.0.11-windowsservercore-ltsc2022 C:\\mongodb C:\\mongodb
 RUN mongod --version
 
 VOLUME C:\\data\\db C:\\data\\configdb
