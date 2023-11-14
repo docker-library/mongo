@@ -86,8 +86,8 @@ RUN echo "deb [ signed-by=/etc/apt/keyrings/mongodb.gpg ] http://$MONGO_REPO/apt
 RUN echo "deb [ signed-by=/etc/apt/keyrings/mongodb.gpg ] http://$MONGO_REPO/apt/ubuntu jammy/${MONGO_PACKAGE%-unstable}/6.0 multiverse" | tee "/etc/apt/sources.list.d/mongodb-6.0.list"
 
 # https://docs.mongodb.org/master/release-notes/6.0/
-ENV MONGO_VERSION 6.0.12~rc0
-# 11/09/2023, https://github.com/mongodb/mongo/tree/4cf365118b715bca6461d741d4c1edecf1341817
+ENV MONGO_VERSION 6.0.12~rc1
+# 11/13/2023, https://github.com/mongodb/mongo/tree/21e6e8e11a45dfbdb7ca6cf95fa8c5f859e2b118
 
 RUN set -x \
 # installing "mongodb-enterprise" pulls in "tzdata" which prompts for input
