@@ -84,8 +84,8 @@ ENV MONGO_MAJOR 7.0
 RUN echo "deb [ signed-by=/etc/apt/keyrings/mongodb.gpg ] http://$MONGO_REPO/apt/ubuntu jammy/${MONGO_PACKAGE%-unstable}/$MONGO_MAJOR multiverse" | tee "/etc/apt/sources.list.d/${MONGO_PACKAGE%-unstable}.list"
 
 # https://docs.mongodb.org/master/release-notes/7.0/
-ENV MONGO_VERSION 7.0.3
-# 10/30/2023, https://github.com/mongodb/mongo/tree/b96efb7e0cf6134d5938de8a94c37cec3f22cff4
+ENV MONGO_VERSION 7.0.4
+# 11/15/2023, https://github.com/mongodb/mongo/tree/38f3e37057a43d2e9f41a39142681a76062d582e
 
 RUN set -x \
 # installing "mongodb-enterprise" pulls in "tzdata" which prompts for input
