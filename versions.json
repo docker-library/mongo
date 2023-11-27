@@ -101,61 +101,7 @@
     },
     "version": "5.0.23"
   },
-  "5.0-rc": {
-    "changes": "https://jira.mongodb.org/issues/?jql=project%20%3D%20SERVER%20AND%20fixVersion%20%3D%20%225.0.23%22%20ORDER%20BY%20status%20DESC%2C%20priority%20DESC",
-    "date": "11/13/2023",
-    "githash": "3367195a14d0ba2734d2ba2719294fb974ad0834",
-    "gpg": [
-      "28DE23AF08040FB24C33F36381B0EBBBADCEA95C",
-      "F5679A222C647C87527C2F8CB00A0BD1E2C63C11"
-    ],
-    "linux": "ubuntu2004",
-    "notes": "https://docs.mongodb.org/master/release-notes/5.0/",
-    "targets": {
-      "debian10": {
-        "arches": [
-          "amd64"
-        ],
-        "image": "debian:buster-slim",
-        "suite": "buster"
-      },
-      "debian11": {
-        "arches": [
-          "amd64"
-        ],
-        "image": "debian:bullseye-slim",
-        "suite": "bullseye"
-      },
-      "ubuntu2004": {
-        "arches": [
-          "amd64",
-          "arm64v8"
-        ],
-        "image": "ubuntu:focal",
-        "suite": "focal"
-      },
-      "windows": {
-        "arches": [
-          "amd64"
-        ],
-        "features": [
-          "Client",
-          "MiscellaneousTools",
-          "Router",
-          "ServerNoService"
-        ],
-        "msi": "https://fastdl.mongodb.org/windows/mongodb-windows-x86_64-5.0.23-rc0-signed.msi",
-        "sha256": "5648bf3b9fa727f45c403d934889ebafc0aa343ca8ad0578c812cc281bb2a544",
-        "variants": [
-          "windowsservercore-ltsc2022",
-          "windowsservercore-1809",
-          "nanoserver-ltsc2022",
-          "nanoserver-1809"
-        ]
-      }
-    },
-    "version": "5.0.23-rc0"
-  },
+  "5.0-rc": null,
   "6.0": {
     "changes": "https://jira.mongodb.org/issues/?jql=project%20%3D%20SERVER%20AND%20fixVersion%20%3D%20%226.0.11%22%20ORDER%20BY%20status%20DESC%2C%20priority%20DESC",
     "date": "10/05/2023",
