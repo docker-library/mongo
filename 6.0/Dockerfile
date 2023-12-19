@@ -47,7 +47,10 @@ RUN set -ex; \
 	gpgconf --kill all; \
 	rm -rf "$GNUPGHOME" /usr/local/bin/gosu.asc; \
 	\
-	wget -O /js-yaml.js "https://github.com/nodeca/js-yaml/raw/${JSYAML_VERSION}/dist/js-yaml.js"; \
+	mkdir -p /opt/js-yaml/; \
+	wget -O /opt/js-yaml/js-yaml.js "https://github.com/nodeca/js-yaml/raw/${JSYAML_VERSION}/dist/js-yaml.js"; \
+	wget -O /opt/js-yaml/package.json "https://github.com/nodeca/js-yaml/raw/${JSYAML_VERSION}/package.json"; \
+	ln -s /opt/js-yaml/js-yaml.js /js-yaml.js; \
 # TODO some sort of download verification here
 	\
 	apt-mark auto '.*' > /dev/null; \
