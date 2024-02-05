@@ -3,11 +3,16 @@
     "changes": "https://jira.mongodb.org/issues/?jql=project%20%3D%20SERVER%20AND%20fixVersion%20%3D%20%224.4.28%22%20ORDER%20BY%20status%20DESC%2C%20priority%20DESC",
     "date": "01/11/2024",
     "githash": "61c2baf63a060f7c12bd76e779044800ae18710b",
-    "gpg": [
-      "20691EEC35216C63CAF66CE1656408E390CFB1F5"
-    ],
     "linux": "ubuntu2004",
     "notes": "https://docs.mongodb.org/master/release-notes/4.4/",
+    "pgp": [
+      {
+        "fingerprints": [
+          "20691EEC35216C63CAF66CE1656408E390CFB1F5"
+        ],
+        "url": "https://pgp.mongodb.com/server-4.4.asc"
+      }
+    ],
     "targets": {
       "debian10": {
         "arches": [
@@ -51,11 +56,16 @@
     "changes": "https://jira.mongodb.org/issues/?jql=project%20%3D%20SERVER%20AND%20fixVersion%20%3D%20%225.0.24%22%20ORDER%20BY%20status%20DESC%2C%20priority%20DESC",
     "date": "01/11/2024",
     "githash": "f034f0c51b3dffef4b8c9452d77ede9888f28f66",
-    "gpg": [
-      "F5679A222C647C87527C2F8CB00A0BD1E2C63C11"
-    ],
     "linux": "ubuntu2004",
     "notes": "https://docs.mongodb.org/master/release-notes/5.0/",
+    "pgp": [
+      {
+        "fingerprints": [
+          "F5679A222C647C87527C2F8CB00A0BD1E2C63C11"
+        ],
+        "url": "https://pgp.mongodb.com/server-5.0.asc"
+      }
+    ],
     "targets": {
       "debian10": {
         "arches": [
@@ -106,11 +116,16 @@
     "changes": "https://jira.mongodb.org/issues/?jql=project%20%3D%20SERVER%20AND%20fixVersion%20%3D%20%226.0.13%22%20ORDER%20BY%20status%20DESC%2C%20priority%20DESC",
     "date": "01/11/2024",
     "githash": "3b13907f9bdf6bd3264d67140d6c215d51bbd20c",
-    "gpg": [
-      "39BD841E4BE5FB195A65400E6A26B1AE64C3C388"
-    ],
     "linux": "ubuntu2204",
     "notes": "https://docs.mongodb.org/master/release-notes/6.0/",
+    "pgp": [
+      {
+        "fingerprints": [
+          "39BD841E4BE5FB195A65400E6A26B1AE64C3C388"
+        ],
+        "url": "https://pgp.mongodb.com/server-6.0.asc"
+      }
+    ],
     "targets": {
       "debian10": {
         "arches": [
@@ -168,11 +183,16 @@
     "changes": "https://jira.mongodb.org/issues/?jql=project%20%3D%20SERVER%20AND%20fixVersion%20%3D%20%227.0.5%22%20ORDER%20BY%20status%20DESC%2C%20priority%20DESC",
     "date": "12/28/2023",
     "githash": "7809d71e84e314b497f282ea8aa06d7ded3eb205",
-    "gpg": [
-      "E58830201F7DD82CD808AA84160D26BB1785BA38"
-    ],
     "linux": "ubuntu2204",
     "notes": "https://docs.mongodb.org/master/release-notes/7.0/",
+    "pgp": [
+      {
+        "fingerprints": [
+          "E58830201F7DD82CD808AA84160D26BB1785BA38"
+        ],
+        "url": "https://pgp.mongodb.com/server-7.0.asc"
+      }
+    ],
     "targets": {
       "debian11": {
         "arches": [

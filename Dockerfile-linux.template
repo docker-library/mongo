@@ -12,7 +12,6 @@ RUN set -eux; \
 	apt-get update; \
 	apt-get install -y --no-install-recommends \
 		ca-certificates \
-		gnupg \
 		jq \
 		numactl \
 		procps \
@@ -24,15 +23,17 @@ ENV GOSU_VERSION 1.16
 # grab "js-yaml" for parsing mongod's YAML config files (https://github.com/nodeca/js-yaml/releases)
 ENV JSYAML_VERSION 3.13.1
 
-RUN set -ex; \
+RUN set -eux; \
 	\
 	savedAptMark="$(apt-mark showmanual)"; \
 	apt-get update; \
 	apt-get install -y --no-install-recommends \
+		gnupg \
 		wget \
 	; \
 	rm -rf /var/lib/apt/lists/*; \
 	\
+# download/install gosu
 	dpkgArch="$(dpkg --print-architecture | awk -F- '{ print $NF }')"; \
 	wget -O /usr/local/bin/gosu "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$dpkgArch"; \
 	wget -O /usr/local/bin/gosu.asc "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$dpkgArch.asc"; \
@@ -42,11 +43,21 @@ RUN set -ex; \
 	gpgconf --kill all; \
 	rm -rf "$GNUPGHOME" /usr/local/bin/gosu.asc; \
 	\
+# download/install js-yaml
 	mkdir -p /opt/js-yaml/; \
 	wget -O /opt/js-yaml/js-yaml.js "https://github.com/nodeca/js-yaml/raw/${JSYAML_VERSION}/dist/js-yaml.js"; \
 	wget -O /opt/js-yaml/package.json "https://github.com/nodeca/js-yaml/raw/${JSYAML_VERSION}/package.json"; \
 	ln -s /opt/js-yaml/js-yaml.js /js-yaml.js; \
 # TODO some sort of download verification here
+	\
+# download/install MongoDB PGP keys
+	export GNUPGHOME="$(mktemp -d)"; \
+	wget -O KEYS {{ [ .pgp[].url ] | map(@sh) | join(" ") }}; \
+	gpg --batch --import KEYS; \
+	mkdir -p /etc/apt/keyrings; \
+	gpg --batch --export --armor {{ [ .pgp[].fingerprints[] ] | map(@sh) | join(" ") }} > /etc/apt/keyrings/mongodb.asc; \
+	gpgconf --kill all; \
+	rm -rf "$GNUPGHOME" KEYS; \
 	\
 	apt-mark auto '.*' > /dev/null; \
 	apt-mark manual $savedAptMark > /dev/null; \
@@ -59,17 +70,6 @@ RUN set -ex; \
 
 RUN mkdir /docker-entrypoint-initdb.d
 
-RUN set -ex; \
-	export GNUPGHOME="$(mktemp -d)"; \
-	set -- {{ .gpg | map(@sh) | join(" ") }}; \
-	for key; do \
-		gpg --batch --keyserver keyserver.ubuntu.com --recv-keys "$key"; \
-	done; \
-	mkdir -p /etc/apt/keyrings; \
-	gpg --batch --export "$@" > /etc/apt/keyrings/mongodb.gpg; \
-	gpgconf --kill all; \
-	rm -rf "$GNUPGHOME"
-
 # Allow build-time overrides (eg. to build image with MongoDB Enterprise version)
 # Options for MONGO_PACKAGE: mongodb-org OR mongodb-enterprise
 # Options for MONGO_REPO: repo.mongodb.org OR repo.mongodb.com
@@ -79,14 +79,14 @@ ARG MONGO_REPO=repo.mongodb.org
 ENV MONGO_PACKAGE=${MONGO_PACKAGE} MONGO_REPO=${MONGO_REPO}
 
 ENV MONGO_MAJOR {{ if env.version != env.rcVersion then "testing" else env.version end }}
-RUN echo "deb [ signed-by=/etc/apt/keyrings/mongodb.gpg ] http://$MONGO_REPO/apt/{{ target.image | gsub(":.*$"; "") }} {{ target.suite }}/${MONGO_PACKAGE%-unstable}/$MONGO_MAJOR {{ if target.image | test("^debian") then "main" else "multiverse" end }}" | tee "/etc/apt/sources.list.d/${MONGO_PACKAGE%-unstable}.list"
+RUN echo "deb [ signed-by=/etc/apt/keyrings/mongodb.asc ] http://$MONGO_REPO/apt/{{ target.image | gsub(":.*$"; "") }} {{ target.suite }}/${MONGO_PACKAGE%-unstable}/$MONGO_MAJOR {{ if target.image | test("^debian") then "main" else "multiverse" end }}" | tee "/etc/apt/sources.list.d/${MONGO_PACKAGE%-unstable}.list"
 {{ if env.version != env.rcVersion and (env.rcVersion | tonumber >= 5) then ( -}}
 {{ if .version | ltrimstr(env.rcVersion) | startswith(".0-") then ( -}}
 # {{ env.rcVersion }} is not GA, so we need the previous release for mongodb-mongosh and mongodb-database-tools
-RUN echo "deb [ signed-by=/etc/apt/keyrings/mongodb.gpg ] http://$MONGO_REPO/apt/{{ target.image | gsub(":.*$"; "") }} {{ target.suite }}/${MONGO_PACKAGE%-unstable}/{{ env.rcVersion | split(".") | .[0] |= (tonumber - 1 | tostring) | join(".") }} {{ if target.image | test("^debian") then "main" else "multiverse" end }}" | tee "/etc/apt/sources.list.d/mongodb-previous.list"
+RUN echo "deb [ signed-by=/etc/apt/keyrings/mongodb.asc ] http://$MONGO_REPO/apt/{{ target.image | gsub(":.*$"; "") }} {{ target.suite }}/${MONGO_PACKAGE%-unstable}/{{ env.rcVersion | split(".") | .[0] |= (tonumber - 1 | tostring) | join(".") }} {{ if target.image | test("^debian") then "main" else "multiverse" end }}" | tee "/etc/apt/sources.list.d/mongodb-previous.list"
 {{ ) else ( -}}
 # add GA repo for mongodb-mongosh and mongodb-database-tools
-RUN echo "deb [ signed-by=/etc/apt/keyrings/mongodb.gpg ] http://$MONGO_REPO/apt/{{ target.image | gsub(":.*$"; "") }} {{ target.suite }}/${MONGO_PACKAGE%-unstable}/{{ env.rcVersion }} {{ if target.image | test("^debian") then "main" else "multiverse" end }}" | tee "/etc/apt/sources.list.d/mongodb-{{ env.rcVersion }}.list"
+RUN echo "deb [ signed-by=/etc/apt/keyrings/mongodb.asc ] http://$MONGO_REPO/apt/{{ target.image | gsub(":.*$"; "") }} {{ target.suite }}/${MONGO_PACKAGE%-unstable}/{{ env.rcVersion }} {{ if target.image | test("^debian") then "main" else "multiverse" end }}" | tee "/etc/apt/sources.list.d/mongodb-{{ env.rcVersion }}.list"
 {{ ) end -}}
 {{ ) else "" end -}}
 

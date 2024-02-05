@@ -1,0 +1,50 @@
+{
+  "dev": {
+    "url": "https://pgp.mongodb.com/server-dev.asc",
+    "fingerprints": [
+      "28DE23AF08040FB24C33F36381B0EBBBADCEA95C"
+    ]
+  },
+  "8.0": {
+    "url": "https://pgp.mongodb.com/server-8.0.asc",
+    "fingerprints": [
+      "4B0752C1BCA238C0B4EE14DC41DE058A4E7DCA05"
+    ]
+  },
+  "7.0": {
+    "url": "https://pgp.mongodb.com/server-7.0.asc",
+    "fingerprints": [
+      "E58830201F7DD82CD808AA84160D26BB1785BA38"
+    ]
+  },
+  "6.0": {
+    "url": "https://pgp.mongodb.com/server-6.0.asc",
+    "fingerprints": [
+      "39BD841E4BE5FB195A65400E6A26B1AE64C3C388"
+    ]
+  },
+  "5.0": {
+    "url": "https://pgp.mongodb.com/server-5.0.asc",
+    "fingerprints": [
+      "F5679A222C647C87527C2F8CB00A0BD1E2C63C11"
+    ]
+  },
+  "4.4": {
+    "url": "https://pgp.mongodb.com/server-4.4.asc",
+    "fingerprints": [
+      "20691EEC35216C63CAF66CE1656408E390CFB1F5"
+    ]
+  },
+  "4.2": {
+    "url": "https://pgp.mongodb.com/server-4.2.asc",
+    "fingerprints": [
+      "E162F504A20CDF15827F718D4B7C549A058F8B6B"
+    ]
+  },
+  "4.0": {
+    "url": "https://pgp.mongodb.com/server-4.0.asc",
+    "fingerprints": [
+      "9DA31620334BD75D9DCB49F368818C72E52529D4"
+    ]
+  }
+}
