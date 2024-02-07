@@ -65,7 +65,12 @@ shell="$(
 		]
 
 		# now convert all that data to a basic shell list + map so we can loop over/use it appropriately
-		| "allVersions=( " + (map(.version | @sh) | join(" ")) + " )\n"
+		| "allVersions=( " + (
+			map(.version | ., if endswith("-rc") then empty else . + "-rc" end)
+			| unique
+			| map(@sh)
+			| join(" ")
+		) + " )\n"
 		+ "declare -A versionMeta=(\n" + (
 			map(
 				"\t[" + (.version | @sh) + "]="
@@ -107,25 +112,23 @@ for version in "${versions[@]}"; do
 	msiSha256="${msiSha256%% *}"
 	export msiUrl msiSha256
 
-	# GPG keys
-	gpgKeyVersion="${version%-rc}"
-	minor="${gpgKeyVersion#*.}" # "4.3" -> "3"
+	pgpKeyVersion="${version%-rc}"
+	pgp='[]'
+	if [ "$pgpKeyVersion" != "$version" ]; then
+		# the "testing" repository (used for RCs) has a dedicated PGP key (but still needs the "release" key for the release line)
+		pgp="$(jq -c --argjson pgp "$pgp" '$pgp + [ .dev // error("missing PGP key for dev") ]' pgp-keys.json)"
+	fi
+	minor="${pgpKeyVersion#*.}" # "4.3" -> "3"
 	if [ "$(( minor % 2 ))" = 1 ]; then
-		gpgKeyVersion="${version%.*}.$(( minor + 1 ))"
+		pgpKeyVersion="${version%.*}.$(( minor + 1 ))"
 	fi
-	gpgKeys="$(grep "^$gpgKeyVersion:" gpg-keys.txt | cut -d: -f2)"
-	if [[ "$version" == *-rc ]]; then
-		# the "testing" repository (used for RCs) has a dedicated GPG key
-		gpgKeys+=" $(grep -E '^dev:' gpg-keys.txt | cut -d: -f2 | xargs)"
-	fi
-
-	[ -n "$gpgKeys" ]
-	export gpgKeys
+	export pgpKeyVersion
+	pgp="$(jq -c --argjson pgp "$pgp" '$pgp + [ .[env.pgpKeyVersion] // error("missing PGP key for \(env.pgpKeyVersion)") ]' pgp-keys.json)"
 
 	json="$(
 		{
 			jq <<<"$json" -c .
-			_jq '{ (env.version): (
+			_jq --argjson pgp "$pgp" '{ (env.version): (
 				with_entries(select(.key as $key | [
 					# interesting bits of raw upstream metadata
 					"changes",
@@ -136,7 +139,7 @@ for version in "${versions[@]}"; do
 					null # ... trailing comma hack
 				] | index($key)))
 				+ {
-					gpg: (env.gpgKeys | split(" ") | sort),
+					pgp: $pgp,
 					targets: (
 						reduce (
 							.downloads[]

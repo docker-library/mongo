@@ -17,7 +17,6 @@ RUN set -eux; \
 	apt-get update; \
 	apt-get install -y --no-install-recommends \
 		ca-certificates \
-		gnupg \
 		jq \
 		numactl \
 		procps \
@@ -29,15 +28,17 @@ ENV GOSU_VERSION 1.17
 # grab "js-yaml" for parsing mongod's YAML config files (https://github.com/nodeca/js-yaml/releases)
 ENV JSYAML_VERSION 3.13.1
 
-RUN set -ex; \
+RUN set -eux; \
 	\
 	savedAptMark="$(apt-mark showmanual)"; \
 	apt-get update; \
 	apt-get install -y --no-install-recommends \
+		gnupg \
 		wget \
 	; \
 	rm -rf /var/lib/apt/lists/*; \
 	\
+# download/install gosu
 	dpkgArch="$(dpkg --print-architecture | awk -F- '{ print $NF }')"; \
 	wget -O /usr/local/bin/gosu "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$dpkgArch"; \
 	wget -O /usr/local/bin/gosu.asc "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$dpkgArch.asc"; \
@@ -47,11 +48,21 @@ RUN set -ex; \
 	gpgconf --kill all; \
 	rm -rf "$GNUPGHOME" /usr/local/bin/gosu.asc; \
 	\
+# download/install js-yaml
 	mkdir -p /opt/js-yaml/; \
 	wget -O /opt/js-yaml/js-yaml.js "https://github.com/nodeca/js-yaml/raw/${JSYAML_VERSION}/dist/js-yaml.js"; \
 	wget -O /opt/js-yaml/package.json "https://github.com/nodeca/js-yaml/raw/${JSYAML_VERSION}/package.json"; \
 	ln -s /opt/js-yaml/js-yaml.js /js-yaml.js; \
 # TODO some sort of download verification here
+	\
+# download/install MongoDB PGP keys
+	export GNUPGHOME="$(mktemp -d)"; \
+	wget -O KEYS 'https://pgp.mongodb.com/server-5.0.asc'; \
+	gpg --batch --import KEYS; \
+	mkdir -p /etc/apt/keyrings; \
+	gpg --batch --export --armor 'F5679A222C647C87527C2F8CB00A0BD1E2C63C11' > /etc/apt/keyrings/mongodb.asc; \
+	gpgconf --kill all; \
+	rm -rf "$GNUPGHOME" KEYS; \
 	\
 	apt-mark auto '.*' > /dev/null; \
 	apt-mark manual $savedAptMark > /dev/null; \
@@ -64,17 +75,6 @@ RUN set -ex; \
 
 RUN mkdir /docker-entrypoint-initdb.d
 
-RUN set -ex; \
-	export GNUPGHOME="$(mktemp -d)"; \
-	set -- 'F5679A222C647C87527C2F8CB00A0BD1E2C63C11'; \
-	for key; do \
-		gpg --batch --keyserver keyserver.ubuntu.com --recv-keys "$key"; \
-	done; \
-	mkdir -p /etc/apt/keyrings; \
-	gpg --batch --export "$@" > /etc/apt/keyrings/mongodb.gpg; \
-	gpgconf --kill all; \
-	rm -rf "$GNUPGHOME"
-
 # Allow build-time overrides (eg. to build image with MongoDB Enterprise version)
 # Options for MONGO_PACKAGE: mongodb-org OR mongodb-enterprise
 # Options for MONGO_REPO: repo.mongodb.org OR repo.mongodb.com
@@ -84,7 +84,7 @@ ARG MONGO_REPO=repo.mongodb.org
 ENV MONGO_PACKAGE=${MONGO_PACKAGE} MONGO_REPO=${MONGO_REPO}
 
 ENV MONGO_MAJOR 5.0
-RUN echo "deb [ signed-by=/etc/apt/keyrings/mongodb.gpg ] http://$MONGO_REPO/apt/ubuntu focal/${MONGO_PACKAGE%-unstable}/$MONGO_MAJOR multiverse" | tee "/etc/apt/sources.list.d/${MONGO_PACKAGE%-unstable}.list"
+RUN echo "deb [ signed-by=/etc/apt/keyrings/mongodb.asc ] http://$MONGO_REPO/apt/ubuntu focal/${MONGO_PACKAGE%-unstable}/$MONGO_MAJOR multiverse" | tee "/etc/apt/sources.list.d/${MONGO_PACKAGE%-unstable}.list"
 
 # https://docs.mongodb.org/master/release-notes/5.0/
 ENV MONGO_VERSION 5.0.24
