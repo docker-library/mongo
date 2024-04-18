@@ -178,78 +178,7 @@
     },
     "version": "6.0.15"
   },
-  "6.0-rc": {
-    "changes": "https://jira.mongodb.org/issues/?jql=project%20%3D%20SERVER%20AND%20fixVersion%20%3D%20%226.0.15%22%20ORDER%20BY%20status%20DESC%2C%20priority%20DESC",
-    "date": "04/09/2024",
-    "githash": "7494119c41ca4e13b493e9f048df4032164e860e",
-    "linux": "ubuntu2204",
-    "notes": "https://docs.mongodb.org/master/release-notes/6.0/",
-    "pgp": [
-      {
-        "fingerprints": [
-          "28DE23AF08040FB24C33F36381B0EBBBADCEA95C"
-        ],
-        "url": "https://pgp.mongodb.com/server-dev.asc"
-      },
-      {
-        "fingerprints": [
-          "39BD841E4BE5FB195A65400E6A26B1AE64C3C388"
-        ],
-        "url": "https://pgp.mongodb.com/server-6.0.asc"
-      }
-    ],
-    "targets": {
-      "debian10": {
-        "arches": [
-          "amd64"
-        ],
-        "image": "debian:buster-slim",
-        "suite": "buster"
-      },
-      "debian11": {
-        "arches": [
-          "amd64"
-        ],
-        "image": "debian:bullseye-slim",
-        "suite": "bullseye"
-      },
-      "ubuntu2004": {
-        "arches": [
-          "amd64",
-          "arm64v8"
-        ],
-        "image": "ubuntu:focal",
-        "suite": "focal"
-      },
-      "ubuntu2204": {
-        "arches": [
-          "amd64",
-          "arm64v8"
-        ],
-        "image": "ubuntu:jammy",
-        "suite": "jammy"
-      },
-      "windows": {
-        "arches": [
-          "amd64"
-        ],
-        "features": [
-          "MiscellaneousTools",
-          "Router",
-          "ServerNoService"
-        ],
-        "msi": "https://fastdl.mongodb.org/windows/mongodb-windows-x86_64-6.0.15-rc0-signed.msi",
-        "sha256": "56729cf4652023a9700e3ac94547ff0a31a10a4e01a7e6e66fe943a179ea643d",
-        "variants": [
-          "windowsservercore-ltsc2022",
-          "windowsservercore-1809",
-          "nanoserver-ltsc2022",
-          "nanoserver-1809"
-        ]
-      }
-    },
-    "version": "6.0.15-rc0"
-  },
+  "6.0-rc": null,
   "7.0": {
     "changes": "https://jira.mongodb.org/issues/?jql=project%20%3D%20SERVER%20AND%20fixVersion%20%3D%20%227.0.8%22%20ORDER%20BY%20status%20DESC%2C%20priority%20DESC",
     "date": "03/29/2024",
