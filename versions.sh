@@ -112,17 +112,27 @@ for version in "${versions[@]}"; do
 	msiSha256="${msiSha256%% *}"
 	export msiUrl msiSha256
 
-	pgpKeyVersion="${version%-rc}"
+	export pgpKeyVersion="${version%-rc}"
 	pgp='[]'
 	if [ "$pgpKeyVersion" != "$version" ]; then
 		# the "testing" repository (used for RCs) has a dedicated PGP key (but still needs the "release" key for the release line)
 		pgp="$(jq -c --argjson pgp "$pgp" '$pgp + [ .dev // error("missing PGP key for dev") ]' pgp-keys.json)"
+
+		# if {{ env.rcVersion }} is not GA, so we need the previous release for mongodb-mongosh and mongodb-database-tools
+		isDotZeroPrerelease="$(_jq -r '.version | ltrimstr(env.pgpKeyVersion) | startswith(".0-")')"
+		if [ "$isDotZeroPrerelease" = 'true' ]; then
+			pgp="$(
+				jq -c --argjson pgp "$pgp" '
+					(env.pgpKeyVersion | split(".") | .[0] |= (tonumber - 1 | tostring) | join(".")) as $previousVersion
+					| $pgp + [ .[$previousVersion] // error("missing PGP key for \($previousVersion)") ]
+				' pgp-keys.json
+			)"
+		fi
 	fi
 	minor="${pgpKeyVersion#*.}" # "4.3" -> "3"
 	if [ "$(( minor % 2 ))" = 1 ]; then
 		pgpKeyVersion="${version%.*}.$(( minor + 1 ))"
 	fi
-	export pgpKeyVersion
 	pgp="$(jq -c --argjson pgp "$pgp" '$pgp + [ .[env.pgpKeyVersion] // error("missing PGP key for \(env.pgpKeyVersion)") ]' pgp-keys.json)"
 
 	json="$(
