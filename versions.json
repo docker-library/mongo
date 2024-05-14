@@ -1,6 +1,4 @@
 {
-  "4.4": null,
-  "4.4-rc": null,
   "5.0": {
     "changes": "https://jira.mongodb.org/issues/?jql=project%20%3D%20SERVER%20AND%20fixVersion%20%3D%20%225.0.26%22%20ORDER%20BY%20status%20DESC%2C%20priority%20DESC",
     "date": "03/20/2024",

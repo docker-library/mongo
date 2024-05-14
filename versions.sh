@@ -187,7 +187,7 @@ for version in "${versions[@]}"; do
 						# https://github.com/mongodb/mongo/blob/r6.0.0/src/mongo/installer/msi/wxs/FeatureFragment.wxs#L9-L85 (no Client)
 						# https://github.com/mongodb/mongo/blob/r4.4.2/src/mongo/installer/msi/wxs/FeatureFragment.wxs#L9-L92 (no MonitoringTools,ImportExportTools)
 						"ServerNoService",
-						if [ "4.4", "5.0" ] | index(env.version | rtrimstr("-rc")) then
+						if [ "5.0" ] | index(env.version | rtrimstr("-rc")) then
 							"Client"
 						else empty end,
 						"Router",
