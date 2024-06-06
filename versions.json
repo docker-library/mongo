@@ -58,71 +58,7 @@
     },
     "version": "5.0.27"
   },
-  "5.0-rc": {
-    "changes": "https://jira.mongodb.org/issues/?jql=project%20%3D%20SERVER%20AND%20fixVersion%20%3D%20%225.0.27%22%20ORDER%20BY%20status%20DESC%2C%20priority%20DESC",
-    "date": "05/24/2024",
-    "githash": "49571988f1fea870e803f71a3ef8417173f3fbb1",
-    "linux": "ubuntu2004",
-    "notes": "https://docs.mongodb.org/master/release-notes/5.0/",
-    "pgp": [
-      {
-        "fingerprints": [
-          "28DE23AF08040FB24C33F36381B0EBBBADCEA95C"
-        ],
-        "url": "https://pgp.mongodb.com/server-dev.asc"
-      },
-      {
-        "fingerprints": [
-          "F5679A222C647C87527C2F8CB00A0BD1E2C63C11"
-        ],
-        "url": "https://pgp.mongodb.com/server-5.0.asc"
-      }
-    ],
-    "targets": {
-      "debian10": {
-        "arches": [
-          "amd64"
-        ],
-        "image": "debian:buster-slim",
-        "suite": "buster"
-      },
-      "debian11": {
-        "arches": [
-          "amd64"
-        ],
-        "image": "debian:bullseye-slim",
-        "suite": "bullseye"
-      },
-      "ubuntu2004": {
-        "arches": [
-          "amd64",
-          "arm64v8"
-        ],
-        "image": "ubuntu:focal",
-        "suite": "focal"
-      },
-      "windows": {
-        "arches": [
-          "amd64"
-        ],
-        "features": [
-          "Client",
-          "MiscellaneousTools",
-          "Router",
-          "ServerNoService"
-        ],
-        "msi": "https://fastdl.mongodb.org/windows/mongodb-windows-x86_64-5.0.27-rc0-signed.msi",
-        "sha256": "c16328896733bdef6b9e65ee3d4b33393bd4fec49904de911fecd2499288d5a2",
-        "variants": [
-          "windowsservercore-ltsc2022",
-          "windowsservercore-1809",
-          "nanoserver-ltsc2022",
-          "nanoserver-1809"
-        ]
-      }
-    },
-    "version": "5.0.27-rc0"
-  },
+  "5.0-rc": null,
   "6.0": {
     "changes": "https://jira.mongodb.org/issues/?jql=project%20%3D%20SERVER%20AND%20fixVersion%20%3D%20%226.0.15%22%20ORDER%20BY%20status%20DESC%2C%20priority%20DESC",
     "date": "04/15/2024",
