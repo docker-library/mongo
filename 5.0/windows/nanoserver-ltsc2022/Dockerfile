@@ -16,6 +16,7 @@ USER ContainerUser
 
 COPY --from=mongo:5.0.27-windowsservercore-ltsc2022 \
 	C:\\Windows\\System32\\msvcp140.dll \
+	C:\\Windows\\System32\\msvcp140_1.dll \
 	C:\\Windows\\System32\\vcruntime140.dll \
 	C:\\Windows\\System32\\vcruntime140_1.dll \
 	C:\\Windows\\System32\\
