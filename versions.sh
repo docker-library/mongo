@@ -170,10 +170,13 @@ for version in "${versions[@]}"; do
 										"debian10": "debian:buster-slim",
 										"debian11": "debian:bullseye-slim",
 										"debian12": "debian:bookworm-slim",
+										"debian13": "debian:trixie-slim",
+										"debian14": "debian:forky-slim",
 										"ubuntu1604": "ubuntu:xenial",
 										"ubuntu1804": "ubuntu:bionic",
 										"ubuntu2004": "ubuntu:focal",
 										"ubuntu2204": "ubuntu:jammy",
+										"ubuntu2404": "ubuntu:noble",
 									}[$t] // "unknown"
 								)
 								| .[$t].suite = (
