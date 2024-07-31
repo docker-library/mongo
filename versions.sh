@@ -52,7 +52,7 @@ shell="$(
 				"3.6", # April 2021
 				"4.0", # April 2022
 				"4.2", # April 2023
-				null # ... so we can have a trailing comma above, making diffs nicer :trollface:
+				empty
 			] | index($v) | not)
 
 			# filter out so-called "rapid releases": https://docs.mongodb.com/upcoming/reference/versioning/
@@ -62,7 +62,20 @@ shell="$(
 				| ($splitVersion[0] | tonumber) >= 5 and ($splitVersion[1] | tonumber) > 0
 				| not
 			)
+
+			# if a given pre-release version has not had a GA release yet, we need the previous release for mongodb-mongosh and mongodb-database-tools
+			| (.version | rtrimstr("-rc")) as $rcVersion
+			| if .version != $rcVersion and (.meta.version | ltrimstr($rcVersion) | startswith(".0-")) then
+				.meta.dockerNeedsVersion = ($rcVersion | split(".") | .[0] |= (tonumber -1 | tostring) | join("."))
+			else . end
 		]
+
+		# filter the list of "downloads" (targets) down to the set of targets of (M-1).0 if we need that previous version (see "dockerNeedsVersion" above)
+		| (map({ key: .version, value: [ .meta.downloads[].target ] }) | from_entries) as $targets
+		| map(if .meta | has("dockerNeedsVersion") then
+			.meta.dockerNeedsVersion as $needsVersion
+			| .meta.downloads |= map(select(.target as $target | $targets[$needsVersion] | index($target)))
+		else . end)
 
 		# now convert all that data to a basic shell list + map so we can loop over/use it appropriately
 		| "allVersions=( " + (
@@ -112,44 +125,38 @@ for version in "${versions[@]}"; do
 	msiSha256="${msiSha256%% *}"
 	export msiUrl msiSha256
 
-	export pgpKeyVersion="${version%-rc}"
-	pgp='[]'
-	if [ "$pgpKeyVersion" != "$version" ]; then
-		# the "testing" repository (used for RCs) has a dedicated PGP key (but still needs the "release" key for the release line)
-		pgp="$(jq -c --argjson pgp "$pgp" '$pgp + [ .dev // error("missing PGP key for dev") ]' pgp-keys.json)"
-
-		# if {{ env.rcVersion }} is not GA, so we need the previous release for mongodb-mongosh and mongodb-database-tools
-		isDotZeroPrerelease="$(_jq -r '.version | ltrimstr(env.pgpKeyVersion) | startswith(".0-")')"
-		if [ "$isDotZeroPrerelease" = 'true' ]; then
-			pgp="$(
-				jq -c --argjson pgp "$pgp" '
-					(env.pgpKeyVersion | split(".") | .[0] |= (tonumber - 1 | tostring) | join(".")) as $previousVersion
-					| $pgp + [ .[$previousVersion] // error("missing PGP key for \($previousVersion)") ]
-				' pgp-keys.json
-			)"
-		fi
-	fi
-	minor="${pgpKeyVersion#*.}" # "4.3" -> "3"
-	if [ "$(( minor % 2 ))" = 1 ]; then
-		pgpKeyVersion="${version%.*}.$(( minor + 1 ))"
-	fi
-	pgp="$(jq -c --argjson pgp "$pgp" '$pgp + [ .[env.pgpKeyVersion] // error("missing PGP key for \(env.pgpKeyVersion)") ]' pgp-keys.json)"
-
 	json="$(
 		{
 			jq <<<"$json" -c .
-			_jq --argjson pgp "$pgp" '{ (env.version): (
-				with_entries(select(.key as $key | [
+			_jq --slurpfile pgpKeys pgp-keys.json '{ (env.version): (
+				$pgpKeys[0] as $pgp
+				| (env.version | rtrimstr("-rc")) as $rcVersion
+				| with_entries(select(.key as $key | [
 					# interesting bits of raw upstream metadata
 					"changes",
 					"date",
 					"githash",
 					"notes",
 					"version",
-					null # ... trailing comma hack
+					"dockerNeedsVersion",
+					empty
 				] | index($key)))
 				+ {
-					pgp: $pgp,
+					pgp: [
+						if env.version != $rcVersion then
+							# the "testing" repository (used for RCs) has a dedicated PGP key (but still needs the "release" key for the release line)
+							$pgp.dev
+						else empty end,
+
+						if .dockerNeedsVersion then
+							# see "dockerNeedsVersion" notes above
+							$pgp[.dockerNeedsVersion]
+						else empty end,
+
+						$pgp[$rcVersion],
+
+						empty
+					],
 					targets: (
 						reduce (
 							.downloads[]
