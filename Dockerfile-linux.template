@@ -45,9 +45,11 @@ RUN set -eux; \
 	\
 # download/install js-yaml
 	mkdir -p /opt/js-yaml/; \
-	wget -O /opt/js-yaml/js-yaml.js "https://github.com/nodeca/js-yaml/raw/${JSYAML_VERSION}/dist/js-yaml.js"; \
-	wget -O /opt/js-yaml/package.json "https://github.com/nodeca/js-yaml/raw/${JSYAML_VERSION}/package.json"; \
-	ln -s /opt/js-yaml/js-yaml.js /js-yaml.js; \
+	wget -O /opt/js-yaml/js-yaml.tgz https://registry.npmjs.org/js-yaml/-/js-yaml-${JSYAML_VERSION}.tgz; \
+	echo "662e32319bdd378e91f67578e56a34954b0a2e33aca11d70ab9f4826af24b941 */opt/js-yaml/js-yaml.tgz" | sha256sum -c -; \
+	tar -xz --strip-components=1 -f /opt/js-yaml/js-yaml.tgz -C /opt/js-yaml package/dist/js-yaml.js package/package.json; \
+	rm -rf /opt/js-yaml/js-yaml.tgz; \
+	ln -s /opt/js-yaml/dist/js-yaml.js /js-yaml.js; \
 # TODO some sort of download verification here
 	\
 # download/install MongoDB PGP keys
