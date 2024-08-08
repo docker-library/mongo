@@ -268,9 +268,8 @@
   "8.0-rc": {
     "changes": "https://jira.mongodb.org/issues/?jql=project%20%3D%20SERVER%20AND%20fixVersion%20%3D%20%228.0.0-rc16%22%20ORDER%20BY%20status%20DESC%2C%20priority%20DESC",
     "date": "08/03/2024",
-    "dockerNeedsVersion": "7.0",
     "githash": "c05b57203089bb276c31ab34dfc538f1da972a36",
-    "linux": "ubuntu2204",
+    "linux": "ubuntu2404",
     "notes": "https://docs.mongodb.org/master/release-notes/8.0/",
     "pgp": [
       {
@@ -278,12 +277,6 @@
           "28DE23AF08040FB24C33F36381B0EBBBADCEA95C"
         ],
         "url": "https://pgp.mongodb.com/server-dev.asc"
-      },
-      {
-        "fingerprints": [
-          "E58830201F7DD82CD808AA84160D26BB1785BA38"
-        ],
-        "url": "https://pgp.mongodb.com/server-7.0.asc"
       },
       {
         "fingerprints": [
@@ -315,6 +308,14 @@
         ],
         "image": "ubuntu:jammy",
         "suite": "jammy"
+      },
+      "ubuntu2404": {
+        "arches": [
+          "amd64",
+          "arm64v8"
+        ],
+        "image": "ubuntu:noble",
+        "suite": "noble"
       },
       "windows": {
         "arches": [
