@@ -265,8 +265,8 @@
   },
   "7.0-rc": {
     "changes": "https://jira.mongodb.org/issues/?jql=project%20%3D%20SERVER%20AND%20fixVersion%20%3D%20%227.0.13%22%20ORDER%20BY%20status%20DESC%2C%20priority%20DESC",
-    "date": "08/05/2024",
-    "githash": "1628203bd5754119e4c3f4324c8cf25eb3bc75aa",
+    "date": "08/07/2024",
+    "githash": "7d06f0a750b0cfdaf4aab7ced47db746ed4ce271",
     "linux": "ubuntu2204",
     "notes": "https://docs.mongodb.org/master/release-notes/7.0/",
     "pgp": [
@@ -323,8 +323,8 @@
           "Router",
           "ServerNoService"
         ],
-        "msi": "https://fastdl.mongodb.org/windows/mongodb-windows-x86_64-7.0.13-rc0-signed.msi",
-        "sha256": "86b878731b6d156dee7e6511a41db92b4cb57bff08fe011ba0e6c38264b91bf2",
+        "msi": "https://fastdl.mongodb.org/windows/mongodb-windows-x86_64-7.0.13-rc1-signed.msi",
+        "sha256": "42fb4a542f2ca80542fe4f0cb21b6105d4e9613c85c733cf34b074169c3b99ba",
         "variants": [
           "windowsservercore-ltsc2022",
           "windowsservercore-1809",
@@ -333,7 +333,7 @@
         ]
       }
     },
-    "version": "7.0.13-rc0"
+    "version": "7.0.13-rc1"
   },
   "8.0": null,
   "8.0-rc": {
