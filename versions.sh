@@ -62,20 +62,7 @@ shell="$(
 				| ($splitVersion[0] | tonumber) >= 5 and ($splitVersion[1] | tonumber) > 0
 				| not
 			)
-
-			# if a given pre-release version has not had a GA release yet, we need the previous release for mongodb-mongosh and mongodb-database-tools
-			| (.version | rtrimstr("-rc")) as $rcVersion
-			| if .version != $rcVersion and (.meta.version | ltrimstr($rcVersion) | startswith(".0-")) then
-				.meta.dockerNeedsVersion = ($rcVersion | split(".") | .[0] |= (tonumber -1 | tostring) | join("."))
-			else . end
 		]
-
-		# filter the list of "downloads" (targets) down to the set of targets of (M-1).0 if we need that previous version (see "dockerNeedsVersion" above)
-		| (map({ key: .version, value: [ .meta.downloads[].target ] }) | from_entries) as $targets
-		| map(if .meta | has("dockerNeedsVersion") then
-			.meta.dockerNeedsVersion as $needsVersion
-			| .meta.downloads |= map(select(.target as $target | $targets[$needsVersion] | index($target)))
-		else . end)
 
 		# now convert all that data to a basic shell list + map so we can loop over/use it appropriately
 		| "allVersions=( " + (
@@ -138,7 +125,6 @@ for version in "${versions[@]}"; do
 					"githash",
 					"notes",
 					"version",
-					"dockerNeedsVersion",
 					empty
 				] | index($key)))
 				+ {
@@ -146,11 +132,6 @@ for version in "${versions[@]}"; do
 						if env.version != $rcVersion then
 							# the "testing" repository (used for RCs) has a dedicated PGP key (but still needs the "release" key for the release line)
 							$pgp.dev
-						else empty end,
-
-						if .dockerNeedsVersion then
-							# see "dockerNeedsVersion" notes above
-							$pgp[.dockerNeedsVersion]
 						else empty end,
 
 						$pgp[$rcVersion],
