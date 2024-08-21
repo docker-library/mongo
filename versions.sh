@@ -64,6 +64,11 @@ shell="$(
 			)
 		]
 
+		# in case of duplicates that map to the same "X.Y[-rc]", prefer the first one (the upstream file is typically in descending sorted order, so we do not need to get much more complicated than this)
+		# *not* doing this was actually totally fine/sane up until 2024-08-14, because prior to that there were never any duplicates in the upstream file so everything "just worked"
+		# on 2024-08-14, upstream released 7.0.14-rc0, but (accidentally?) left 7.0.13-rc1 listed in the file, and without this fix, we prefer the later entry due to how we export the data below
+		| unique_by(.version)
+
 		# now convert all that data to a basic shell list + map so we can loop over/use it appropriately
 		| "allVersions=( " + (
 			map(.version | ., if endswith("-rc") then empty else . + "-rc" end)
