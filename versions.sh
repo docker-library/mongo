@@ -71,7 +71,7 @@ shell="$(
 
 		# now convert all that data to a basic shell list + map so we can loop over/use it appropriately
 		| "allVersions=( " + (
-			map(.version | ., if endswith("-rc") then empty else . + "-rc" end)
+			map(.version | ., if endswith("-rc") then rtrimstr("-rc") else . + "-rc" end)
 			| unique
 			| map(@sh)
 			| join(" ")
