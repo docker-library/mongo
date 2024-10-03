@@ -27,6 +27,7 @@ RUN set -eux; \
 ENV GOSU_VERSION 1.17
 # grab "js-yaml" for parsing mongod's YAML config files (https://github.com/nodeca/js-yaml/releases)
 ENV JSYAML_VERSION 3.13.1
+ENV JSYAML_CHECKSUM 662e32319bdd378e91f67578e56a34954b0a2e33aca11d70ab9f4826af24b941
 
 RUN set -eux; \
 	\
@@ -50,10 +51,11 @@ RUN set -eux; \
 	\
 # download/install js-yaml
 	mkdir -p /opt/js-yaml/; \
-	wget -O /opt/js-yaml/js-yaml.js "https://github.com/nodeca/js-yaml/raw/${JSYAML_VERSION}/dist/js-yaml.js"; \
-	wget -O /opt/js-yaml/package.json "https://github.com/nodeca/js-yaml/raw/${JSYAML_VERSION}/package.json"; \
-	ln -s /opt/js-yaml/js-yaml.js /js-yaml.js; \
-# TODO some sort of download verification here
+	wget -O /opt/js-yaml/js-yaml.tgz https://registry.npmjs.org/js-yaml/-/js-yaml-${JSYAML_VERSION}.tgz; \
+	echo "$JSYAML_CHECKSUM */opt/js-yaml/js-yaml.tgz" | sha256sum -c -; \
+	tar -xz --strip-components=1 -f /opt/js-yaml/js-yaml.tgz -C /opt/js-yaml package/dist/js-yaml.js package/package.json; \
+	rm /opt/js-yaml/js-yaml.tgz; \
+	ln -s /opt/js-yaml/dist/js-yaml.js /js-yaml.js; \
 	\
 # download/install MongoDB PGP keys
 	export GNUPGHOME="$(mktemp -d)"; \
