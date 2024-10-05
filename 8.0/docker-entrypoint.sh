@@ -1,6 +1,8 @@
 #!/bin/bash
 set -Eeuo pipefail
 
+IP_ADDRESS=$(hostname -i)
+
 if [ "${1:0:1}" = '-' ]; then
 	set -- mongod "$@"
 fi
@@ -303,7 +305,7 @@ if [ "$originalArgOne" = 'mongod' ]; then
 		if _parse_config "$@"; then
 			_mongod_hack_ensure_arg_val --config "$tempConfigFile" "${mongodHackedArgs[@]}"
 		fi
-		_mongod_hack_ensure_arg_val --bind_ip 127.0.0.1 "${mongodHackedArgs[@]}"
+		_mongod_hack_ensure_arg_val --bind_ip "$IP_ADDRESS" "${mongodHackedArgs[@]}"
 		_mongod_hack_ensure_arg_val --port 27017 "${mongodHackedArgs[@]}"
 		_mongod_hack_ensure_no_arg --bind_ip_all "${mongodHackedArgs[@]}"
 
@@ -313,9 +315,6 @@ if [ "$originalArgOne" = 'mongod' ]; then
 		# "keyFile implies security.authorization"
 		# https://docs.mongodb.com/manual/reference/configuration-options/#mongodb-setting-security.keyFile
 		_mongod_hack_ensure_no_arg_val --keyFile "${mongodHackedArgs[@]}"
-		if [ "$MONGO_INITDB_ROOT_USERNAME" ] && [ "$MONGO_INITDB_ROOT_PASSWORD" ]; then
-			_mongod_hack_ensure_no_arg_val --replSet "${mongodHackedArgs[@]}"
-		fi
 
 		# "BadValue: need sslPEMKeyFile when SSL is enabled" vs "BadValue: need to enable SSL via the sslMode flag when using SSL configuration parameters"
 		tlsMode='disabled'
@@ -339,9 +338,27 @@ if [ "$originalArgOne" = 'mongod' ]; then
 		rm -f "$pidfile"
 		_mongod_hack_ensure_arg_val --pidfilepath "$pidfile" "${mongodHackedArgs[@]}"
 
+		if [ -n "${MONGO_REPLICA_SET_NAME:-}" ]; then
+			echo "adding replSet ${MONGO_REPLICA_SET_NAME} to mongod"
+			_mongod_hack_ensure_arg_val --replSet "$MONGO_REPLICA_SET_NAME" "${mongodHackedArgs[@]}"
+		fi
+
 		"${mongodHackedArgs[@]}" --fork
 
-		mongo=( "$mongoShell" --host 127.0.0.1 --port 27017 --quiet )
+		mongo=( "$mongoShell" --host "$IP_ADDRESS" --port 27017 --quiet )
+		
+		if [ -n "${MONGO_REPLICA_SET_NAME:-}" ]; then
+			CONFIG="{ _id: $(_js_escape "$MONGO_REPLICA_SET_NAME"), members: [{ _id: 0, host: $(_js_escape "$IP_ADDRESS:27017"), priority: 7 }]}"
+			"$mongoShell" --host "$IP_ADDRESS" --port 27017 --eval "rs.initiate($CONFIG)"
+			n=0
+			until [ $n -ge 20 ]
+			do
+				mongosh admin --host "$IP_ADDRESS" --port 27017 --eval "rs.status().ok" && echo "Replica set $MONGO_REPLICA_SET_NAME configured" && break
+				n=$[$n+1]
+				echo "Waiting for replica set $MONGO_REPLICA_SET_NAME to be configured..."
+				sleep 2
+			done
+		fi
 
 		# check to see that our "mongod" actually did start up (catches "--help", "--version", slow prealloc, etc)
 		# https://jira.mongodb.org/browse/SERVER-16292
@@ -413,6 +430,11 @@ if [ "$originalArgOne" = 'mongod' ]; then
 	fi
 
 	unset "${!MONGO_INITDB_@}"
+
+	# Runs as replica set
+	if [ -n "${MONGO_REPLICA_SET_NAME:-}" ]; then
+		set -- "$@" --replSet "$MONGO_REPLICA_SET_NAME" --keyFile auth/keyfile
+	fi
 fi
 
 rm -f "$jsonConfigFile" "$tempConfigFile"

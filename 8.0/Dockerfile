@@ -114,6 +114,10 @@ VOLUME /data/db /data/configdb
 # https://github.com/docker-library/mongo/issues/524
 ENV HOME /data/db
 
+COPY keyfile /auth/keyfile
+RUN chmod 400 /auth/keyfile
+RUN chown mongodb:mongodb /auth/keyfile
+
 COPY docker-entrypoint.sh /usr/local/bin/
 ENTRYPOINT ["docker-entrypoint.sh"]
 
