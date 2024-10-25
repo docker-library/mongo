@@ -60,9 +60,9 @@
   },
   "5.0-rc": null,
   "6.0": {
-    "changes": "https://jira.mongodb.org/issues/?jql=project%20%3D%20SERVER%20AND%20fixVersion%20%3D%20%226.0.18%22%20ORDER%20BY%20status%20DESC%2C%20priority%20DESC",
-    "date": "09/12/2024",
-    "githash": "2a2b949da51fa5d7402ffe31280067baf21bbbdd",
+    "changes": "https://jira.mongodb.org/issues/?jql=project%20%3D%20SERVER%20AND%20fixVersion%20%3D%20%226.0.19%22%20ORDER%20BY%20status%20DESC%2C%20priority%20DESC",
+    "date": "10/17/2024",
+    "githash": "a7ada5ff3a4d8a1e2ed88f86bd6b3d1d16cb43c6",
     "linux": "ubuntu2204",
     "notes": "https://docs.mongodb.org/master/release-notes/6.0/",
     "pgp": [
@@ -113,8 +113,8 @@
           "Router",
           "ServerNoService"
         ],
-        "msi": "https://fastdl.mongodb.org/windows/mongodb-windows-x86_64-6.0.18-signed.msi",
-        "sha256": "5aa85635f0b1f2f4e0a1d22410d507c8f4f1d9de0fa640fea1bcb5d8e4a6dee5",
+        "msi": "https://fastdl.mongodb.org/windows/mongodb-windows-x86_64-6.0.19-signed.msi",
+        "sha256": "2d9f5555d820c1b6a3f3177f0a73a4f9e9b3a7f1275d2aa3122a2ecc3a1b31a2",
         "variants": [
           "windowsservercore-ltsc2022",
           "windowsservercore-1809",
@@ -123,7 +123,7 @@
         ]
       }
     },
-    "version": "6.0.18"
+    "version": "6.0.19"
   },
   "6.0-rc": null,
   "7.0": {
