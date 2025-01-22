@@ -52,7 +52,6 @@
           "windowsservercore-ltsc2025",
           "windowsservercore-ltsc2022",
           "windowsservercore-1809",
-          "nanoserver-ltsc2025",
           "nanoserver-ltsc2022",
           "nanoserver-1809"
         ]
@@ -119,7 +118,6 @@
           "windowsservercore-ltsc2025",
           "windowsservercore-ltsc2022",
           "windowsservercore-1809",
-          "nanoserver-ltsc2025",
           "nanoserver-ltsc2022",
           "nanoserver-1809"
         ]
@@ -187,7 +185,6 @@
           "windowsservercore-ltsc2025",
           "windowsservercore-ltsc2022",
           "windowsservercore-1809",
-          "nanoserver-ltsc2025",
           "nanoserver-ltsc2022",
           "nanoserver-1809"
         ]
@@ -256,7 +253,6 @@
           "windowsservercore-ltsc2025",
           "windowsservercore-ltsc2022",
           "windowsservercore-1809",
-          "nanoserver-ltsc2025",
           "nanoserver-ltsc2022",
           "nanoserver-1809"
         ]
@@ -326,7 +322,6 @@
           "windowsservercore-ltsc2025",
           "windowsservercore-ltsc2022",
           "windowsservercore-1809",
-          "nanoserver-ltsc2025",
           "nanoserver-ltsc2022",
           "nanoserver-1809"
         ]
