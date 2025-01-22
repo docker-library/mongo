@@ -184,8 +184,10 @@ for version in "${versions[@]}"; do
 					msi: env.msiUrl,
 					sha256: env.msiSha256,
 					variants: [
+						"windowsservercore-ltsc2025",
 						"windowsservercore-ltsc2022",
 						"windowsservercore-1809",
+						"nanoserver-ltsc2025",
 						"nanoserver-ltsc2022",
 						"nanoserver-1809"
 					],

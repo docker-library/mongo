@@ -49,8 +49,10 @@
         "msi": "https://fastdl.mongodb.org/windows/mongodb-windows-x86_64-5.0.30-signed.msi",
         "sha256": "acabc07cba2e1b4a8bc2a852715a21ca29cae0f08a0dc157d54c1049f586fe45",
         "variants": [
+          "windowsservercore-ltsc2025",
           "windowsservercore-ltsc2022",
           "windowsservercore-1809",
+          "nanoserver-ltsc2025",
           "nanoserver-ltsc2022",
           "nanoserver-1809"
         ]
@@ -114,8 +116,10 @@
         "msi": "https://fastdl.mongodb.org/windows/mongodb-windows-x86_64-5.0.31-rc1-signed.msi",
         "sha256": "598aed12e48cab241ef048580d624fbbc78c24b947e56e5702e9a8cedba0476d",
         "variants": [
+          "windowsservercore-ltsc2025",
           "windowsservercore-ltsc2022",
           "windowsservercore-1809",
+          "nanoserver-ltsc2025",
           "nanoserver-ltsc2022",
           "nanoserver-1809"
         ]
@@ -180,8 +184,10 @@
         "msi": "https://fastdl.mongodb.org/windows/mongodb-windows-x86_64-6.0.20-signed.msi",
         "sha256": "518cf974540402bd2992996372d29dd13912e2662d2288649e7984ed091a5e5c",
         "variants": [
+          "windowsservercore-ltsc2025",
           "windowsservercore-ltsc2022",
           "windowsservercore-1809",
+          "nanoserver-ltsc2025",
           "nanoserver-ltsc2022",
           "nanoserver-1809"
         ]
@@ -247,8 +253,10 @@
         "msi": "https://fastdl.mongodb.org/windows/mongodb-windows-x86_64-7.0.16-signed.msi",
         "sha256": "88fe05d7f324e72b9d17cbfe9bde652053c398efc7cffc0249c944faf4f32b34",
         "variants": [
+          "windowsservercore-ltsc2025",
           "windowsservercore-ltsc2022",
           "windowsservercore-1809",
+          "nanoserver-ltsc2025",
           "nanoserver-ltsc2022",
           "nanoserver-1809"
         ]
@@ -315,8 +323,10 @@
         "msi": "https://fastdl.mongodb.org/windows/mongodb-windows-x86_64-8.0.4-signed.msi",
         "sha256": "52d30392e6767eb48c03fc9886b831da5a282af7aba49cc46f45c6b0f85280cb",
         "variants": [
+          "windowsservercore-ltsc2025",
           "windowsservercore-ltsc2022",
           "windowsservercore-1809",
+          "nanoserver-ltsc2025",
           "nanoserver-ltsc2022",
           "nanoserver-1809"
         ]
