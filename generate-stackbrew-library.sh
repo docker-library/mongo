@@ -130,6 +130,11 @@ for version; do
 			windows/*)
 				# this is the really long way to say "windows-amd64"
 				variantArches="$(jq -r '.[env.version] | .targets.windows.arches | map("windows-" + . | @sh) | join(" ")' versions.json)"
+
+				# TODO temporary hack patch; see https://github.com/docker-library/official-images/pull/18390#issuecomment-2641238124
+				if [ "$fullVersion" = '8.0.5-rc1' ]; then
+					continue
+				fi
 				;;
 			*)
 				variantArches="$(jq -r '.[env.version] | .targets[.linux].arches | map(@sh) | join(" ")' versions.json)"
