@@ -19,7 +19,7 @@ if [[ "$originalArgOne" == mongo* ]] && [ "$(id -u)" = '0' ]; then
 	chown --dereference mongodb "/proc/$$/fd/1" "/proc/$$/fd/2" || :
 	# ignore errors thanks to https://github.com/docker-library/mongo/issues/149
 
-	exec gosu mongodb "$BASH_SOURCE" "$@"
+	exec setpriv --reuid mongodb --regid mongodb --clear-groups "$BASH_SOURCE" "$@"
 fi
 
 dpkgArch="$(dpkg --print-architecture)"
