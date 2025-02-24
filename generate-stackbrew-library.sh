@@ -5,7 +5,6 @@ declare -A aliases=(
 	[8.0]='8 latest'
 	[7.0]='7'
 	[6.0]='6'
-	[5.0]='5'
 )
 
 self="$(basename "$BASH_SOURCE")"
