@@ -119,6 +119,13 @@ VOLUME /data/db /data/configdb
 # ensure that if running as custom user that "mongosh" has a valid "HOME"
 # https://github.com/docker-library/mongo/issues/524
 ENV HOME /data/db
+{{ if (env.rcVersion | tonumber >= 8) then ( -}}
+{{ # TODO remove this when it is no longer necessary: https://www.mongodb.com/docs/manual/administration/tcmalloc-performance/#enable-per-cpu-caches -}}
+
+# ensure that glibc isn't using rseq so that google-tcmalloc can
+# https://www.mongodb.com/docs/manual/administration/tcmalloc-performance/#disable-glibc-rseq
+ENV GLIBC_TUNABLES glibc.pthread.rseq=0
+{{ ) else "" end -}}
 
 COPY docker-entrypoint.sh /usr/local/bin/
 ENTRYPOINT ["docker-entrypoint.sh"]

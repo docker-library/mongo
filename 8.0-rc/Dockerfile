@@ -116,6 +116,10 @@ VOLUME /data/db /data/configdb
 # https://github.com/docker-library/mongo/issues/524
 ENV HOME /data/db
 
+# ensure that glibc isn't using rseq so that google-tcmalloc can
+# https://www.mongodb.com/docs/manual/administration/tcmalloc-performance/#disable-glibc-rseq
+ENV GLIBC_TUNABLES glibc.pthread.rseq=0
+
 COPY docker-entrypoint.sh /usr/local/bin/
 ENTRYPOINT ["docker-entrypoint.sh"]
 
