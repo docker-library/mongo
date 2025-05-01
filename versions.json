@@ -136,9 +136,9 @@
   },
   "7.0-rc": null,
   "8.0": {
-    "changes": "https://jira.mongodb.org/issues/?jql=project%20%3D%20SERVER%20AND%20fixVersion%20%3D%20%228.0.8%22%20ORDER%20BY%20status%20DESC%2C%20priority%20DESC",
-    "date": "04/08/2025",
-    "githash": "7f52660c14217ed2c8d3240f823a2291a4fe6abd",
+    "changes": "https://jira.mongodb.org/issues/?jql=project%20%3D%20SERVER%20AND%20fixVersion%20%3D%20%228.0.9%22%20ORDER%20BY%20status%20DESC%2C%20priority%20DESC",
+    "date": "04/25/2025",
+    "githash": "f882ef816d531ecfbb593843e4c554fda90ca416",
     "linux": "ubuntu2404",
     "notes": "https://docs.mongodb.org/master/release-notes/8.0/",
     "pgp": [
@@ -190,8 +190,8 @@
           "Router",
           "ServerNoService"
         ],
-        "msi": "https://fastdl.mongodb.org/windows/mongodb-windows-x86_64-8.0.8-signed.msi",
-        "sha256": "4bf700912876c337697fa02bf4c38db0baed89604033b138e5e27d4e3eb743ee",
+        "msi": "https://fastdl.mongodb.org/windows/mongodb-windows-x86_64-8.0.9-signed.msi",
+        "sha256": "4acf24592a7658cc58b4293cbf0a3f42133c9c1d4f2234f1a249f74aa1c7d22a",
         "variants": [
           "windowsservercore-ltsc2025",
           "windowsservercore-ltsc2022",
@@ -201,7 +201,7 @@
         ]
       }
     },
-    "version": "8.0.8"
+    "version": "8.0.9"
   },
   "8.0-rc": null
 }
