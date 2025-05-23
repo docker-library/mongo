@@ -208,12 +208,21 @@ _parse_config() {
 			cat >&2 "$jsonConfigFile"
 			exit 1
 		fi
-		jq 'del(.systemLog, .processManagement, .net, .security, .replication)' "$jsonConfigFile" > "$tempConfigFile"
+		jq 'del(.systemLog, .processManagement, .net, .security, .replication, .sharding)' "$jsonConfigFile" > "$tempConfigFile"
 		return 0
 	fi
 
 	return 1
 }
+
+_isConfigServer() {
+	_mongod_hack_have_arg --configsvr "$@" || {
+		_parse_config "$@" \
+		&& clusterRole="$(jq -r '.sharding.clusterRole // empty' "$jsonConfigFile")" \
+		&& [ "$clusterRole" = 'configsvr' ]
+	}
+}
+
 dbPath=
 _dbPath() {
 	if [ -n "$dbPath" ]; then
@@ -228,11 +237,7 @@ _dbPath() {
 	fi
 
 	if [ -z "$dbPath" ]; then
-		if _mongod_hack_have_arg --configsvr "$@" || {
-			_parse_config "$@" \
-			&& clusterRole="$(jq -r '.sharding.clusterRole // empty' "$jsonConfigFile")" \
-			&& [ "$clusterRole" = 'configsvr' ]
-		}; then
+		if _isConfigServer "$@"; then
 			# if running as config server, then the default dbpath is /data/configdb
 			# https://docs.mongodb.com/manual/reference/program/mongod/#cmdoption-mongod-configsvr
 			dbPath=/data/configdb
@@ -315,6 +320,12 @@ if [ "$originalArgOne" = 'mongod' ]; then
 		_mongod_hack_ensure_no_arg_val --keyFile "${mongodHackedArgs[@]}"
 		if [ "$MONGO_INITDB_ROOT_USERNAME" ] && [ "$MONGO_INITDB_ROOT_PASSWORD" ]; then
 			_mongod_hack_ensure_no_arg_val --replSet "${mongodHackedArgs[@]}"
+		fi
+		# Setting sharding.clusterRole=configsvr requires the mongod instance to be running with replication
+		# disable configsvr for initial startup (https://github.com/docker-library/mongo/issues/509)
+		if _isConfigServer "$@"; then
+			_mongod_hack_ensure_no_arg '--configsvr' "${mongodHackedArgs[@]}"
+			_mongod_hack_ensure_arg_val '--dbpath' "$dbPath" "${mongodHackedArgs[@]}"
 		fi
 
 		# "BadValue: need sslPEMKeyFile when SSL is enabled" vs "BadValue: need to enable SSL via the sslMode flag when using SSL configuration parameters"
