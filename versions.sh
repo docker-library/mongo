@@ -186,10 +186,9 @@ for version in "${versions[@]}"; do
 					variants: [
 						"windowsservercore-ltsc2025",
 						"windowsservercore-ltsc2022",
-						"windowsservercore-1809",
 						#"nanoserver-ltsc2025", # The command "cmd /S /C mongod --version" returned a non-zero code: 3221225785
 						"nanoserver-ltsc2022",
-						"nanoserver-1809"
+						empty # trailing comma
 					],
 					features: ([
 						# https://github.com/mongodb/mongo/blob/r6.0.0/src/mongo/installer/msi/wxs/FeatureFragment.wxs#L9-L85 (no Client)
