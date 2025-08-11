@@ -91,8 +91,8 @@ RUN echo "deb [ signed-by=/etc/apt/keyrings/mongodb.asc ] http://$MONGO_REPO/apt
 RUN echo "deb [ signed-by=/etc/apt/keyrings/mongodb.asc ] http://$MONGO_REPO/apt/ubuntu noble/${MONGO_PACKAGE%-unstable}/8.0 multiverse" | tee "/etc/apt/sources.list.d/mongodb-8.0.list"
 
 # https://docs.mongodb.org/master/release-notes/8.0/
-ENV MONGO_VERSION 8.0.13~rc1
-# 08/05/2025, https://github.com/mongodb/mongo/tree/567b4ca48acce8999e5dcd81ffe49fb4ce15b9ec
+ENV MONGO_VERSION 8.0.13~rc2
+# 08/08/2025, https://github.com/mongodb/mongo/tree/8dc5cd2a30c4524132e2d44bb314544dc477e611
 
 RUN set -x \
 # installing "mongodb-enterprise" pulls in "tzdata" which prompts for input
