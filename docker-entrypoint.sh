@@ -393,6 +393,9 @@ if [ "$originalArgOne" = 'mongod' ]; then
 		done
 
 		"${mongodHackedArgs[@]}" --shutdown
+		while ps "$(< "$pidfile")" &> /dev/null; do
+			sleep 1
+		done
 		rm -f "$pidfile"
 
 		echo
