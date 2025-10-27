@@ -42,25 +42,27 @@ shell="$(
 				meta: .,
 			}
 
-			# filter out EOL versions
-			# (for some reason "current.json" still lists all these, and as of 2021-05-13 there is not an included way to differentiate them)
-			| select(.version as $v | [
-				# https://www.mongodb.com/support-policy/lifecycles
-				"3.0", # February 2018
-				"3.2", # September 2018
-				"3.4", # January 2020
-				"3.6", # April 2021
-				"4.0", # April 2022
-				"4.2", # April 2023
-				empty
-			] | index($v) | not)
+			# inject upstream EOL dates
+			| .meta.eol = (
+				.version
+				| rtrimstr("-rc")
+				| {
+					# https://www.mongodb.com/support-policy/lifecycles
+					# (only needs to list versions that currently exist in "current.json" that we are scraping, and only because they do not get removed promptly at EOL)
 
-			# filter out so-called "rapid releases": https://docs.mongodb.com/upcoming/reference/versioning/
-			# "Rapid Releases are designed for use with MongoDB Atlas, and are not generally supported for use in an on-premise capacity."
+					"8.0": "2029-10-31",
+					"7.0": "2027-08-31",
+					"6.0": "2025-07-31",
+
+					# "Rapid Releases" and "Minor Releases"
+					"8.2": "2026-03-30",
+				}[.]
+			)
+			# ... so we can filter out EOL versions (because "current.json" continues to list them for some period of time, but with no explicitly differentiating metadata about their EOL state)
 			| select(
-				(.version | split("[.-]"; "")) as $splitVersion
-				| ($splitVersion[0] | tonumber) >= 5 and ($splitVersion[1] | tonumber) > 0
-				| not
+				.meta.eol
+				| not or . >= (now | strftime("%Y-%m-%d"))
+				# (ie, only keep versions whose EOL status is unknown because we need to update the table above or versions we know are not yet EOL)
 			)
 		]
 
@@ -123,15 +125,16 @@ for version in "${versions[@]}"; do
 			_jq --slurpfile pgpKeys pgp-keys.json '{ (env.version): (
 				$pgpKeys[0] as $pgp
 				| (env.version | rtrimstr("-rc")) as $rcVersion
-				| with_entries(select(.key as $key | [
+				| with_entries(select(IN(.key;
 					# interesting bits of raw upstream metadata
 					"changes",
 					"date",
 					"githash",
 					"notes",
 					"version",
+					"eol", # not exactly "upstream" metadata, but metadata from upstream that we carefully injected
 					empty
-				] | index($key)))
+				)))
 				+ {
 					pgp: [
 						if env.version != $rcVersion then
@@ -139,7 +142,7 @@ for version in "${versions[@]}"; do
 							$pgp.dev
 						else empty end,
 
-						$pgp[$rcVersion],
+						$pgp[$rcVersion | sub("[.][0-9]+$"; ".0")], # normalizing 8.x to 8.0 because "Rapid Releases" use the key of the most recent major
 
 						empty
 					],
