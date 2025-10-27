@@ -4,7 +4,7 @@
 # PLEASE DO NOT EDIT IT DIRECTLY.
 #
 
-FROM ubuntu:jammy
+FROM ubuntu:noble
 
 # add our user and group first to make sure their IDs get assigned consistently, regardless of whatever dependencies get added
 RUN set -eux; \
@@ -59,10 +59,10 @@ RUN set -eux; \
 	\
 # download/install MongoDB PGP keys
 	export GNUPGHOME="$(mktemp -d)"; \
-	wget -O KEYS 'https://pgp.mongodb.com/server-6.0.asc'; \
+	wget -O KEYS 'https://pgp.mongodb.com/server-8.0.asc'; \
 	gpg --batch --import KEYS; \
 	mkdir -p /etc/apt/keyrings; \
-	gpg --batch --export --armor '39BD841E4BE5FB195A65400E6A26B1AE64C3C388' > /etc/apt/keyrings/mongodb.asc; \
+	gpg --batch --export --armor '4B0752C1BCA238C0B4EE14DC41DE058A4E7DCA05' > /etc/apt/keyrings/mongodb.asc; \
 	gpgconf --kill all; \
 	rm -rf "$GNUPGHOME" KEYS; \
 	\
@@ -85,12 +85,12 @@ ARG MONGO_PACKAGE=mongodb-org
 ARG MONGO_REPO=repo.mongodb.org
 ENV MONGO_PACKAGE=${MONGO_PACKAGE} MONGO_REPO=${MONGO_REPO}
 
-ENV MONGO_MAJOR 6.0
-RUN echo "deb [ signed-by=/etc/apt/keyrings/mongodb.asc ] http://$MONGO_REPO/apt/ubuntu jammy/${MONGO_PACKAGE%-unstable}/$MONGO_MAJOR multiverse" | tee "/etc/apt/sources.list.d/${MONGO_PACKAGE%-unstable}.list"
+ENV MONGO_MAJOR 8.2
+RUN echo "deb [ signed-by=/etc/apt/keyrings/mongodb.asc ] http://$MONGO_REPO/apt/ubuntu noble/${MONGO_PACKAGE%-unstable}/$MONGO_MAJOR multiverse" | tee "/etc/apt/sources.list.d/${MONGO_PACKAGE%-unstable}.list"
 
-# https://docs.mongodb.org/master/release-notes/6.0/
-ENV MONGO_VERSION 6.0.26
-# 08/14/2025, https://github.com/mongodb/mongo/tree/0c4ec4b6005f75582ce208fc800f09f561b6c2e8
+# https://docs.mongodb.org/master/release-notes/8.2/
+ENV MONGO_VERSION 8.2.1
+# 09/30/2025, https://github.com/mongodb/mongo/tree/3312bdcf28aa65f5930005e21c2cb130f648b8c3
 
 RUN set -x \
 # installing "mongodb-enterprise" pulls in "tzdata" which prompts for input
@@ -113,6 +113,10 @@ VOLUME /data/db /data/configdb
 # ensure that if running as custom user that "mongosh" has a valid "HOME"
 # https://github.com/docker-library/mongo/issues/524
 ENV HOME /data/db
+
+# ensure that glibc isn't using rseq so that google-tcmalloc can
+# https://www.mongodb.com/docs/manual/administration/tcmalloc-performance/#disable-glibc-rseq
+ENV GLIBC_TUNABLES glibc.pthread.rseq=0
 
 COPY docker-entrypoint.sh /usr/local/bin/
 ENTRYPOINT ["docker-entrypoint.sh"]
