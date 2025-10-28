@@ -204,7 +204,79 @@
     },
     "version": "8.0.15"
   },
-  "8.0-rc": null,
+  "8.0-rc": {
+    "changes": "https://jira.mongodb.org/issues/?jql=project%20%3D%20SERVER%20AND%20fixVersion%20%3D%20%228.0.16%22%20ORDER%20BY%20status%20DESC%2C%20priority%20DESC",
+    "date": "10/25/2025",
+    "eol": "2029-10-31",
+    "githash": "ba70b6a13fda907977110bf46e6c8137f5de48f6",
+    "linux": "ubuntu2404",
+    "notes": "https://docs.mongodb.org/master/release-notes/8.0/",
+    "pgp": [
+      {
+        "fingerprints": [
+          "28DE23AF08040FB24C33F36381B0EBBBADCEA95C"
+        ],
+        "url": "https://pgp.mongodb.com/server-dev.asc"
+      },
+      {
+        "fingerprints": [
+          "4B0752C1BCA238C0B4EE14DC41DE058A4E7DCA05"
+        ],
+        "url": "https://pgp.mongodb.com/server-8.0.asc"
+      }
+    ],
+    "targets": {
+      "debian12": {
+        "arches": [
+          "amd64"
+        ],
+        "image": "debian:bookworm-slim",
+        "suite": "bookworm"
+      },
+      "ubuntu2004": {
+        "arches": [
+          "amd64",
+          "arm64v8"
+        ],
+        "image": "ubuntu:focal",
+        "suite": "focal"
+      },
+      "ubuntu2204": {
+        "arches": [
+          "amd64",
+          "arm64v8"
+        ],
+        "image": "ubuntu:jammy",
+        "suite": "jammy"
+      },
+      "ubuntu2404": {
+        "arches": [
+          "amd64",
+          "arm64v8"
+        ],
+        "image": "ubuntu:noble",
+        "suite": "noble"
+      },
+      "windows": {
+        "arches": [
+          "amd64"
+        ],
+        "features": [
+          "MiscellaneousTools",
+          "Router",
+          "ServerNoService"
+        ],
+        "msi": "https://fastdl.mongodb.org/windows/mongodb-windows-x86_64-8.0.16-rc1-signed.msi",
+        "sha256": "f09850c6a8dc45243586d6db5651239f2404913285d9d99f5d01a9e0cce65f5b",
+        "variants": [
+          "windowsservercore-ltsc2025",
+          "windowsservercore-ltsc2022",
+          "nanoserver-ltsc2022"
+        ]
+      }
+    },
+    "version": "8.0.16-rc1"
+  },
   "8.2": {
     "changes": "https://jira.mongodb.org/issues/?jql=project%20%3D%20SERVER%20AND%20fixVersion%20%3D%20%228.2.1%22%20ORDER%20BY%20status%20DESC%2C%20priority%20DESC",
     "date": "09/30/2025",
