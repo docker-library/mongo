@@ -48,12 +48,6 @@ getArches() {
 	parentRepoToArchesStr="$(
 		find -name 'Dockerfile' -exec awk -v officialImagesBase="$officialImagesBase" '
 				toupper($1) == "FROM" && $2 !~ /^('"$repo"'|scratch|.*\/.*)(:|$)/ {
-					if ($2 == "ubuntu:focal") {
-						# temporary hack for EOL releases (TODO remove me)
-						# 2d96d3b45936c5e7784c4f56ae58d87d96267a35 is the last commit that contained ubuntu:focal in DOI
-						printf "https://github.com/docker-library/official-images/raw/2d96d3b45936c5e7784c4f56ae58d87d96267a35/library/%s\n", $2
-						next
-					}
 					printf "%s%s\n", officialImagesBase, $2
 				}
 			' '{}' + \

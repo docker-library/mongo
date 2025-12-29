@@ -52,10 +52,9 @@ shell="$(
 
 					"8.0": "2029-10-31",
 					"7.0": "2027-08-31",
-					# TODO comment these back out after one build for CVE-2025-14847 ("MongoBleed"; https://jira.mongodb.org/browse/SERVER-115508)
-					#"6.0": "2025-07-31",
-					#"5.0": "2024-10-31",
-					#"4.4": "2024-02-29",
+					"6.0": "2025-07-31",
+					"5.0": "2024-10-31",
+					"4.4": "2024-02-29",
 
 					# "Rapid Releases" and "Minor Releases"
 					"8.2": "2026-03-30",
