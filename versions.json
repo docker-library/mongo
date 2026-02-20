@@ -344,5 +344,77 @@
     },
     "version": "8.2.5"
   },
-  "8.2-rc": null
+  "8.2-rc": {
+    "changes": "https://jira.mongodb.org/issues/?jql=project%20%3D%20SERVER%20AND%20fixVersion%20%3D%20%228.2.6%22%20ORDER%20BY%20status%20DESC%2C%20priority%20DESC",
+    "date": "02/18/2026",
+    "eol": "2026-03-30",
+    "githash": "5d25c835745d06f712320b6cdae9d50b7b43663e",
+    "linux": "ubuntu2404",
+    "notes": "https://docs.mongodb.org/master/release-notes/8.2/",
+    "pgp": [
+      {
+        "fingerprints": [
+          "28DE23AF08040FB24C33F36381B0EBBBADCEA95C"
+        ],
+        "url": "https://pgp.mongodb.com/server-dev.asc"
+      },
+      {
+        "fingerprints": [
+          "4B0752C1BCA238C0B4EE14DC41DE058A4E7DCA05"
+        ],
+        "url": "https://pgp.mongodb.com/server-8.0.asc"
+      }
+    ],
+    "targets": {
+      "debian12": {
+        "arches": [
+          "amd64"
+        ],
+        "image": "debian:bookworm-slim",
+        "suite": "bookworm"
+      },
+      "ubuntu2004": {
+        "arches": [
+          "amd64",
+          "arm64v8"
+        ],
+        "image": "ubuntu:focal",
+        "suite": "focal"
+      },
+      "ubuntu2204": {
+        "arches": [
+          "amd64",
+          "arm64v8"
+        ],
+        "image": "ubuntu:jammy",
+        "suite": "jammy"
+      },
+      "ubuntu2404": {
+        "arches": [
+          "amd64",
+          "arm64v8"
+        ],
+        "image": "ubuntu:noble",
+        "suite": "noble"
+      },
+      "windows": {
+        "arches": [
+          "amd64"
+        ],
+        "features": [
+          "MiscellaneousTools",
+          "Router",
+          "ServerNoService"
+        ],
+        "msi": "https://fastdl.mongodb.org/windows/mongodb-windows-x86_64-8.2.6-rc0-signed.msi",
+        "sha256": "83e72061c152d009dd35137a3e7e33364905b6fc7faa681cdfc3282b9e4b8a48",
+        "variants": [
+          "windowsservercore-ltsc2025",
+          "windowsservercore-ltsc2022",
+          "nanoserver-ltsc2022"
+        ]
+      }
+    },
+    "version": "8.2.6-rc0"
+  }
 }
