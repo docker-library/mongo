@@ -76,7 +76,7 @@ RUN mkdir /docker-entrypoint-initdb.d
 # Options for MONGO_PACKAGE: mongodb-org OR mongodb-enterprise
 # Options for MONGO_REPO: repo.mongodb.org OR repo.mongodb.com
 # Example: docker build --build-arg MONGO_PACKAGE=mongodb-enterprise --build-arg MONGO_REPO=repo.mongodb.com .
-ARG MONGO_PACKAGE=mongodb-org{{ if (env.version != env.rcVersion) and (env.rcVersion | split(".")[1] | tonumber % 2 == 1) then "-unstable" else "" end }}
+ARG MONGO_PACKAGE=mongodb-org
 ARG MONGO_REPO=repo.mongodb.org
 ENV MONGO_PACKAGE=${MONGO_PACKAGE} MONGO_REPO=${MONGO_REPO}
 
@@ -84,7 +84,7 @@ ENV MONGO_MAJOR {{ if env.version != env.rcVersion then "testing" else env.versi
 RUN echo "deb [ signed-by=/etc/apt/keyrings/mongodb.asc ] http://$MONGO_REPO/apt/{{ target.image | gsub(":.*$"; "") }} {{ target.suite }}/${MONGO_PACKAGE%-unstable}/$MONGO_MAJOR {{ if target.image | test("^debian") then "main" else "multiverse" end }}" | tee "/etc/apt/sources.list.d/${MONGO_PACKAGE%-unstable}.list"
 {{ if env.version != env.rcVersion then ( -}}
 # add GA repo for mongodb-mongosh and mongodb-database-tools
-RUN echo "deb [ signed-by=/etc/apt/keyrings/mongodb.asc ] http://$MONGO_REPO/apt/{{ target.image | gsub(":.*$"; "") }} {{ target.suite }}/${MONGO_PACKAGE%-unstable}/{{ env.rcVersion }} {{ if target.image | test("^debian") then "main" else "multiverse" end }}" | tee "/etc/apt/sources.list.d/mongodb-{{ env.rcVersion }}.list"
+RUN echo "deb [ signed-by=/etc/apt/keyrings/mongodb.asc ] http://$MONGO_REPO/apt/{{ target.image | gsub(":.*$"; "") }} {{ target.suite }}/${MONGO_PACKAGE%-unstable}/{{ .dockerNeedsVersion // env.rcVersion }} {{ if target.image | test("^debian") then "main" else "multiverse" end }}" | tee "/etc/apt/sources.list.d/mongodb-{{ .dockerNeedsVersion // env.rcVersion }}.list"
 {{ ) else "" end -}}
 
 {{ if .notes then ( -}}

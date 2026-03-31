@@ -34,17 +34,17 @@ shell="$(
 			| not))
 
 			| {
-				version: (
+				key: (
 					# convert "4.4.x" into "4.4" and "4.9.x-rcY" into "4.9-rc"
 					(.version | split(".")[0:2] | join("."))
 					+ if .release_candidate then "-rc" else "" end
 				),
-				meta: .,
+				value: .,
 			}
 
 			# inject upstream EOL dates
-			| .meta.eol = (
-				.version
+			| .value.eol = (
+				.key
 				| rtrimstr("-rc")
 				| {
 					# https://www.mongodb.com/support-policy/lifecycles
@@ -62,28 +62,40 @@ shell="$(
 			)
 			# ... so we can filter out EOL versions (because "current.json" continues to list them for some period of time, but with no explicitly differentiating metadata about their EOL state)
 			| select(
-				.meta.eol
+				.value.eol
 				| not or . >= (now | strftime("%Y-%m-%d"))
 				# (ie, only keep versions whose EOL status is unknown because we need to update the table above or versions we know are not yet EOL)
 			)
 		]
 
+		# inject null entries for every combination at the end which will be removed/ignored by the block just below this for anything that has data, leaving just the missing entries as nulls (so we can always have all the explicit "X.Y" and "X.Y-rc" pairs)
+		| . + [ { key: (.[].key | rtrimstr("-rc") | ., . + "-rc") } ]
+
 		# in case of duplicates that map to the same "X.Y[-rc]", prefer the first one (the upstream file is typically in descending sorted order, so we do not need to get much more complicated than this)
 		# *not* doing this was actually totally fine/sane up until 2024-08-14, because prior to that there were never any duplicates in the upstream file so everything "just worked"
 		# on 2024-08-14, upstream released 7.0.14-rc0, but (accidentally?) left 7.0.13-rc1 listed in the file, and without this fix, we prefer the later entry due to how we export the data below
-		| unique_by(.version)
+		| unique_by(.key | scan("[0-9]+|[.-]+|[^0-9.-]+") | tonumber? // .)
+		| reverse # highest release number first
+
+		# if the latest RC does not have a corresponding GA, it needs to know what the "latest GA" is so that it can install "mongodb-mongosh" and "mongodb-database-tools" from that older GA repo (and to know that it cannot / should not use the GA repo of its own version)
+		# .[0] is our "newest RC"
+		# .[1] is the associated "newest GA"
+		# so .[3] is the "previous newest GA"
+		| if (.[1].value | not) and .[3].value then
+			.[0].value.dockerNeedsVersion = .[3].key
+		else . end
+		# TODO if we ever have more than one "newer than latest" RC (like if we had an 8.2 as the latest GA and both 8.3 and 9.0 RCs without GA), then this has to get more complicated to set { dockerNeedsVersion: "8.2" } on both of those, but that is not something we need today
 
 		# now convert all that data to a basic shell list + map so we can loop over/use it appropriately
 		| "allVersions=( " + (
-			map(.version | ., if endswith("-rc") then rtrimstr("-rc") else . + "-rc" end)
-			| unique
-			| map(@sh)
+			[ .[].key | @sh ]
 			| join(" ")
 		) + " )\n"
 		+ "declare -A versionMeta=(\n" + (
 			map(
-				"\t[" + (.version | @sh) + "]="
-				+ (.meta | @json | @sh)
+				select(.value)
+				| "\t[" + (.key | @sh) + "]="
+				+ (.value | @json | @sh)
 			) | join("\n")
 		) + "\n)"
 	'
@@ -134,7 +146,9 @@ for version in "${versions[@]}"; do
 					"githash",
 					"notes",
 					"version",
-					"eol", # not exactly "upstream" metadata, but metadata from upstream that we carefully injected
+					# not exactly "upstream" metadata, but metadata from or implied by upstream that we carefully injected
+					"eol",
+					"dockerNeedsVersion",
 					empty
 				)))
 				+ {
