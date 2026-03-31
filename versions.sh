@@ -57,7 +57,7 @@ shell="$(
 					"4.4": "2024-02-29",
 
 					# "Rapid Releases" and "Minor Releases"
-					"8.2": "2026-03-30",
+					"8.2": "2026-07-31",
 				}[.]
 			)
 			# ... so we can filter out EOL versions (because "current.json" continues to list them for some period of time, but with no explicitly differentiating metadata about their EOL state)
