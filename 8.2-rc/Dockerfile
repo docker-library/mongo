@@ -88,11 +88,11 @@ ENV MONGO_PACKAGE=${MONGO_PACKAGE} MONGO_REPO=${MONGO_REPO}
 ENV MONGO_MAJOR testing
 RUN echo "deb [ signed-by=/etc/apt/keyrings/mongodb.asc ] http://$MONGO_REPO/apt/ubuntu noble/$MONGO_PACKAGE/$MONGO_MAJOR multiverse" | tee "/etc/apt/sources.list.d/$MONGO_PACKAGE.list"
 # add GA repo for mongodb-mongosh and mongodb-database-tools
-RUN echo "deb [ signed-by=/etc/apt/keyrings/mongodb.asc ] http://$MONGO_REPO/apt/ubuntu noble/$MONGO_PACKAGE/8.0 multiverse" | tee "/etc/apt/sources.list.d/mongodb-8.0.list"
+RUN echo "deb [ signed-by=/etc/apt/keyrings/mongodb.asc ] http://$MONGO_REPO/apt/ubuntu noble/$MONGO_PACKAGE/8.2 multiverse" | tee "/etc/apt/sources.list.d/mongodb-8.2.list"
 
-# https://docs.mongodb.org/master/release-notes/8.0/
-ENV MONGO_VERSION 8.0.21~rc0
-# 03/20/2026, https://github.com/mongodb/mongo/tree/79f82fb20b12965bd63d54032051d318e31cd5e7
+# https://docs.mongodb.org/master/release-notes/8.2/
+ENV MONGO_VERSION 8.2.7~rc0
+# 03/20/2026, https://github.com/mongodb/mongo/tree/ab2d2b973ce6aa2fc9d621809eb5db23d5b37683
 
 RUN set -x \
 # installing "mongodb-enterprise" pulls in "tzdata" which prompts for input
