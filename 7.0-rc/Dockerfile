@@ -91,7 +91,7 @@ RUN echo "deb [ signed-by=/etc/apt/keyrings/mongodb.asc ] http://$MONGO_REPO/apt
 RUN echo "deb [ signed-by=/etc/apt/keyrings/mongodb.asc ] http://$MONGO_REPO/apt/ubuntu jammy/$MONGO_PACKAGE/7.0 multiverse" | tee "/etc/apt/sources.list.d/mongodb-7.0.list"
 
 # https://docs.mongodb.org/master/release-notes/7.0/
-ENV MONGO_VERSION 7.0.32~rc1
+ENV MONGO_VERSION 7.0.32~rc2
 # 03/26/2026, https://github.com/mongodb/mongo/tree/40a2e0f542b0a68f0ed51fa216e9d38b9917fe14
 
 RUN set -x \
