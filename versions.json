@@ -202,7 +202,73 @@
     "version": "8.2.7"
   },
   "8.2-rc": null,
-  "8.3": null,
+  "8.3": {
+    "changes": "https://jira.mongodb.org/issues/?jql=project%20%3D%20SERVER%20AND%20fixVersion%20%3D%20%228.3.1%22%20ORDER%20BY%20status%20DESC%2C%20priority%20DESC",
+    "date": "04/24/2026",
+    "eol": null,
+    "githash": "094e631246d5b5bee5bd5f20b12f882bc8e286ea",
+    "linux": "ubuntu2404",
+    "notes": "https://docs.mongodb.org/master/release-notes/8.3/",
+    "pgp": [
+      {
+        "fingerprints": [
+          "4B0752C1BCA238C0B4EE14DC41DE058A4E7DCA05"
+        ],
+        "url": "https://pgp.mongodb.com/server-8.0.asc"
+      }
+    ],
+    "targets": {
+      "debian12": {
+        "arches": [
+          "amd64"
+        ],
+        "image": "debian:bookworm-slim",
+        "suite": "bookworm"
+      },
+      "ubuntu2004": {
+        "arches": [
+          "amd64",
+          "arm64v8"
+        ],
+        "image": "ubuntu:focal",
+        "suite": "focal"
+      },
+      "ubuntu2204": {
+        "arches": [
+          "amd64",
+          "arm64v8"
+        ],
+        "image": "ubuntu:jammy",
+        "suite": "jammy"
+      },
+      "ubuntu2404": {
+        "arches": [
+          "amd64",
+          "arm64v8"
+        ],
+        "image": "ubuntu:noble",
+        "suite": "noble"
+      },
+      "windows": {
+        "arches": [
+          "amd64"
+        ],
+        "features": [
+          "MiscellaneousTools",
+          "Router",
+          "ServerNoService"
+        ],
+        "msi": "https://fastdl.mongodb.org/windows/mongodb-windows-x86_64-8.3.1-signed.msi",
+        "sha256": "f888aca86bcdcc15952f0651adfd711c4e29986d2ed3c9b1b304ddd270fd1574",
+        "variants": [
+          "windowsservercore-ltsc2025",
+          "windowsservercore-ltsc2022",
+          "nanoserver-ltsc2022"
+        ]
+      }
+    },
+    "version": "8.3.1"
+  },
   "8.3-rc": {
     "changes": "https://jira.mongodb.org/issues/?jql=project%20%3D%20SERVER%20AND%20fixVersion%20%3D%20%228.3.0-rc5%22%20ORDER%20BY%20status%20DESC%2C%20priority%20DESC",
     "date": "04/06/2026",
