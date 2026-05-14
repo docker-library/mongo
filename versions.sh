@@ -22,7 +22,7 @@ shell="$(
 							"windows.*" # windows, windows_x86_64, windows_x86_64-2012plus, etc
 						] | join("|")) + ")$")
 						and (
-							# a few things old enough we do not want anything to do with them /o\
+							# a few things old enough we do not want anything to do with them /o\.
 							test("^(" + ([
 								"debian[89].*",
 								"ubuntu1[0-9].*"
