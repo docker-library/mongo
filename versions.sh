@@ -52,9 +52,8 @@ shell="$(
 
 					"8.0": "2029-10-31",
 					"7.0": "2027-08-31",
-					# TODO uncomment these after one build for CVE-2026-8053 (https://jira.mongodb.org/browse/SERVER-126021)
-					#"6.0": "2025-07-31",
-					#"5.0": "2024-10-31",
+					"6.0": "2025-07-31",
+					"5.0": "2024-10-31",
 					"4.4": "2024-02-29",
 
 					# "Rapid Releases" and "Minor Releases"
