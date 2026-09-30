@@ -5,6 +5,13 @@
       "28DE23AF08040FB24C33F36381B0EBBBADCEA95C"
     ]
   },
+  "9.0": {
+    "url": "https://pgp.mongodb.com/server-9.asc",
+    "fingerprints": [
+      "B3B42B6C39E5CDDEC0A27E3CF366D55B602E502D",
+      "CC524D92D4374A7FDD702AC3849AF88AAC5C6694"
+    ]
+  },
   "8.0": {
     "url": "https://pgp.mongodb.com/server-8.0.asc",
     "fingerprints": [
