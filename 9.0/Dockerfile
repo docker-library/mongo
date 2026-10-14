@@ -4,7 +4,7 @@
 # PLEASE DO NOT EDIT IT DIRECTLY.
 #
 
-FROM ubuntu:noble
+FROM ubuntu:resolute
 
 # add our user and group first to make sure their IDs get assigned consistently, regardless of whatever dependencies get added
 RUN set -eux; \
@@ -86,11 +86,11 @@ ARG MONGO_REPO=repo.mongodb.org
 ENV MONGO_PACKAGE=${MONGO_PACKAGE} MONGO_REPO=${MONGO_REPO}
 
 ENV MONGO_MAJOR 9.0
-RUN echo "deb [ signed-by=/etc/apt/keyrings/mongodb.asc ] http://$MONGO_REPO/apt/ubuntu noble/$MONGO_PACKAGE/$MONGO_MAJOR multiverse" | tee "/etc/apt/sources.list.d/$MONGO_PACKAGE.list"
+RUN echo "deb [ signed-by=/etc/apt/keyrings/mongodb.asc ] http://$MONGO_REPO/apt/ubuntu resolute/$MONGO_PACKAGE/$MONGO_MAJOR multiverse" | tee "/etc/apt/sources.list.d/$MONGO_PACKAGE.list"
 
 # https://docs.mongodb.org/master/release-notes/9.0/
-ENV MONGO_VERSION 9.0.2
-# 09/17/2026, https://github.com/mongodb/mongo/tree/c4d309807b94ac30edcca32e35e88a9598eadfc8
+ENV MONGO_VERSION 9.0.4
+# 09/30/2026, https://github.com/mongodb/mongo/tree/64ade602b836c9adeffba7fa038c887ffab56196
 
 RUN set -x \
 # installing "mongodb-enterprise" pulls in "tzdata" which prompts for input
