@@ -192,6 +192,7 @@ for version in "${versions[@]}"; do
 										"ubuntu2004": "ubuntu:focal",
 										"ubuntu2204": "ubuntu:jammy",
 										"ubuntu2404": "ubuntu:noble",
+										"ubuntu2604": "ubuntu:resolute",
 									}[$t] // "unknown"
 								)
 								| .[$t].suite = (
